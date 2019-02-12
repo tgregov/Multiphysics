@@ -11,4 +11,4 @@ matrix:
       install:
         - docker exec -t ubuntu-19-04 bash -c "apt-get -qq update; apt-get install -y git; apt-get install -y cmake; apt-get install -y build-essential; apt-get install -y libgmsh-dev;"
       script:
-        - docker exec -t ubuntu-19-04 bash -c "cd /travis; git clone https://github.com/tgregov/Multiphysics.git; cd Multiphysics/;  mkdir build; cd build/; cmake ../ -DCMAKE_BUILD_TYPE=Release  -G \"Unix Makefiles\"; make;"
+        - docker exec -t ubuntu-19-04 bash -c "cd /travis; git clone https://github.com/tgregov/Multiphysics.git; ls; cd Multiphysics/;  mkdir build; cd build/; cmake ../ -DCMAKE_BUILD_TYPE=Release  -G \"Unix Makefiles\"; make;"
