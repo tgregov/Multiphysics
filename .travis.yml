@@ -9,6 +9,6 @@ matrix:
       before_install:
         - docker run -d --name ubuntu-19-04 -v $(pwd):/travis ubuntu:19.04 tail -f /dev/null
       install:
-        - docker exec -t ubuntu-19-04 bash -c "apt-get -qq update; apt-get install -y git; apt-get install -y cmake; apt-get install -y build-essential; apt-get install -y libgmsh-dev;"
+        - docker exec -t ubuntu-19-04 bash -c "apt-get -qq update; apt-get install -y git; apt-get install -y cmake; apt-get install -y build-essential;  apt-get install -y wget;  apt-get install -y tar;"
       script:
-        - docker exec -t ubuntu-19-04 bash -c "cd /travis; locate gmsh.h git clone https://github.com/ImperatorS79/Multiphysics.git; cd Multiphysics/;  mkdir build; cd build/; cmake ../ -DCMAKE_BUILD_TYPE=Release  -G \"Unix Makefiles\"; make;"
+        - docker exec -t ubuntu-19-04 bash -c "cd /travis; wget http://gmsh.info/bin/Linux/gmsh-4.1.4-Linux64-sdk.tgz; tar -xf gmsh-4.1.4-Linux64-sdk.tgz; cd gmsh-4.1.4-Linux64-sdk/include; rm -rf gmsh.h; cp gmsh.h_ cwrap gmsh.h; cd ../; export PATH=${PWD}/bin:${PWD}/lib:${PATH}; export INCLUDE=${PWD}/include:${INCLUDE}; export LIB=${PWD}/lib:${LIB}; export PYTHONPATH=${PWD}/lib:${PYTHONPATH}; cd ../; git clone https://github.com/ImperatorS79/Multiphysics.git; cd Multiphysics/;  mkdir build; cd build/; cmake ../ -DCMAKE_BUILD_TYPE=Release  -G \"Unix Makefiles\"; make;"
