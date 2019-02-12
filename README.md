@@ -1,13 +1,17 @@
 # MATH 0471: Multiphysics integrated computational project
 ## Goal
-Development of the Discontinuous Galerkin Method applied to a particular physical situation (to be determined).
+Development of the Discontinuous Galerkin method (DG) applied to a particular physical situation (to be determined). 
+[Link](http://www.montefiore.ulg.ac.be/~geuzaine/MATH0471/enonce2019.pdf) of the problem statement.
 
 ## Git/Github memo:
+* *State*
+	* `git status`
 * *Commit:*
 	* `git add`
-	* `git commit -m "Message"`
+	* `git commit -m "<message>"`
 * *Pull:*
-	* `git pull origin master`
+	* `git fetch`
+	* `git pull origin master` (same as `git fetch` followed by `git merge`)
 * *Push:*
 	* `git push -u origin master`
 
