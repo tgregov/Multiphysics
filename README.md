@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/ImperatorS79/Multiphysics.svg?branch=master)](https://travis-ci.org/ImperatorS79/Multiphysics)
 # MATH 0471: Multiphysics integrated computational project
 ## Goal
 Development of the Discontinuous Galerkin method (DG) applied to a particular physical situation (to be determined).  
