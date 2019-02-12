@@ -9,6 +9,6 @@ matrix:
       before_install:
         - docker run -d --name ubuntu-19-04 -v $(pwd):/travis ubuntu:19.04 tail -f /dev/null
       install:
-        - docker exec -t ubuntu-19-04 bash -c "apt-get -qq update; apt-get install -y git; apt-get install -y cmake; apt-get install -y build-essential;  apt-get install -y wget;  apt-get install -y tar;  apt-get install -y libgfortran-8-dev;"
+        - docker exec -t ubuntu-19-04 bash -c "apt-get -qq update; apt-get install -y git; apt-get install -y cmake; apt-get install -y build-essential;  apt-get install -y wget;  apt-get install -y tar;  apt-get install -y libgfortran-8-dev; apt-get install -y libgmsh-dev;"
       script:
          - docker exec -t ubuntu-19-04 bash -c "cd /travis; ./build.sh;"
