@@ -3,7 +3,7 @@
 #
 # HOW TO USE THIS FILE?
 #   open a terminal
-#   . ./devenv-linux-macos.sh     # the first dot is important!
+#   . ./envs/linux-macos.sh     # the first dot is important!
 #   mkdir build
 #   cd build
 #   cmake ..
