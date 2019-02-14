@@ -7,7 +7,7 @@ export INCLUDE=${PWD}/include:${INCLUDE}
 export LIB=${PWD}/lib:${LIB}
 export PYTHONPATH=${PWD}/lib:${PYTHONPATH}
 cd ../
-git clone https://github.com/ImperatorS79/Multiphysics.git
+git clone https://github.com/tgregov/Multiphysics.git
 cd Multiphysics/  
 mkdir build
 cd build 
