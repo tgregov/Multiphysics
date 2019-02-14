@@ -26,6 +26,7 @@ int main()
         std::string type;
         gmsh::model::getType(dim, tag, type);
         std::cout<<"Entitites "<<i<<", type"<<type<<std::endl;
+        std::cout<<"hello "<<i<<", type"<<type<<std::endl;
     }
 
     gmsh::finalize();
