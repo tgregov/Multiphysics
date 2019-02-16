@@ -1,1 +1,2 @@
 build/*
+envs/linux-macos.sh
