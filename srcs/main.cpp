@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <iostream>
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
@@ -14,7 +13,7 @@
  *
  */
 
-int posInVector(std::vector<int> vec, std::vector<int> couple)
+int posInVector(const std::vector<int>& vec, const std::vector<int>& couple)
 {
     for(std::size_t i = 0; i < vec.size()/2; i++)
     {
