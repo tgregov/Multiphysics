@@ -160,6 +160,13 @@ Mesh* readMesh(int argc, char **argv)
         int eleType1D = gmsh::model::mesh::getElementType("line", order);
         gmsh::model::mesh::setElementsByType(1, disEntity, eleType1D, {},
                                              nodesReduced);
+
+
+        // Save the data in a mesh structure
+        // TO DO: handle the case of multiple surfaces
+        mesh->elementTags = elementTags;
+        mesh->nodeTags =  nodesReduced;
+        mesh->parentElement = parentElement;
     }
     
     // write the new .msh file
@@ -190,11 +197,6 @@ Mesh* readMesh(int argc, char **argv)
     // finalize gmsh
     gmsh::finalize();
 
-    // Save the data in a mesh structure
-    // TO DO: handle the case of multiple surfaces
-    mesh->elementTags = elementTags;
-    mesh->nodeTags =  nodesReduced;
-    mesh->parentElement = parentElement;
 
     return mesh;
 }

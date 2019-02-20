@@ -1,2 +1,3 @@
-build/*
-envs/linux-macos.sh
+/build/*
+/envs/linux-macos.sh
+/run/macOS/compile/sh
