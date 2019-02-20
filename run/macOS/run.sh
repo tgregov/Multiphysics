@@ -2,4 +2,4 @@
 clear
 cd ../..
 ./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh
-cd ./run/mac/
+cd ./run/macOS/
