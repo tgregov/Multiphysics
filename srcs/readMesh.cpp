@@ -20,6 +20,18 @@ int posInVector(const std::vector<int>& vec, const std::vector<int>& couple)
 }
 
 
+// TO DO: optimize this procedure (linked to the normal computation)
+int diffVector(const std::vector<int>& vec, const std::vector<int>& couple)
+{
+    for(std::size_t i = 0; i < vec.size(); i++){
+        if(vec[i] != couple[0] && vec[i] != couple[1])
+            return vec[i];
+    }
+
+    return -1;
+}
+
+
 Mesh* readMesh(int argc, char **argv)
 {
     
@@ -66,14 +78,17 @@ Mesh* readMesh(int argc, char **argv)
     {
         // get the tag of the current surface
         int entityTag = entities[i].second;
+        /*
         gmsh::logger::write("[Surface " + std::to_string(entityTag)  + "]");
-        
+        */
+
         // get the elements (their tag & node tag) of the current surface
         // -> to do so, we search over the 2D elements of type eleType2D,
         // belonging to the entity entityTag
         std::vector<int> elementTags, nodeTags;
         gmsh::model::mesh::getElementsByType(eleType2D, elementTags, nodeTags,
                                              entityTag);
+        /*
         gmsh::logger::write("------------------------------------------------");
         gmsh::logger::write("-> there are " + std::to_string(elementTags.size())
                             + " elements:");
@@ -82,6 +97,7 @@ Mesh* readMesh(int argc, char **argv)
             gmsh::logger::write("   - element [" + std::to_string(j) +
                                 "] has tag: " + std::to_string(elementTags[j]));
         }
+        */
         
         // get the nodes (in fact, tags) on the edges of the 2D elements
         // -> to do so, we search over the 2D elements of type eleType2D,
@@ -89,6 +105,7 @@ Mesh* readMesh(int argc, char **argv)
         std::vector<int> nodes;
         gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodes, entityTag,
                                                true);
+        /*
         gmsh::logger::write("------------------------------------------------");
         gmsh::logger::write("-> there are " + std::to_string(nodes.size())
                             + " (non-unique) nodes");
@@ -96,37 +113,51 @@ Mesh* readMesh(int argc, char **argv)
                             + " = 6*"
                             + std::to_string(elementTags.size())
                             + " => ok");
-        
+        */
+
         // reduce the number of edges in order not to have any duplicate
         // edges, and store the parent element(s) of each edges
         // TO DO:
         //  - optimize the code
         //  - maybe store the results in a structure
-        std::vector<std::vector<int>> parentElement;
+        std::vector<std::vector<int>> parentElement, nodeOpposite;
         std::vector<int> nodesReduced;
         int p;
+
         for(std::size_t j = 0; j < elementTags.size(); j++)
         {
+
+            std::vector<int> nodesAllElement;
+            for(int k = 0; k < 6; k++) nodesAllElement.push_back(nodes[6*j+k]);
+
             for(int k = 0; k < 3; k++)
             {
+
                 std::vector<int> currentEdge;
                 currentEdge.push_back(nodes[6*j + 2*k]);
                 currentEdge.push_back(nodes[6*j + 2*k + 1]);
                 
                 p = posInVector(nodesReduced, currentEdge);
-                if(p == -1){
+                if(p == -1)
+                {
                     nodesReduced.push_back(currentEdge[0]);
                     nodesReduced.push_back(currentEdge[1]);
                     
-                    std::vector<int> temp;
-                    temp.push_back(elementTags[j]);
-                    parentElement.push_back(temp);
+                    std::vector<int> temp1, temp2;
+                    temp1.push_back(elementTags[j]);
+                    parentElement.push_back(temp1);
+                    temp2.push_back(diffVector(nodesAllElement, currentEdge));
+                    nodeOpposite.push_back(temp2);
+
                 } else{
                     parentElement[p].push_back(elementTags[j]);
+                    nodeOpposite[p].push_back(diffVector(nodesAllElement,
+                                                         currentEdge));
                 }
             }
         }
         
+        /*
         gmsh::logger::write("------------------------------------------------");
         gmsh::logger::write("-> there are "
                             + std::to_string(nodesReduced.size())
@@ -149,6 +180,75 @@ Mesh* readMesh(int argc, char **argv)
             }
         }
         gmsh::logger::write("------------------------------------------------");
+        */
+
+        // compute the normals of each edge for each element, in an order that
+        // is similar to parentElement
+        // TO DO: optimize the computations (at the moment the computation is 
+        // quite stupid !)
+        /*
+        std::vector<std::vector<double>> normalVector;
+        std::vector<int> nodeTagsTemo;
+        std::vector<double> nodeCoords, nodeParamsTemp, barycenters, 
+                            nodeCoordsOpp;
+        double xA, yA, xB, yB, xO, yO, nx, ny, norm, dotprod;
+        int elementTagTemp;
+        
+        
+        for(std::size_t j = 0; j < nodesReduced.size()/2; j++)
+        {
+
+            // get the nodes coordinates
+            gmsh::model::mesh::getNodes(nodeTagsTemo, nodeCoords, 
+                                        nodeParamsTemp, 0, nodesReduced[2*j]);
+            xA = nodeCoords[0];
+            yA = nodeCoords[1];
+
+            gmsh::model::mesh::getNodes(nodeTagsTemo, nodeCoords,
+                                        nodeParamsTemp, 0, nodesReduced[2*j+1]);
+            xB = nodeCoords[0];
+            yB = nodeCoords[0];
+
+            // compute the normal vector
+            // N.B.: explanation:
+            // the vector linking the two points is given by (vx, vy) with
+            // vx = xB - xA;
+            // vy = yB - yA;
+            // such that a vector orthogonal is given by (vy, -vx)
+            nx = yB - yA;
+            ny = xA - xB;
+
+            
+            // check the direction for the first element in the list of parents
+            gmsh::model::mesh::getNodes(nodeTagsTemo, nodeCoordsOpp,
+                                        nodeParamsTemp, 0, nodeOpposite[j][0]);
+            xO = nodeCoordsOpp[0];
+            yO = nodeCoordsOpp[1];
+
+            dotprod = xO*xA + yO*yB;
+            if(dotprod > 0){
+                ny = -ny;
+                nx = -nx;
+            }
+
+            // normalize it
+            norm = sqrt(nx*nx + ny*ny);
+            nx = nx/norm;
+            ny = ny/norm;
+
+            // save it 
+            std::vector<double> temp;
+            temp.push_back(nx);
+            temp.push_back(ny);
+            normalVector.push_back(temp);
+
+            // if there is a second element, then its associated normal is 
+            // simply the opposite of the one that has just been defined
+            if(nodeOpposite[j].size() > 1){
+                normalVector[j].push_back(-nx);
+                normalVector[j].push_back(-ny);
+            }
+        }*/
         
         // create a new discrete entity of dimension 1
         int disEntity = gmsh::model::addDiscreteEntity(1);
@@ -161,12 +261,12 @@ Mesh* readMesh(int argc, char **argv)
         gmsh::model::mesh::setElementsByType(1, disEntity, eleType1D, {},
                                              nodesReduced);
 
-
         // Save the data in a mesh structure
         // TO DO: handle the case of multiple surfaces
         mesh->elementTags = elementTags;
         mesh->nodeTags =  nodesReduced;
         mesh->parentElement = parentElement;
+        //mesh->normalVector = normalVector;
     }
     
     // write the new .msh file
