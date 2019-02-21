@@ -8,7 +8,7 @@
 
 int main(int argc, char **argv)
 {
-	Eigen::MatrixXd m2();
+    Eigen::MatrixXd m2();
     Mesh* mesh = readMesh(argc, argv);
 
     if(mesh == nullptr){
