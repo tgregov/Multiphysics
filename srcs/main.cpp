@@ -5,14 +5,11 @@
 // #include <gmsh.h>
 #include "readMesh.hpp"
 
-
 int main(int argc, char **argv)
 {
+    Mesh mesh;
 
-
-    Mesh* mesh = readMesh(argc, argv);
-
-    if(mesh == nullptr){
+    if(!readMesh(mesh, argc, argv)){
         std::cout << "[FAIL] The mesh was not read !" << std::endl;
         return 1;
     } else{

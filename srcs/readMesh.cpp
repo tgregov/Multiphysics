@@ -15,7 +15,7 @@ int posInVector(const std::vector<int>& vec, const std::vector<int>& couple)
         if(vec[2*i] == couple[1] && vec[2*i+1] == couple[0])
             return i;
     }
-    
+
     return -1;
 }
 
@@ -32,24 +32,20 @@ int diffVector(const std::vector<int>& vec, const std::vector<int>& couple)
 }
 
 
-Mesh* readMesh(int argc, char **argv)
+bool readMesh(Mesh& mesh, int argc, char **argv)
 {
-    
+
     // check that a .msh file was introduced
     if (argc < 2)
     {
-        std::cout << "Usage: " << argv[0] << " file.msh [options]" << std::endl;
-        return NULL;
-    } 
-        
-    // initialize gmsh, open a terminal and open the file
-    Mesh meshInit;
-    Mesh* mesh = &meshInit;
+        std::cerr << "Usage: " << argv[0] << " file.msh [options]" << std::endl;
+        return false;
+    }
 
     gmsh::initialize(argc, argv);
     gmsh::option::setNumber("General.Terminal", 1);
     gmsh::open(argv[1]);
-    
+
     // get the properties of 2D elements
     std::vector<int> eleTypes;
     gmsh::model::mesh::getElementTypes(eleTypes, 2);
@@ -58,7 +54,7 @@ Mesh* readMesh(int argc, char **argv)
         // TO DO: handle hybrid meshes
         gmsh::logger::write("Hybrid meshes not handled in this example!",
                             "error");
-        return NULL;
+        return false;
     }
     int eleType2D = eleTypes[0];
     std::string name;
@@ -66,12 +62,12 @@ Mesh* readMesh(int argc, char **argv)
     std::vector<double> paramCoord;
     gmsh::model::mesh::getElementProperties(eleType2D, name, dim, order,
                                             numNodes, paramCoord);
-    
+
     // create a pair vector that will contain the (dim, tag) of the geometrical
     // entities, and get the entities over dim = 2, that is, the surfaces
     std::vector<std::pair<int, int>> entities;
     gmsh::model::getEntities(entities, 2);
-    
+
     // loop over the surfaces
     // TO DO: what if there are more than one surface ? -> handle that case
     for (std::size_t i = 0; i < entities.size(); i++)
@@ -98,7 +94,7 @@ Mesh* readMesh(int argc, char **argv)
                                 "] has tag: " + std::to_string(elementTags[j]));
         }
         */
-        
+
         // get the nodes (in fact, tags) on the edges of the 2D elements
         // -> to do so, we search over the 2D elements of type eleType2D,
         // belonging to the entity entityTag
@@ -136,13 +132,13 @@ Mesh* readMesh(int argc, char **argv)
                 std::vector<int> currentEdge;
                 currentEdge.push_back(nodes[6*j + 2*k]);
                 currentEdge.push_back(nodes[6*j + 2*k + 1]);
-                
+
                 p = posInVector(nodesReduced, currentEdge);
                 if(p == -1)
                 {
                     nodesReduced.push_back(currentEdge[0]);
                     nodesReduced.push_back(currentEdge[1]);
-                    
+
                     std::vector<int> temp1, temp2;
                     temp1.push_back(elementTags[j]);
                     parentElement.push_back(temp1);
@@ -156,7 +152,7 @@ Mesh* readMesh(int argc, char **argv)
                 }
             }
         }
-        
+
         /*
         gmsh::logger::write("------------------------------------------------");
         gmsh::logger::write("-> there are "
@@ -184,22 +180,22 @@ Mesh* readMesh(int argc, char **argv)
 
         // compute the normals of each edge for each element, in an order that
         // is similar to parentElement
-        // TO DO: optimize the computations (at the moment the computation is 
+        // TO DO: optimize the computations (at the moment the computation is
         // quite stupid !)
         /*
         std::vector<std::vector<double>> normalVector;
         std::vector<int> nodeTagsTemo;
-        std::vector<double> nodeCoords, nodeParamsTemp, barycenters, 
+        std::vector<double> nodeCoords, nodeParamsTemp, barycenters,
                             nodeCoordsOpp;
         double xA, yA, xB, yB, xO, yO, nx, ny, norm, dotprod;
         int elementTagTemp;
-        
-        
+
+
         for(std::size_t j = 0; j < nodesReduced.size()/2; j++)
         {
 
             // get the nodes coordinates
-            gmsh::model::mesh::getNodes(nodeTagsTemo, nodeCoords, 
+            gmsh::model::mesh::getNodes(nodeTagsTemo, nodeCoords,
                                         nodeParamsTemp, 0, nodesReduced[2*j]);
             xA = nodeCoords[0];
             yA = nodeCoords[1];
@@ -218,7 +214,7 @@ Mesh* readMesh(int argc, char **argv)
             nx = yB - yA;
             ny = xA - xB;
 
-            
+
             // check the direction for the first element in the list of parents
             gmsh::model::mesh::getNodes(nodeTagsTemo, nodeCoordsOpp,
                                         nodeParamsTemp, 0, nodeOpposite[j][0]);
@@ -236,23 +232,23 @@ Mesh* readMesh(int argc, char **argv)
             nx = nx/norm;
             ny = ny/norm;
 
-            // save it 
+            // save it
             std::vector<double> temp;
             temp.push_back(nx);
             temp.push_back(ny);
             normalVector.push_back(temp);
 
-            // if there is a second element, then its associated normal is 
+            // if there is a second element, then its associated normal is
             // simply the opposite of the one that has just been defined
             if(nodeOpposite[j].size() > 1){
                 normalVector[j].push_back(-nx);
                 normalVector[j].push_back(-ny);
             }
         }*/
-        
+
         // create a new discrete entity of dimension 1
         int disEntity = gmsh::model::addDiscreteEntity(1);
-        
+
         // and add new 1D elements to it, for all edges
         // N.B.: setElementsByType sets the elements of type eleType1D (here
         // lines) in the entity of dimension 1 (which is the dimension) and tag
@@ -263,15 +259,15 @@ Mesh* readMesh(int argc, char **argv)
 
         // Save the data in a mesh structure
         // TO DO: handle the case of multiple surfaces
-        mesh->elementTags = elementTags;
-        mesh->nodeTags =  nodesReduced;
-        mesh->parentElement = parentElement;
+        mesh.elementTags = elementTags;
+        mesh.nodeTags =  nodesReduced;
+        mesh.parentElement = parentElement;
         //mesh->normalVector = normalVector;
     }
-    
+
     // write the new .msh file
     // gmsh::write("new_mesh.msh");
-    
+
     // basis functions for a 1D element
     gmsh::model::mesh::getElementTypes(eleTypes, 1);
     int eleType1D = eleTypes[0];
@@ -279,7 +275,7 @@ Mesh* readMesh(int argc, char **argv)
     int numComp;
     gmsh::model::mesh::getBasisFunctions(eleType1D, "Gauss3", "IsoParametric",
                                          intpts, numComp, bf);
-    
+
     // iterate over the new 1D elements and get integration information
     // TO DO: dynamically take into account the fact that there might be a
     // vector of entities disEntity (here I just took the last entity of dim =
@@ -290,13 +286,13 @@ Mesh* readMesh(int argc, char **argv)
     gmsh::model::mesh::getElementsByType(eleType1D, elementTags, nodeTags, c);
     std::vector<double> jac, det, pts;
     gmsh::model::mesh::getJacobians(eleType1D, "Gauss3", jac, det, pts, c);
-    
+
     // TO DO: see what it means
     //gmsh::fltk::run();
-    
+
     // finalize gmsh
     gmsh::finalize();
 
 
-    return mesh;
+    return true;
 }
