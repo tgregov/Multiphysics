@@ -32,23 +32,12 @@ int diffVector(const std::vector<int>& vec, const std::pair<int, int>& couple)
 }
 
 
-Mesh* readMesh(int argc, char **argv)
+bool readMesh(Mesh& mesh, const std::string& fileName)
 {
-
     // check that a .msh file was introduced
-    if (argc < 2)
-    {
-        std::cout << "Usage: " << argv[0] << " file.msh [options]" << std::endl;
-        return NULL;
-    }
-
-    // initialize gmsh, open a terminal and open the file
-    Mesh meshInit;
-    Mesh* mesh = &meshInit;
-
-    gmsh::initialize(argc, argv);
+    gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
-    gmsh::open(argv[1]);
+    gmsh::open(fileName);
 
     // get the properties of 2D elements
     std::vector<int> eleTypes;
@@ -58,8 +47,11 @@ Mesh* readMesh(int argc, char **argv)
         // TO DO: handle hybrid meshes
         gmsh::logger::write("Hybrid meshes not handled in this example!",
                             "error");
-        return NULL;
+
+        gmsh::finalize();
+        return false;
     }
+
     int eleType2D = eleTypes[0];
     std::string name;
     int dim, order, numNodes;
@@ -132,9 +124,7 @@ Mesh* readMesh(int argc, char **argv)
 
             for(int k = 0; k < 3; k++)
             {
-
                 std::pair<int,int> currentEdge(nodes[6*j + 2*k], nodes[6*j + 2*k + 1]);
-
                 p = posInVector(nodesReduced, currentEdge);
                 if(p == -1)
                 {
@@ -261,9 +251,9 @@ Mesh* readMesh(int argc, char **argv)
 
         // Save the data in a mesh structure
         // TO DO: handle the case of multiple surfaces
-        mesh->elementTags = elementTags;
-        mesh->nodeTags =  nodesReduced;
-        mesh->parentElement = parentElement;
+        mesh.elementTags = elementTags;
+        mesh.nodeTags =  nodesReduced;
+        mesh.parentElement = parentElement;
         //mesh->normalVector = normalVector;
     }
 
@@ -296,5 +286,5 @@ Mesh* readMesh(int argc, char **argv)
     gmsh::finalize();
 
 
-    return mesh;
+    return true;
 }

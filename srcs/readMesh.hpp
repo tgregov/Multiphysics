@@ -2,6 +2,7 @@
 #define readMesh_hpp
 
 #include <vector>
+#include <string>
 
 /**
  * \struct Mesh
@@ -32,6 +33,7 @@ struct Mesh
     std::vector<double> jacEdges;/**<  [jac1gp1, jac1gp2, jac2gp1, ...]: jacobian of each edge, evaluated at the Gauss points*/
 };
 
-Mesh* readMesh(int argc, char **argv);
+int posInVector(const std::vector<int>& vec, const std::vector<int>& couple);
+bool readMesh(Mesh& mesh, const std::string& fileName);
 
 #endif /* readMesh_hpp */
