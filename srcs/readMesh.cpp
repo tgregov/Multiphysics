@@ -6,13 +6,13 @@
 #include "readMesh.hpp"
 
 
-int posInVector(const std::vector<int>& vec, const std::vector<int>& couple)
+int posInVector(const std::vector<int>& vec, const std::pair<int, int>& couple)
 {
     for(std::size_t i = 0; i < vec.size()/2; i++)
     {
-        if(vec[2*i] == couple[0] && vec[2*i+1] == couple[1])
+        if(vec[2*i] == couple.first && vec[2*i+1] == couple.second)
             return i;
-        if(vec[2*i] == couple[1] && vec[2*i+1] == couple[0])
+        if(vec[2*i] == couple.second && vec[2*i+1] == couple.first)
             return i;
     }
 
@@ -21,10 +21,10 @@ int posInVector(const std::vector<int>& vec, const std::vector<int>& couple)
 
 
 // TO DO: optimize this procedure (linked to the normal computation)
-int diffVector(const std::vector<int>& vec, const std::vector<int>& couple)
+int diffVector(const std::vector<int>& vec, const std::pair<int, int>& couple)
 {
     for(std::size_t i = 0; i < vec.size(); i++){
-        if(vec[i] != couple[0] && vec[i] != couple[1])
+        if(vec[i] != couple.first && vec[i] != couple.second)
             return vec[i];
     }
 
@@ -124,16 +124,12 @@ bool readMesh(Mesh& mesh, const std::string& fileName)
 
             for(int k = 0; k < 3; k++)
             {
-
-                std::vector<int> currentEdge;
-                currentEdge.push_back(nodes[6*j + 2*k]);
-                currentEdge.push_back(nodes[6*j + 2*k + 1]);
-
+                std::pair<int,int> currentEdge(nodes[6*j + 2*k], nodes[6*j + 2*k + 1]);
                 p = posInVector(nodesReduced, currentEdge);
                 if(p == -1)
                 {
-                    nodesReduced.push_back(currentEdge[0]);
-                    nodesReduced.push_back(currentEdge[1]);
+                    nodesReduced.push_back(currentEdge.first);
+                    nodesReduced.push_back(currentEdge.second);
 
                     std::vector<int> temp1, temp2;
                     temp1.push_back(elementTags[j]);
