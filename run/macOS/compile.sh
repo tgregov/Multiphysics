@@ -1,6 +1,6 @@
 #!/bin/sh
 # Compile on Mac
-GMSHSDK=/Users/thomasgregov9/Documents/Unif/1Master\ Inge\ Civil/Cours/2Quadri/Multiphysics\ integrated\ computational\ project/Gmsh/sdk
+GMSHSDK=/Users/name/... # ADD YOUR PATH OF THE GMSH SDK
 export PATH=${GMSHSDK}/bin:${GMSHSDK}/lib:${PATH}
 export INCLUDE=${GMSHSDK}/include:${INCLUDE}
 export LIB=${GMSHSDK}/lib:${LIB}
