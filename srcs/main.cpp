@@ -16,7 +16,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    Eigen::MatrixXd m2();
+    Eigen::MatrixXd m2(10, 10);
     Mesh mesh;
 
     if(!readMesh(mesh, std::string(argv[1]))){
