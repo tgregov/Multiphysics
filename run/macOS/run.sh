@@ -1,3 +1,4 @@
+#!/bin/sh
 # Test on mac
 clear
 cd ../..

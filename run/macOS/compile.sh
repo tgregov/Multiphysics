@@ -1,3 +1,4 @@
+#!/bin/sh
 # Compile on Mac
 GMSHSDK=/Users/name/... # ADD YOUR PATH OF THE GMSH SDK
 export PATH=${GMSHSDK}/bin:${GMSHSDK}/lib:${PATH}
