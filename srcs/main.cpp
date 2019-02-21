@@ -1,12 +1,13 @@
 #include <iostream>
 #include <string>
+#include <Eigen/Dense>
 #ifndef M_PI
     #define M_PI 3.14159265358979323846
 #endif // M_PI
 // #include <gmsh.h>
 #include "readMesh.hpp"
 
-
+  
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -15,6 +16,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    Eigen::MatrixXd m2();
     Mesh mesh;
 
     if(!readMesh(mesh, std::string(argv[1]))){
