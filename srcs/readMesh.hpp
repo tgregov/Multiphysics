@@ -6,6 +6,7 @@
 #define readMesh_hpp
 
 #include <vector>
+#include <string>
 
 struct Mesh
 {
@@ -41,6 +42,6 @@ struct Mesh
 };
 
 int posInVector(const std::vector<int>& vec, const std::vector<int>& couple);
-bool readMesh(Mesh& mesh, int argc, char **argv);
+bool readMesh(Mesh& mesh, const std::string& fileName);
 
 #endif /* readMesh_hpp */

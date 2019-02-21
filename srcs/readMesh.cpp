@@ -32,19 +32,12 @@ int diffVector(const std::vector<int>& vec, const std::vector<int>& couple)
 }
 
 
-bool readMesh(Mesh& mesh, int argc, char **argv)
+bool readMesh(Mesh& mesh, const std::string& fileName)
 {
-
     // check that a .msh file was introduced
-    if (argc < 2)
-    {
-        std::cerr << "Usage: " << argv[0] << " file.msh [options]" << std::endl;
-        return false;
-    }
-
-    gmsh::initialize(argc, argv);
+    gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
-    gmsh::open(argv[1]);
+    gmsh::open(fileName);
 
     // get the properties of 2D elements
     std::vector<int> eleTypes;
@@ -54,8 +47,11 @@ bool readMesh(Mesh& mesh, int argc, char **argv)
         // TO DO: handle hybrid meshes
         gmsh::logger::write("Hybrid meshes not handled in this example!",
                             "error");
+
+        gmsh::finalize();
         return false;
     }
+
     int eleType2D = eleTypes[0];
     std::string name;
     int dim, order, numNodes;
