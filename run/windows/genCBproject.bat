@@ -7,12 +7,13 @@
 
 @ECHO OFF
 
-set GMSHSDK=C:\Program Files (x86)\CodeBlocks\gmsh-4.1.4-Windows64-sdk
+set GMSHSDK=C:\Program Files (x86)\CodeBlocks\gmsh-4.1.5-Windows64-sdk
+set EIGENSDK=C:\Program Files (x86)\CodeBlocks\eigen-eigen-323c052e1731
 
 :: where is gmsh.exe and gmsh-**.dll ? (HINT: copy gmsh-**.dll to the bin folder)
 set PATH=%GMSHSDK%\bin;%GMSHSDK%\lib;%PATH%
 :: where is gmsh.h ? (rename gmsh.h_cwrap => gmsh.h)
-set INCLUDE=%GMSHSDK%\include;%INCLUDE%
+set INCLUDE=%EIGENSDK%;%GMSHSDK%\include;%INCLUDE%
 :: where is gmsh.lib ?
 set LIB=%GMSHSDK%\lib;%LIB%
 :: where is gmsh.py ? (required only if you want to use the python API)

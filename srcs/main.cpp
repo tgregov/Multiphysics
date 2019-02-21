@@ -4,12 +4,11 @@
 #endif // M_PI
 // #include <gmsh.h>
 #include "readMesh.hpp"
-
+#include <Eigen/Dense>
 
 int main(int argc, char **argv)
 {
-
-
+	Eigen::MatrixXd m2();
     Mesh* mesh = readMesh(argc, argv);
 
     if(mesh == nullptr){
@@ -18,6 +17,6 @@ int main(int argc, char **argv)
     } else{
         std::cout << "The mesh was read successfully" << std::endl;
     }
-
+	
     return 0;
 }
