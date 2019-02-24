@@ -6,6 +6,7 @@
 #endif // M_PI
 // #include <gmsh.h>
 #include "readMesh.hpp"
+#include "testMij.hpp"
 
   
 int main(int argc, char **argv)
@@ -25,6 +26,9 @@ int main(int argc, char **argv)
     } else{
         std::cout << "The mesh was read successfully" << std::endl;
     }
+
+    // TEMPORARY
+    testMij(std::string(argv[1]));
 
     return 0;
 }
