@@ -3,6 +3,7 @@
 #define M_PI 3.14159265358979323846
 #endif // M_PI
 #include <gmsh.h>
+#include <Eigen/Sparse>
 
 bool testMij(const std::string& fileName)
 {
@@ -164,8 +165,8 @@ bool testMij(const std::string& fileName)
 
     // assembly of the matrix M_ij
     // temporary => later we will use Eigen
-    std::vector<std::vector<double>> M(nE*nSF, std::vector<double>(nE*nSF, 0.0));
-
+    Eigen::SparseMatrix<double> M(nE*nSF, nE*nSF);
+    std::vector<Eigen::Triplet<double>> index;
 
     for(unsigned int elm = 0; elm < nE; elm++)
     {   
@@ -173,10 +174,14 @@ bool testMij(const std::string& fileName)
         unsigned int j = 0;
         for(unsigned int l = 0; l < nSF*(nSF+1)/2; l++)
         {
-            M[i + elm*nSF][j + elm*nSF] = E[elm][l];
+
+            index.push_back(Eigen::Triplet<double>(i + elm*nSF, j + elm*nSF,
+                                E[elm][l]));
+
             if(i != j)
             {
-                M[j + elm*nSF][i + elm*nSF] = E[elm][l];
+                index.push_back(Eigen::Triplet<double>(j + elm*nSF, i + elm*nSF,
+                                E[elm][l]));
             }
 
             j += 1;
@@ -188,11 +193,40 @@ bool testMij(const std::string& fileName)
         }
     }  
 
-    for(size_t i = 0; i < M.size(); i++)
-    {
-        for(size_t j = 0; j < M[i].size(); j++)
+    M.setFromTriplets(index.begin(), index.end());
+    std::cout << M << std::endl;
+
+
+
+    // method with vector (to delete)
+    std::vector<std::vector<double>> Mv(nE*nSF, std::vector<double>(nE*nSF, 0.0));
+
+    for(unsigned int elm = 0; elm < nE; elm++)
+    {   
+        unsigned int i = 0;
+        unsigned int j = 0;
+        for(unsigned int l = 0; l < nSF*(nSF+1)/2; l++)
         {
-            std::cout << "| " << M[i][j] << " ";
+            Mv[i + elm*nSF][j + elm*nSF] = E[elm][l];
+            if(i != j)
+            {
+                Mv[j + elm*nSF][i + elm*nSF] = E[elm][l];
+            }
+
+            j += 1;
+            if(j == nSF)
+            {
+                i += 1;
+                j = i;
+            }
+        }
+    }  
+
+    for(size_t i = 0; i < Mv.size(); i++)
+    {
+        for(size_t j = 0; j < Mv[i].size(); j++)
+        {
+            std::cout << "| " << Mv[i][j] << " ";
         }
         std::cout << "|" << std::endl;
     }
