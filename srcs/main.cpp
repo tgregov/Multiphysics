@@ -28,11 +28,12 @@ int main(int argc, char **argv)
         std::cout << "The mesh was read successfully" << std::endl;
     }
 
-    Eigen::SparseMatrix<double> M(meshParams.nE*meshParams.nSF, meshParams.nE*meshParams.nSF);
+    Eigen::SparseMatrix<double> M(meshParams.nE*meshParams.nSF, 
+                                    meshParams.nE*meshParams.nSF);
 
     buildM(meshParams, M);
-    std::cout<<std::endl;
-    std::cout<<M<<std::endl;
+    std::cout << std::endl;
+    std::cout << M << std::endl;
 
     return 0;
 }
