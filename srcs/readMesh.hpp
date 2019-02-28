@@ -54,6 +54,13 @@ struct Mesh
                                     Gauss points*/
 };
 
+enum ElemDim
+{
+    DIM1 = 1,
+    DIM2 = 2,
+    DIM3 = 3
+};
+
 /**
  * \struct MeshParams
  * \brief structure that contains all the information of the mesh that this
@@ -79,6 +86,9 @@ struct MeshParams
     unsigned int nGP; //maybe short
     unsigned int nSF;
     unsigned int nE;
+
+    ElemDim elementDim;
+    int elementType;
 };
 
 

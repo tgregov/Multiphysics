@@ -39,19 +39,37 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
     gmsh::option::setNumber("General.Terminal", 1);
     gmsh::open(fileName);
 
-    // get the properties of 2D elements
-    std::vector<int> eleTypes;
-    gmsh::model::mesh::getElementTypes(eleTypes, 2);
-    if (eleTypes.size() != 1)
+    for(unsigned short i = 1 ; i <= 3 ; ++i)
     {
-        // TO DO: handle hybrid meshes
-        gmsh::logger::write("Hybrid meshes not handled in this example!",
-                            "error");
+        std::vector<int> eleTypes;
+        gmsh::model::mesh::getElementTypes(eleTypes, i);
+        switch(eleTypes.size())
+        {
+            case 0:
+                break;
+            case 1:
+                meshParams.elementDim = static_cast<ElemDim>(i);
+                meshParams.elementType = eleTypes[0];
+                break;
+            default:
+                gmsh::logger::write("Hybrid meshes not handled in this example!",
+                                "error");
+
+                gmsh::finalize();
+                return false;
+        }
+    }
+
+    if(meshParams.elementDim != DIM2)
+    {
+        gmsh::logger::write("Only 2D meshes handled currently!",
+                                "error");
 
         gmsh::finalize();
         return false;
     }
-    int eleType2D = eleTypes[0]; // e.g. T3 elements
+
+    int eleType2D = meshParams.elementType; // e.g. T3 elements
 
     // get basis functions
     int numComp;
@@ -82,21 +100,24 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
         // get the nodes (in fact, tags) on the edges of the 2D elements
         // -> to do so, we search over the 2D elements of type eleType2D,
         // belonging to the entity entityTag
-        std::vector<int> nodes;
+        std::vector<int> nodes;  // 2nodes per edge per element
         gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodes, entityTag, true);
 
+        meshParams.nE = meshParams.elementTags.size();
+
+        double nEdgePerEl = nodes.size()/(2* meshParams.nE);
 
         // Compute a vector of nodes per edge per element and normal per edge per element
         // to be generalized to 1D and 3D
-        for(std::size_t j = 0; j < meshParams.elementTags.size(); j++)
+        for(std::size_t j = 0; j < meshParams.nE; j++)
         {
             std::vector<std::pair<int, int>> edgeList;
             std::vector<std::vector<double>> normalList; //List of normal for an element
-            for(unsigned short k = 0; k < 3; k++) //T3 element, change it later
+            for(unsigned short k = 0 ; k < nEdgePerEl ; k++) //Normally now any element type
             {
                 std::vector<double> normal; //The normal of one edge
 
-                edgeList.push_back(std::pair<int, int>(nodes[6*j+2*k], nodes[6*j+2*k+1]));   // The value 6 is indeed equal to 2*number of edge by element
+                edgeList.push_back(std::pair<int, int>(nodes[2*nEdgePerEl*j+2*k], nodes[2*nEdgePerEl*j+2*k+1]));
 
                 std::vector<double> coord1, parametricCoord1;
                 gmsh::model::mesh::getNode(edgeList[k].first,  coord1, parametricCoord1);
@@ -119,7 +140,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
         }
 
         //Just read what we have found
-        for(std::size_t j = 0; j < meshParams.elementTags.size(); j++)
+        for(std::size_t j = 0; j < meshParams.nE; j++)
         {
             std::cout<<"Element: "<<meshParams.elementTags[j]<<std::endl;
             for (unsigned short i = 0 ; i < meshParams.normals[j].size() ; i++ )
@@ -139,7 +160,6 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
 
     meshParams.nGP = meshParams.intPoints.size()/4;
     meshParams.nSF = meshParams.basisFunc.size()/meshParams.nGP;
-    meshParams.nE = meshParams.determinant.size()/meshParams.nGP;
 
     return true;
 }
