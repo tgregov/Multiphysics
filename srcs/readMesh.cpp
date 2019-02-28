@@ -69,7 +69,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
     int c = entities[0].second; // c is the tag of the surface
 
     // Get the Jacobians information for the 2D triangular elements
-    std::vector<double> jac, pts;
+    std::vector<double> pts;
     gmsh::model::mesh::getJacobians(eleType2D, intScheme, meshParams.jacobian, 
                                     meshParams.determinant, pts, c);
     gmsh::finalize();
