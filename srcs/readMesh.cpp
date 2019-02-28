@@ -1,8 +1,9 @@
 #include <iostream>
 #ifndef M_PI
-#define M_PI 3.14159265358979323846
+    #define M_PI 3.14159265358979323846
 #endif // M_PI
 #include <gmsh.h>
+#include <cmath>
 #include "readMesh.hpp"
 
 
@@ -64,6 +65,76 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
     // Get the Jacobians information for the 2D triangular elements
     std::vector<double> jac, pts;
     gmsh::model::mesh::getJacobians(eleType2D, intScheme, jac, meshParams.determinant, pts, c);
+
+    // TO DO: what if there are more than one surface ? -> handle that case
+    for (std::size_t i = 0; i < entities.size(); i++)
+    {
+        // get the tag of the current surface
+        int entityTag = entities[i].second;
+
+        // get the elements (their tag & node tag) of the current surface
+        // -> to do so, we search over the 2D elements of type eleType2D,
+        // belonging to the entity entityTag
+        std::vector<int> nodeTags;
+        gmsh::model::mesh::getElementsByType(eleType2D, meshParams.elementTags, nodeTags,
+                                             entityTag);  //When multiple entity, table of meshParams ? ^^
+
+        // get the nodes (in fact, tags) on the edges of the 2D elements
+        // -> to do so, we search over the 2D elements of type eleType2D,
+        // belonging to the entity entityTag
+        std::vector<int> nodes;
+        gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodes, entityTag, true);
+
+
+        // Compute a vector of nodes per edge per element and normal per edge per element
+        // to be generalized to 1D and 3D
+        for(std::size_t j = 0; j < meshParams.elementTags.size(); j++)
+        {
+            std::vector<std::pair<int, int>> edgeList;
+            std::vector<std::vector<double>> normalList; //List of normal for an element
+            for(unsigned short k = 0; k < 3; k++) //T3 element, change it later
+            {
+                std::vector<double> normal; //The normal of one edge
+
+                edgeList.push_back(std::pair<int, int>(nodes[6*j+2*k], nodes[6*j+2*k+1]));   // The value 6 is indeed equal to 2*number of edge by element
+
+                std::vector<double> coord1, parametricCoord1;
+                gmsh::model::mesh::getNode(edgeList[k].first,  coord1, parametricCoord1);
+
+                std::vector<double> coord2, parametricCoord2;
+                gmsh::model::mesh::getNode(edgeList[k].second,  coord2, parametricCoord2);
+
+                //  +/- !
+                double dy = coord2[1]-coord1[1];  //Not general, 2D case, to be genralized for 1D and 3D
+                double dx = coord2[0]-coord1[0];
+                double norm = sqrt(dy*dy + dx*dx);
+                normal.push_back(dy/norm);
+                normal.push_back(-dx/norm);
+
+                normalList.push_back(normal); //we add the normal the the list of element's normal
+            }
+
+            meshParams.nodes.push_back(edgeList);
+            meshParams.normals.push_back(normalList); //we add the list of normal of one element to the full list of normal.
+        }
+
+        //Just read what we have found
+        for(std::size_t j = 0; j < meshParams.elementTags.size(); j++)
+        {
+            std::cout<<"Element: "<<meshParams.elementTags[j]<<std::endl;
+            for (unsigned short i = 0 ; i < meshParams.normals[j].size() ; i++ )
+            {
+                std::cout<<"\tEdge: "<<i<<std::endl;
+                std::cout<<"\t\tNormal: (";
+                for (unsigned short k = 0 ; k < meshParams.normals[j][i].size() ; k++ )
+                {
+                    std::cout<<meshParams.normals[j][i][k]<<", ";
+                }
+                std::cout<<")"<<std::endl;
+            }
+        }
+    }
+
     gmsh::finalize();
 
     meshParams.nGP = meshParams.intPoints.size()/4;

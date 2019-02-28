@@ -21,14 +21,14 @@ int main(int argc, char **argv)
     if(!readMesh(meshParams, std::string(argv[1]), "Gauss1", "Lagrange"))
     {
         std::cerr << "[FAIL] The mesh was not read !" << std::endl;
-        return 1;
+        return -1;
     }
     else
     {
         std::cout << "The mesh was read successfully" << std::endl;
     }
 
-    Eigen::SparseMatrix<double> M(meshParams.nE*meshParams.nSF, 
+    Eigen::SparseMatrix<double> M(meshParams.nE*meshParams.nSF,
                                     meshParams.nE*meshParams.nSF);
 
     buildM(meshParams, M);
