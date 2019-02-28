@@ -57,13 +57,17 @@ struct Mesh
 struct MeshParams
 {
     std::vector<double> basisFunc;
+    std::vector<double> basisFuncGrad;
     std::vector<double> determinant;
+    std::vector<double> jacobian;
     std::vector<double> intPoints;
     unsigned int nGP; //maybe short
     unsigned int nSF;
     unsigned int nE;
 };
 
-bool readMesh(MeshParams& meshparams, const std::string& fileName, const std::string& intScheme, const std::string& basisFuncType);
+bool readMesh(MeshParams& meshParams, const std::string& fileName, 
+                const std::string& intScheme, const std::string& basisFuncType,
+                const std::string& basisFuncGradType);
 
 #endif /* readMesh_hpp */
