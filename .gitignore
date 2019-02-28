@@ -1,3 +1,4 @@
-/build/*
-/envs/linux-macos.sh
-/run/macOS/compile/sh
+build/*
+envs/linux-macos.sh
+run/macOS/compile.sh
+.DS_Store

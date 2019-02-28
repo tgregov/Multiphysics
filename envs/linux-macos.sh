@@ -1,3 +1,4 @@
+#!/bin/sh
 # This file setup an environment which allows you to compile the code
 # on Linux or macOS using the default compiler (gcc or clang)
 #
