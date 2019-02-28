@@ -48,8 +48,8 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
             case 0:
                 break;
             case 1:
-                meshParams.elementDim = static_cast<ElemDim>(i);
-                meshParams.elementType = eleTypes[0];
+                meshParams.elementDim = i;
+                meshParams.elementType = eleTypes[0]; // e.g. T3 elements
                 break;
             default:
                 gmsh::logger::write("Hybrid meshes not handled in this example!",
@@ -60,7 +60,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
         }
     }
 
-    if(meshParams.elementDim != DIM2)
+    if(meshParams.elementDim != 2)
     {
         gmsh::logger::write("Only 2D meshes handled currently!",
                                 "error");
@@ -69,11 +69,9 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
         return false;
     }
 
-    int eleType2D = meshParams.elementType; // e.g. T3 elements
-
     // get basis functions
     int numComp;
-    gmsh::model::mesh::getBasisFunctions(eleType2D, intScheme, basisFuncType,
+    gmsh::model::mesh::getBasisFunctions(meshParams.elementType, intScheme, basisFuncType,
                                          meshParams.intPoints, numComp, meshParams.basisFunc);
 
     std::vector<std::pair<int, int>> entities;
@@ -82,7 +80,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
 
     // Get the Jacobians information for the 2D triangular elements
     std::vector<double> jac, pts;
-    gmsh::model::mesh::getJacobians(eleType2D, intScheme, jac, meshParams.determinant, pts, c);
+    gmsh::model::mesh::getJacobians(meshParams.elementType, intScheme, jac, meshParams.determinant, pts, c);
 
     // TO DO: what if there are more than one surface ? -> handle that case
     for (std::size_t i = 0; i < entities.size(); i++)
@@ -94,14 +92,14 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
         // -> to do so, we search over the 2D elements of type eleType2D,
         // belonging to the entity entityTag
         std::vector<int> nodeTags;
-        gmsh::model::mesh::getElementsByType(eleType2D, meshParams.elementTags, nodeTags,
+        gmsh::model::mesh::getElementsByType(meshParams.elementType, meshParams.elementTags, nodeTags,
                                              entityTag);  //When multiple entity, table of meshParams ? ^^
 
         // get the nodes (in fact, tags) on the edges of the 2D elements
         // -> to do so, we search over the 2D elements of type eleType2D,
         // belonging to the entity entityTag
         std::vector<int> nodes;  // 2nodes per edge per element
-        gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodes, entityTag, true);
+        gmsh::model::mesh::getElementEdgeNodes(meshParams.elementType, nodes, entityTag, true);
 
         meshParams.nE = meshParams.elementTags.size();
 
@@ -125,12 +123,29 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
                 std::vector<double> coord2, parametricCoord2;
                 gmsh::model::mesh::getNode(edgeList[k].second,  coord2, parametricCoord2);
 
-                //  +/- !
-                double dy = coord2[1]-coord1[1];  //Not general, 2D case, to be genralized for 1D and 3D
-                double dx = coord2[0]-coord1[0];
-                double norm = sqrt(dy*dy + dx*dx);
-                normal.push_back(dy/norm);
-                normal.push_back(-dx/norm);
+                std::vector<double> coord3, parametricCoord3;
+                if(k == 0)//third point of the triangle, T3 hack.
+                    gmsh::model::mesh::getNode(nodeTags[j*nEdgePerEl + 2],  coord3, parametricCoord3);//I bet the 2 will depends on the element type
+                else
+                    gmsh::model::mesh::getNode(nodeTags[j*nEdgePerEl + k - 1],  coord3, parametricCoord3);
+
+                double nx = coord2[1]-coord1[1];  //Not general, 2D case, to be genralized for 1D and 3D
+                double ny = coord1[0]-coord2[0];
+                double norm = sqrt(ny*ny + nx*nx);
+
+                //Unfortunately, nodes per edge in nodes vector are not always in the same order
+                //clockwise vs anticlockwise
+                double vx = coord3[0]-(coord2[0]+coord1[0])/2;
+                double vy = coord3[1]-(coord2[1]+coord1[1])/2;
+
+                if(nx*vx + ny*vy > 0)
+                {
+                    nx = -nx;
+                    ny = -ny;
+                }
+
+                normal.push_back(nx/norm);
+                normal.push_back(ny/norm);
 
                 normalList.push_back(normal); //we add the normal the the list of element's normal
             }
