@@ -73,7 +73,9 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
 
     // get basis functions
     int numComp;
-
+    
+    int eleType2D = meshParams.elementType; // cf. Travis fail
+    
     gmsh::model::mesh::getBasisFunctions(eleType2D, intScheme, basisFuncType,
                                          meshParams.intPoints, numComp, 
                                          meshParams.basisFunc);
