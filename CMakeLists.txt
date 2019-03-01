@@ -3,8 +3,10 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
 # build type is "" by default in Linux
 IF(NOT CMAKE_BUILD_TYPE)
-    SET( CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 ENDIF()
+
+MESSAGE(STATUS "Build Type is " ${CMAKE_BUILD_TYPE})
 
 # put all generated files in a single folder (required in windows for exe linked to dlls)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin/ CACHE PATH "")

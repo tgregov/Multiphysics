@@ -54,16 +54,36 @@ struct Mesh
                                     Gauss points*/
 };
 
+/**
+ * \struct MeshParams
+ * \brief structure that contains all the information of the mesh that this
+ * necessary for the DG method
+ */
 struct MeshParams
 {
+    std::vector<int> elementTags;  /*!< [e1, e2, e3, ...]: concatenation of
+                                    element tags [maybe not] */
+
+    std::vector<std::vector<std::pair<int, int>>> nodes; /**< vector (length same as elementTags) containing a vector
+                                                              (length = number of edges per element)
+                                                              of pair of nodes tags */
+
+    std::vector<std::vector<std::vector<double>>> normals; /**< vector (length same as elementTags) containing a vector
+                                                              (length = number of edges per element)
+                                                              of normals (length depends on dimension */
+
     std::vector<double> basisFunc;
     std::vector<double> basisFuncGrad;
     std::vector<double> determinant;
     std::vector<double> jacobian;
     std::vector<double> intPoints;
+
     unsigned int nGP; //maybe short
     unsigned int nSF;
     unsigned int nE;
+
+    int elementDim;
+    int elementType;
 };
 
 bool readMesh(MeshParams& meshParams, const std::string& fileName, 
