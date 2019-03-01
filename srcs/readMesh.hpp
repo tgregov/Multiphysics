@@ -73,7 +73,9 @@ struct MeshParams
                                                               of normals (length depends on dimension */
 
     std::vector<double> basisFunc;
+    std::vector<double> basisFuncGrad;
     std::vector<double> determinant;
+    std::vector<double> jacobian;
     std::vector<double> intPoints;
 
     unsigned int nGP; //maybe short
@@ -84,7 +86,8 @@ struct MeshParams
     int elementType;
 };
 
-
-bool readMesh(MeshParams& meshparams, const std::string& fileName, const std::string& intScheme, const std::string& basisFuncType);
+bool readMesh(MeshParams& meshParams, const std::string& fileName, 
+                const std::string& intScheme, const std::string& basisFuncType,
+                const std::string& basisFuncGradType);
 
 #endif /* readMesh_hpp */

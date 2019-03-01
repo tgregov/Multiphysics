@@ -7,6 +7,7 @@
 // #include <gmsh.h>
 #include "readMesh.hpp"
 #include "buildM.hpp"
+#include "buildS.hpp"
 
 int main(int argc, char **argv)
 {
@@ -18,7 +19,8 @@ int main(int argc, char **argv)
 
     MeshParams meshParams;
 
-    if(!readMesh(meshParams, std::string(argv[1]), "Gauss1", "Lagrange"))
+    if(!readMesh(meshParams, std::string(argv[1]), 
+        "Gauss1", "Lagrange", "GradLagrange"))
     {
         std::cerr << "[FAIL] The mesh was not read !" << std::endl;
         return -1;
@@ -30,10 +32,17 @@ int main(int argc, char **argv)
 
     Eigen::SparseMatrix<double> M(meshParams.nE*meshParams.nSF,
                                     meshParams.nE*meshParams.nSF);
+    Eigen::SparseMatrix<double> Sx(meshParams.nE*meshParams.nSF, 
+                                    meshParams.nE*meshParams.nSF);
+    Eigen::SparseMatrix<double> Sy(meshParams.nE*meshParams.nSF, 
+                                    meshParams.nE*meshParams.nSF);
 
     buildM(meshParams, M);
+    buildS(meshParams, Sx, Sy);
     std::cout << std::endl;
     std::cout << M << std::endl;
+    std::cout << Sx << std::endl;
+    std::cout << Sy << std::endl;
 
     return 0;
 }
