@@ -32,7 +32,9 @@ int diffVector(const std::vector<int>& vec, const std::pair<int, int>& couple)
 }
 
 
-bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::string& intScheme, const std::string& basisFuncType)
+bool readMesh(MeshParams& meshParams, const std::string& fileName, 
+                const std::string& intScheme, const std::string& basisFuncType,
+                const std::string& basisFuncGradType)
 {
     gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
@@ -55,15 +57,21 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
     // get basis functions
     int numComp;
     gmsh::model::mesh::getBasisFunctions(eleType2D, intScheme, basisFuncType,
-                                         meshParams.intPoints, numComp, meshParams.basisFunc);
+                                         meshParams.intPoints, numComp, 
+                                         meshParams.basisFunc);
+    gmsh::model::mesh::getBasisFunctions(eleType2D, intScheme, basisFuncGradType,
+                                         meshParams.intPoints, numComp, 
+                                         meshParams.basisFuncGrad);
+
 
     std::vector<std::pair<int, int>> entities;
     gmsh::model::getEntities(entities, 2);
     int c = entities[0].second; // c is the tag of the surface
 
     // Get the Jacobians information for the 2D triangular elements
-    std::vector<double> jac, pts;
-    gmsh::model::mesh::getJacobians(eleType2D, intScheme, jac, meshParams.determinant, pts, c);
+    std::vector<double> pts;
+    gmsh::model::mesh::getJacobians(eleType2D, intScheme, meshParams.jacobian, 
+                                    meshParams.determinant, pts, c);
     gmsh::finalize();
 
     meshParams.nGP = meshParams.intPoints.size()/4;
