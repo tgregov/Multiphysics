@@ -88,12 +88,11 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
         // get the tag of the current surface
         int entityTag = entities[i].second;
 
-        // get the elements (their tag & node tag) of the current surface
-        // -> to do so, we search over the 2D elements of type eleType2D,
-        // belonging to the entity entityTag
         std::vector<int> nodeTags;
-        gmsh::model::mesh::getElementsByType(meshParams.elementType, meshParams.elementTags, nodeTags,
-                                             entityTag);  //When multiple entity, table of meshParams ? ^^
+        gmsh::model::mesh::getElementsByType(meshParams.elementType, meshParams.elementTags, nodeTags, entityTag);
+
+        std::vector<double> baryCenters;
+        gmsh::model::mesh::getBarycenters(meshParams.elementType, entityTag, false, true, baryCenters);//When multiple entity, table of meshParams ? ^
 
         // get the nodes (in fact, tags) on the edges of the 2D elements
         // -> to do so, we search over the 2D elements of type eleType2D,
@@ -123,20 +122,14 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName, const std::st
                 std::vector<double> coord2, parametricCoord2;
                 gmsh::model::mesh::getNode(edgeList[k].second,  coord2, parametricCoord2);
 
-                std::vector<double> coord3, parametricCoord3;
-                if(k == 0)//third point of the triangle, T3 hack.
-                    gmsh::model::mesh::getNode(nodeTags[j*nEdgePerEl + 2],  coord3, parametricCoord3);//I bet the 2 will depends on the element type
-                else
-                    gmsh::model::mesh::getNode(nodeTags[j*nEdgePerEl + k - 1],  coord3, parametricCoord3);
-
                 double nx = coord2[1]-coord1[1];  //Not general, 2D case, to be genralized for 1D and 3D
                 double ny = coord1[0]-coord2[0];
                 double norm = sqrt(ny*ny + nx*nx);
 
                 //Unfortunately, nodes per edge in nodes vector are not always in the same order
                 //clockwise vs anticlockwise
-                double vx = coord3[0]-(coord2[0]+coord1[0])/2;
-                double vy = coord3[1]-(coord2[1]+coord1[1])/2;
+                double vx = baryCenters[3*j]-(coord2[0]+coord1[0])/2;
+                double vy = baryCenters[3*j+1]-(coord2[1]+coord1[1])/2;
 
                 if(nx*vx + ny*vy > 0)
                 {

@@ -35,7 +35,7 @@ cd ../
 
 mkdir Debug
 cd Debug
-cmake ../../ -DCMAKE_BUILD_TYPE=Release  -G "CodeBlocks - MinGW Makefiles"
+cmake ../../ -DCMAKE_BUILD_TYPE=Debug  -G "CodeBlocks - MinGW Makefiles"
 copy "%GMSHSDK%\bin\gmsh-4.1.dll" "%cd%\bin"
 xcopy /E /I "../../Geometry" "%cd%\bin\Geometry"
 
