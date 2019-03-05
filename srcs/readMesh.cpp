@@ -82,7 +82,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
 
     int numComp;
     // get basis functions and their gradients
-    gmsh::model::mesh::getBasisFunctions(meshParams.elementType, "Gauss1",
+    gmsh::model::mesh::getBasisFunctions(meshParams.elementType, intScheme,
                                             basisFuncType, meshParams.intPoints,
                                             numComp, meshParams.basisFunc);
 
@@ -98,7 +98,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
 
     // get the jacobians
     std::vector<double> pts;
-    gmsh::model::mesh::getJacobians(meshParams.elementType, intScheme,
+    gmsh::model::mesh::getJacobians(meshParams.elementType, "Gauss1",
                                     meshParams.jacobian, meshParams.determinant, pts,
                                     c);
 
