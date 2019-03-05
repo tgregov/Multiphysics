@@ -72,6 +72,8 @@ struct MeshParams
                                                               (length = number of edges per element)
                                                               of normals (length depends on dimension */
 
+    std::vector<std::vector<double>> meanElementNormal;
+
     std::vector<double> basisFunc;
     std::vector<double> basisFuncGrad;
     std::vector<double> determinant;
@@ -82,11 +84,22 @@ struct MeshParams
     unsigned int nSF;
     unsigned int nE;
 
+    std::vector<int> elementTagsInferior;
+
+    std::vector<double> basisFuncInferior;
+    std::vector<double> determinantInferior;
+    std::vector<double> intPointsInferior;
+
+    unsigned int nGPInf; //maybe short
+    unsigned int nSFInf;
+    unsigned int nEInf;
+
     int elementDim;
     int elementType;
+    int elementTypeInferior = -1; //type of the boundary, dummy value for dim 0
 };
 
-bool readMesh(MeshParams& meshParams, const std::string& fileName, 
+bool readMesh(MeshParams& meshParams, const std::string& fileName,
                 const std::string& intScheme, const std::string& basisFuncType,
                 const std::string& basisFuncGradType);
 
