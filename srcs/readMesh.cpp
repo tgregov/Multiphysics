@@ -98,7 +98,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
 
     // get the jacobians
     std::vector<double> pts;
-    gmsh::model::mesh::getJacobians(meshParams.elementType, "Gauss1",
+    gmsh::model::mesh::getJacobians(meshParams.elementType, intScheme,
                                     meshParams.jacobian, meshParams.determinant, pts,
                                     c);
 
@@ -221,8 +221,8 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
 
                 // add the normal to the list of normals of the current element
                 normalList.push_back(normal);
-                meanNormal[0]+=normal[0]*meshParams.determinantInferior[elm];
-                meanNormal[1]+=normal[1]*meshParams.determinantInferior[elm];  //to check
+                meanNormal[0]+=normal[0]*meshParams.determinantInferior[elm*meshParams.nGPInf];
+                meanNormal[1]+=normal[1]*meshParams.determinantInferior[elm*meshParams.nGPInf];  //to check
             }
 
             // meshParams.nodes is a vector of vector of a pair: it lists for all the
