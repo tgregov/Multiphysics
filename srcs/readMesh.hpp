@@ -72,7 +72,8 @@ struct MeshParams
                                                               (length = number of edges per element)
                                                               of normals (length depends on dimension */
 
-    std::vector<std::vector<double>> meanElementNormal;
+    std::vector<std::vector<int>> index; //index[elm]=index of nodes f element elm, in the nodes vector returned somewhere in meshparams.
+    std::vector<int> indexInFront; //give it an index, gives you the index of the node in front of
 
     std::vector<double> basisFunc;
     std::vector<double> basisFuncGrad;
@@ -98,8 +99,8 @@ struct MeshParams
     int elementType;
     int elementTypeInferior = -1; //type of the boundary, dummy value for dim 0
 
-    std::vector<Eigen::SparseMatrix<double>> dM ; 
-    unsigned int nSigma = 3; 
+    std::vector<Eigen::SparseMatrix<double>> dM ;
+    unsigned int nSigma = 3;
 };
 
 bool readMesh(MeshParams& meshParams, const std::string& fileName,

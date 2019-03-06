@@ -7,7 +7,7 @@
 #include "readMesh.hpp"
 #include <cmath>
 
-void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C, 
+void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C,
 			const Eigen::VectorXd<double>& u)
 {
 	// first basic flux: simple transport
@@ -63,16 +63,17 @@ bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
 				} else if(typeForm.compare("weak")){
 					factor = +1.0;
 				else{
-					std::cerr 	<< "The form  " << typeForm  << "does not exist !" 
+					std::cerr 	<< "The form  " << typeForm  << "does not exist !"
 								<< std::endl;
 					return false;
 				}
-
+				
+				//DO NOT forget BC !!! 
 				gx[j] = -(factor*fx[index[j]] + fx[opp(s, index[j])])/2
-						- C*meshParams.normals[elm][s][0]*(u[index[j]] - u[opp(s, index[j])])/2;
+						- C*meshParams.normals[elm][s][0]*(u[index[j]] - u[meshParams.indexInFront(index[j])])/2;
 
 				gy[j] = -(factor*fy[index[j]] + fy[opp(s, index[j])])/2
-						- C*meshParams.normals[elm][s][1]*(u[index[j]] - u[opp(s, index[j])])/2;
+						- C*meshParams.normals[elm][s][1]*(u[index[j]] - u[meshParams.indexInFront(index[j]])/2;
 
 			}
 

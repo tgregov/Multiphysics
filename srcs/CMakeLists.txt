@@ -1,3 +1,3 @@
-SET(SRCS main.cpp readMesh.cpp readMesh.hpp buildM.cpp buildM.hpp buildS.cpp buildS.hpp buildDM.cpp buildDM.hpp)
+SET(SRCS main.cpp readMesh.cpp readMesh.hpp buildM.cpp buildM.hpp buildS.cpp buildS.hpp buildDM.cpp buildDM.hpp buildFlux.hpp buildFlux.hpp)
 ADD_EXECUTABLE(main ${SRCS})
 TARGET_LINK_LIBRARIES(main ${GMSH_LIBRARIES})

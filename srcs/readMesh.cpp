@@ -163,6 +163,28 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
         // compute a vector of nodes per edge per element and normal per edge
         // per element => to be generalized to 1D and 3D
 
+        meshParams.indexInFront.resize(nodeTags.size());
+        for(unsigned int i = 0 ; i < nodeTags.size() ; ++i)
+        {
+            std::cout<<"Lol     "<<nodeTags[i]<<std::endl;
+            bool founded = false;
+            for(unsigned int j = 0 ; j < nodeTags.size() ; ++j)
+            {
+                if(j != i)
+                {
+                    if(nodeTags[i] == nodeTags[j])
+                    {
+                        meshParams.indexInFront[i]=j;
+                        founded=true;
+                        break;
+                    }
+                }
+            }
+            if(!founded)
+                meshParams.indexInFront[i]=-1;
+            std::cout<<"Smite   "<<meshParams.indexInFront[i]<<std::endl;
+        }
+
         // loop over the elements
         for(std::size_t elm = 0; elm < meshParams.nE; elm++)
         {
@@ -173,6 +195,11 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
             std::vector<std::pair<int, int>> edgeList;
             std::vector<std::vector<double>> normalList;
             std::vector<double> meanNormal(2,0);
+            std::vector<int> elementIndex;
+            elementIndex.push_back(nEdgePerEl*elm);
+            elementIndex.push_back(nEdgePerEl*elm+1);
+            elementIndex.push_back(nEdgePerEl*elm+2);
+            meshParams.index.push_back(elementIndex);
 
             // loop over the edges of the current element
             for(unsigned short k = 0 ; k < nEdgePerEl; k++)
@@ -232,15 +259,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
             // normal
             meshParams.nodes.push_back(edgeList);
             meshParams.normals.push_back(normalList);
-            meshParams.meanElementNormal.push_back(meanNormal);
         }
-
-        // [TO REMOVE]
-        for(unsigned int e = 0; e < meshParams.meanElementNormal.size() ; ++e)
-        {
-            std::cout<<"Element: "<<e<<", mean normal ("<<meshParams.meanElementNormal[e][0]<<","<<meshParams.meanElementNormal[e][1]<<")"<<std::endl;
-        }
-        std::cout<<std::endl;
 
         // [TO REMOVE] display the normals to check that it works
         for(std::size_t j = 0; j < meshParams.nE; j++)
