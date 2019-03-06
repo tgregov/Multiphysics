@@ -6,6 +6,7 @@
 
 void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C, 
 			const Eigen::VectorXd<double>& u);
-void buildFlux(MeshParams& meshParams, Eigen::VectorXd<double>& I);
+bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
+				const Eigen::VectorXd<double>& u, const std::string& typeForm);
 
 #endif /* buildFlux_hpp */

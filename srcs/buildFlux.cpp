@@ -12,8 +12,8 @@ void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C,
 {
 	// first basic flux: simple transport
 	std::vector<double> a;
-	a[0] = 1.0;
-	a[1] = 0.0;
+	a.push_back(1.0);
+	a.push_back(0.0);
 
 	fx = a[0]*u;
 	fy = a[1]*u;
@@ -22,8 +22,8 @@ void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C,
 }
 
 
-void buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
-				const Eigen::VectorXd<double>& u)
+bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
+				const Eigen::VectorXd<double>& u, const std::string& typeForm)
 {
 
 
@@ -53,11 +53,26 @@ void buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
 
 			for(unsigned int j = 0; j < meshParams.nSF; j++)
 			{
-				gx[j] = (fx[index[j]] + fx[opp(s, index[j])])/2
-						+ C*meshParams.normals[elm][s][0]*(u[index[j]] - u[opp(s, index[j])])/2;
 
-				gy[j] = (fy[index[j]] + fy[opp(s, index[j])])/2
-						+ C*meshParams.normals[elm][s][1]*(u[index[j]] - u[opp(s, index[j])])/2;
+				// the type of form implies a different rhs vector
+				float factor;
+
+				if(typeForm.compare("strong"))
+				{
+					factor = -1.0;
+				} else if(typeForm.compare("weak")){
+					factor = +1.0;
+				else{
+					std::cerr 	<< "The form  " << typeForm  << "does not exist !" 
+								<< std::endl;
+					return false;
+				}
+
+				gx[j] = -(factor*fx[index[j]] + fx[opp(s, index[j])])/2
+						- C*meshParams.normals[elm][s][0]*(u[index[j]] - u[opp(s, index[j])])/2;
+
+				gy[j] = -(factor*fy[index[j]] + fy[opp(s, index[j])])/2
+						- C*meshParams.normals[elm][s][1]*(u[index[j]] - u[opp(s, index[j])])/2;
 
 			}
 
@@ -78,4 +93,6 @@ void buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
 			I[elm*meshParams.nSF + j] = partialI[j];
 		}
 	}
+
+	return true;
 }
