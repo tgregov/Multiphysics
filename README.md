@@ -34,10 +34,10 @@ Automatically build the code:
 ```bash
 . ./build_nic4.sh 
 ```
-Run the code: [TO DO]
+Run the code:
 ```bash
-cd ./run/NIC4
-. ./run.sh
+cd ..
+./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh
 ```
 
 
