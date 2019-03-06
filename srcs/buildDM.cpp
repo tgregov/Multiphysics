@@ -11,7 +11,7 @@ void buildDM(MeshParams& meshParams)
 	double lala = 0.0;
 	double lalb = 0.0;
 	unsigned int nSigma = meshParams.nSigma;
-	
+
 	for (unsigned int k = 0 ; k < meshParams.nGPInf ; k++)
 	{
 	    lala += meshParams.intPointsInferior[4*k + 3]
@@ -24,11 +24,10 @@ void buildDM(MeshParams& meshParams)
 	}
 
 
-
 	for(unsigned int s = 0 ; s < meshParams.nSigma ; s++)
 	{
 		meshParams.dM.push_back(Eigen::SparseMatrix<double>(meshParams.nSF,meshParams.nSF));
-		
+
 		std::vector<Eigen::Triplet<double>> index;
 		index.push_back(Eigen::Triplet<double>(s, s, lala));
 		index.push_back(Eigen::Triplet<double>(s, (s+1) % nSigma, lalb));
@@ -36,7 +35,7 @@ void buildDM(MeshParams& meshParams)
 		index.push_back(Eigen::Triplet<double>((s+1) % nSigma, (s+1)%nSigma, lala));
 
 		meshParams.dM[s].setFromTriplets(index.begin(), index.end());
-		
+
 	}
 
 }
