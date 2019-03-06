@@ -9,5 +9,35 @@ Development of the Discontinuous Galerkin method (DG) applied to a particular ph
 ## Build status 
 Current status: [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?branch=master)](https://travis-ci.org/tgregov/Multiphysics)
 
+## Assumptions
+### On the field:
+* Scalar field
+
+### On the mesh:
+* 2D mesh
+* The elements edges are straight (constant normal vector over it)
+* Same type of elements in the mesh (e.g. T3)
+* Affine change of variable between the reference and physical configuration, for the edges of the elements
+
+
 ## Compilation procedure
-TO DO
+### On NIC4
+Connect to NIC4 (using SSH for instance). Then, clone the repositoy: 
+```bash
+git clone https://github.com/tgregov/Multiphysics
+```
+Move to the code repository:
+```bash
+cd ./Multiphysics
+```
+Automatically build the code:
+```bash
+. ./build_nic4.sh 
+```
+Run the code: [TO DO]
+```bash
+cd ./run/NIC4
+. ./run.sh
+```
+
+
