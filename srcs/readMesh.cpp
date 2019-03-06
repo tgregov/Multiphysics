@@ -195,7 +195,7 @@ bool readMesh(MeshParams& meshParams, const std::string& fileName,
             std::vector<std::pair<int, int>> edgeList;
             std::vector<std::vector<double>> normalList;
             std::vector<double> meanNormal(2,0);
-            std::vector<int> elementIndex;
+            std::vector<unsigned int> elementIndex;
             elementIndex.push_back(nEdgePerEl*elm);
             elementIndex.push_back(nEdgePerEl*elm+1);
             elementIndex.push_back(nEdgePerEl*elm+2);

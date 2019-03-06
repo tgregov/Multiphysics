@@ -7,8 +7,8 @@
 #include "readMesh.hpp"
 #include <cmath>
 
-void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C,
-			const Eigen::VectorXd<double>& u)
+void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
+			const Eigen::VectorXd& u)
 {
 	// first basic flux: simple transport
 	std::vector<double> a;
@@ -22,12 +22,12 @@ void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C,
 }
 
 
-bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
-				const Eigen::VectorXd<double>& u, const std::string& typeForm)
+bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd& I,
+				const Eigen::VectorXd& u, const std::string& typeForm)
 {
 
 
-	Eigen::VectorXd<double> fx(meshParams.nE*meshParams.nSF), fy(meshParams.nE*meshParams.nSF);
+	Eigen::VectorXd fx(meshParams.nE*meshParams.nSF), fy(meshParams.nE*meshParams.nSF);
 	double C;
 	flux(fx, fy, C, u);
 
@@ -68,13 +68,13 @@ bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
 								<< std::endl;
 					return false;
 				}
-				
-				//DO NOT forget BC !!! 
-				gx[j] = -(factor*fx[index[j]] + fx[opp(s, index[j])])/2
-						- C*meshParams.normals[elm][s][0]*(u[index[j]] - u[meshParams.indexInFront(index[j])])/2;
 
-				gy[j] = -(factor*fy[index[j]] + fy[opp(s, index[j])])/2
-						- C*meshParams.normals[elm][s][1]*(u[index[j]] - u[meshParams.indexInFront(index[j]])/2;
+				//DO NOT forget BC !!!
+				gx[j] = -(factor*fx[index[j]] + fx[meshParams.indexInFront[index[j]]])/2
+						- C*meshParams.normals[elm][s][0]*(u[index[j]] - u[meshParams.indexInFront[index[j]]])/2;
+
+				gy[j] = -(factor*fy[index[j]] + fy[meshParams.indexInFront[index[j]]])/2
+						- C*meshParams.normals[elm][s][1]*(u[index[j]] - u[meshParams.indexInFront[index[j]]])/2;
 
 			}
 

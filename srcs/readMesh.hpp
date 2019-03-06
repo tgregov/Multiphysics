@@ -72,7 +72,7 @@ struct MeshParams
                                                               (length = number of edges per element)
                                                               of normals (length depends on dimension */
 
-    std::vector<std::vector<int>> index; //index[elm]=index of nodes f element elm, in the nodes vector returned somewhere in meshparams.
+    std::vector<std::vector<unsigned int>> index; //index[elm]=index of nodes f element elm, in the nodes vector returned somewhere in meshparams.
     std::vector<int> indexInFront; //give it an index, gives you the index of the node in front of
 
     std::vector<double> basisFunc;
