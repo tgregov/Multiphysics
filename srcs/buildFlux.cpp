@@ -62,6 +62,7 @@ bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
 					factor = -1.0;
 				} else if(typeForm.compare("weak")){
 					factor = +1.0;
+				}
 				else{
 					std::cerr 	<< "The form  " << typeForm  << "does not exist !"
 								<< std::endl;
