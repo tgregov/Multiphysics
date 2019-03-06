@@ -8,6 +8,7 @@
 #include "readMesh.hpp"
 #include "buildM.hpp"
 #include "buildS.hpp"
+#include "buildDM.hpp"
 
 int main(int argc, char **argv)
 {
@@ -39,10 +40,12 @@ int main(int argc, char **argv)
 
     buildM(meshParams, M);
     buildS(meshParams, Sx, Sy);
+    buildDM(meshParams);
     std::cout << std::endl;
     std::cout << M << std::endl;
     std::cout << Sx << std::endl;
     std::cout << Sy << std::endl;
+    std::cout << meshParams.dM[0];
 
     return 0;
 }

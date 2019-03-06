@@ -1,6 +1,6 @@
 #ifndef readMesh_hpp
 #define readMesh_hpp
-
+#include <Eigen/Sparse>
 #include <vector>
 #include <string>
 
@@ -97,6 +97,9 @@ struct MeshParams
     int elementDim;
     int elementType;
     int elementTypeInferior = -1; //type of the boundary, dummy value for dim 0
+
+    std::vector<Eigen::SparseMatrix<double>> dM ; 
+    unsigned int nSigma = 3; 
 };
 
 bool readMesh(MeshParams& meshParams, const std::string& fileName,

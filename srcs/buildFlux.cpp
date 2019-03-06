@@ -66,10 +66,12 @@ void buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
 
 			// then we apply a scalar product and sum the current contribution
 			// "+=" seems to work
+			// /!\ nDet not disponible yet /!\
 			partialI += meshParams.nDet[elm][s].first*dMgx + meshParams.nDet[elm][s].second*dMgy;
 
 		}
 
+		//Building of the vector I from the partialI
 		// maybe there is some Eigen function that allows to do that
 		for(unsigned int j = 0; j < meshParams.nSF; j++)
 		{

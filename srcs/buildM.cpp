@@ -58,8 +58,8 @@ void buildM(const MeshParams& meshParams, Eigen::SparseMatrix<double>& M)
                 }
 
                 t.push_back(meshParams.intPoints[4*k + 3]
-                    *meshParams.basisFunc[meshParams.nGP*k + i]
-                    *meshParams.basisFunc[meshParams.nGP*k + j]);
+                    *meshParams.basisFunc[meshParams.nSF*k + i]
+                    *meshParams.basisFunc[meshParams.nSF*k + j]);
             }
         }
 
