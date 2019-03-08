@@ -9,12 +9,20 @@
 struct Edge
 {
     int edgeTag;
+
+    std::vector<double> determinant1D;
+
     std::pair<int, int> nodeTags;
 };
 
 struct Element2D
 {
     int elementTag;
+    int elementType2D;
+    int elementType1D; //Store it only once
+
+    std::vector<double> determinant2D;
+    std::vector<double> jacobian2D;
 
     std::vector<Edge> edges;
     std::vector<std::pair<double, double>> edgesNormal; //Here because outward of the element
@@ -27,12 +35,9 @@ struct Entity2D //problem: an entity can contain multiple elTypes ! reuse a map 
 
     std::vector<Element2D> elements;
 
-    std::map<int, std::vector<double>> determinant2D;
-    std::map<int, std::vector<double>> jacobian2D;
-
-    //From the id of the Edges
-    std::map<int, std::vector<double>> determinant1D;
-    std::map<int, std::vector<double>> jacobian1D;
+    std::map<int, std::vector<int>> elementTags2D;
+    std::map<int, std::vector<int>> nodesTags2D;
+    std::map<int, std::vector<int>> nodesTagsPerEdge2D;
 };
 
 struct ElementProperty
