@@ -5,10 +5,7 @@
     #define M_PI 3.14159265358979323846
 #endif // M_PI
 // #include <gmsh.h>
-#include "readMesh.hpp"
-#include "buildM.hpp"
-#include "buildS.hpp"
-#include "buildDM.hpp"
+#include "Mesh2D.hpp"
 
 int main(int argc, char **argv)
 {
@@ -18,34 +15,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    MeshParams meshParams;
+    Mesh2D mesh;
 
-    if(!readMesh(meshParams, std::string(argv[1]), 
-        "Gauss1", "Lagrange", "GradLagrange"))
+    if(!readMesh2D(mesh, std::string(argv[1]), "Gauss1", "Lagrange", "GradLagrange"))
     {
-        std::cerr << "[FAIL] The mesh was not read !" << std::endl;
+        std::cerr<<"Something went wrong when reading mesh file: "<<argv[1]<<std::endl;
         return -1;
     }
-    else
-    {
-        std::cout << "The mesh was read successfully" << std::endl;
-    }
-
-    Eigen::SparseMatrix<double> M(meshParams.nE*meshParams.nSF,
-                                    meshParams.nE*meshParams.nSF);
-    Eigen::SparseMatrix<double> Sx(meshParams.nE*meshParams.nSF, 
-                                    meshParams.nE*meshParams.nSF);
-    Eigen::SparseMatrix<double> Sy(meshParams.nE*meshParams.nSF, 
-                                    meshParams.nE*meshParams.nSF);
-
-    buildM(meshParams, M);
-    buildS(meshParams, Sx, Sy);
-    buildDM(meshParams);
-    std::cout << std::endl;
-    std::cout << M << std::endl;
-    std::cout << Sx << std::endl;
-    std::cout << Sy << std::endl;
-    std::cout << meshParams.dM[0];
 
     return 0;
 }
