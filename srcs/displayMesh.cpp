@@ -50,6 +50,16 @@ void displayMesh(const Mesh2D& mesh)
 				}
 
 			}
+
+			std::vector<Edge> edges = element.edges;
+			for(unsigned int k = 0 ; k < edges.size() ; ++k)
+			{
+				std::cout	<< "		- [Edge (" << k << ")]:" << std::endl
+							<< "			- Tag A: " << edges[k].nodeTags.first 
+							<< std::endl
+							<< "			- Tag B: " << edges[k].nodeTags.second 
+							<< std::endl;
+			}
 		}
 	}
 	std::cout << std::endl;

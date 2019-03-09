@@ -67,6 +67,12 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge)
 {
 
+    Edge edge; 
+    edge.nodeTags.first = nodesTagsEdge[0];
+    edge.nodeTags.second = nodesTagsEdge[1];
+    element.edges.push_back(edge);
+    // we still need to add its tag & det
+
 }
 
 
@@ -78,7 +84,7 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge)
 static void computeEdgeNormal(Element2D& element, 
                                 const std::vector<int>& nodesTagsEdge)
 {
-
+    // add barycenter as a field of an element Element2D, to be precomputed
 }
 
 
@@ -166,7 +172,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
         gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodesTagPerEdge, 
                                                 entityHandle.second);
         entity.nodesTagsPerEdge2D[eleType2D] = nodesTagPerEdge;
-
+        
         // add 1D entity to store all the lines associated to elements of the same 
         // order
         // TO DO: Problem Q4 and T3 element have the same order ?
@@ -184,7 +190,12 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
                                         entityHandle.second);
 
         unsigned int nGP2D = mesh.elementProperties2D[eleType2D].intPoints.size()/4;
-        unsigned int nEdgePerNode = nodesTagPerEdge.size()/nodeTags.size(); // TO DO: check
+        // TO DO: check
+        // unsigned int nEdgePerNode = nodesTagPerEdge.size()/nodeTags.size();
+        // std::cout << " ====> " << nEdgePerNode << std::endl;
+        unsigned int numNodes = mesh.elementProperties2D[eleType2D].numNodes;
+        // std:: cout << numNodes << std::endl;
+
         for(unsigned int i = 0 ; i < elementTags.size() ; ++i)
         {
             std::vector<double> jacobiansElement2D(
@@ -194,8 +205,8 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
                                             determinants2D.begin() + nGP2D*i, 
                                             determinants2D.begin() + nGP2D*(1 + i));
             std::vector<int> nodesTagPerEdgeElement(
-                                nodesTagPerEdge.begin() + 2*nEdgePerNode*i, 
-                                nodesTagPerEdge.begin() + 2*nEdgePerNode*(i + 1));
+                                nodesTagPerEdge.begin() + 2*numNodes*i, 
+                                nodesTagPerEdge.begin() + 2*numNodes*(i + 1));
             addElement(entity, elementTags[i], eleType2D, eleType1D, 
                         std::move(jacobiansElement2D), 
                         std::move(determinantsElement2D), 
