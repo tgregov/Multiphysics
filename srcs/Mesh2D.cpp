@@ -19,7 +19,7 @@
  * \param basisFuncType The type of basis function you will use.
  * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)(will be droped).
  */
-static void loadElementProperties(std::map<int, ElementProperty>& meshElementProp, const std::vector<int> eleTypes,
+static void loadElementProperties(std::map<int, ElementProperty>& meshElementProp, const std::vector<int>& eleTypes,
                                   const std::string& intScheme, const std::string& basisFuncType,
                                   const std::string& basisFuncGradType)
 {
