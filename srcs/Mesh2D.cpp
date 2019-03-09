@@ -1,7 +1,24 @@
+/**
+ * \file Mesh2D.cpp
+ * \brief Implementation of the required function to load a Mesh2D
+ * struct from file.
+ *
+ */
+
 #include <iostream>
 #include <gmsh.h>
 #include "Mesh2D.hpp"
 
+/**
+ * \brief Loads the name order, dimension, number of nodes,
+ *  basis functions, integration points for a certain element type into a map.
+ * \param meshElementProp The map in which the element properties are stored.
+ * \param eleTypes A vector of element types for which properties will be loaded.
+ * The function does not try to load them twice if it already exists.
+ * \param intScheme Integration scheme for the basis functions evaluation.
+ * \param basisFuncType The type of basis function you will use.
+ * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)(will be droped).
+ */
 static void loadElementProperties(std::map<int, ElementProperty>& meshElementProp, const std::vector<int> eleTypes,
                                   const std::string& intScheme, const std::string& basisFuncType,
                                   const std::string& basisFuncGradType)
@@ -30,16 +47,41 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
     }
 }
 
-static void addEdge(std::vector<int> nodesTagsEdge)
+/**
+ * \brief Add an edge to a certain element (filling the required fields).
+ * \param element The parent element
+ * \param nodesTagsEdge Node tags per edge of the element
+ */
+static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge)
 {
 
 }
 
+/**
+ * \brief Compute the outward normal of an edge
+ * \param element the parent element
+ * \param nodesTagsEdge Node tags per edge of the element
+ */
 static void computeEdgeNormal(Element2D& element, const std::vector<int>& nodesTagsEdge)
 {
 
 }
 
+/**
+ * \brief Add an element to a certain entity (filling the required fields).
+ * \param entity The parent entity.
+ * \param elementTag Element tag.
+ * \param eleType2D Type of the element.
+ * \param eleType1D Type of the element's edges.
+ * \param jacobians2D Jacobian matrix of the variable change of the element
+ * evaluated at each Gauss points.
+ * \param determinants2D Determinant of the variable change of the element
+ * evaluated at each Gauss points.
+ * \param nodesTagsPerEdge Node tags of the element, per edge.
+ * \param intScheme Integration scheme for the basis functions evaluation.
+ * \param basisFuncType The type of basis function you will use.
+ * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)(will be droped).
+ */
 static void addElement(Entity2D& entity, int elementTag, int eleType2D, int eleType1D,
                        std::vector<double> jacobians2D, std::vector<double> determinants2D, std::vector<int> nodesTagsPerEdge,
                        const std::string& intScheme, const std::string& basisFuncType, const std::string& basisFuncGradType)
@@ -56,12 +98,20 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D, int eleT
     {
         std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i, nodesTagsPerEdge.begin() + 2*(i + 1));
         computeEdgeNormal(element, nodesTagsEdge);
-        addEdge(nodesTagsEdge);
+        addEdge(element, nodesTagsEdge);
     }
 
     entity.elements.push_back(element);
 }
 
+/**
+ * \brief Add an entity to a certain 2D mesh (filling the required fields).
+ * \param mesh The parent mesh.
+ * \param entityHandle Entity dimTags to add.
+ * \param intScheme Integration scheme for the basis functions evaluation.
+ * \param basisFuncType The type of basis function you will use.
+ * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)(will be droped).
+ */
 static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
                       const std::string& intScheme, const std::string& basisFuncType, const std::string& basisFuncGradType)
 {
@@ -112,6 +162,10 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
     mesh.entities.push_back(entity);
 }
 
+/**
+ * \brief Checks if the mesh is 2D.
+ * \return true if the mesh is 2D, false otherwise.
+ */
 static bool IsMesh2D()
 {
     int elementDim = -1;
@@ -145,6 +199,7 @@ static bool IsMesh2D()
     return true;
 }
 
+// Doc in .hpp
 bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
                 const std::string& intScheme, const std::string& basisFuncType,
                 const std::string& basisFuncGradType)
