@@ -28,7 +28,7 @@ struct Element2D
 {
     int elementTag;                     /**< element tag of the element*/
     int elementType2D;                  /**< 2D type of the element*/
-    int elementType1D;                  /**<12D type of the element*///Store it only once
+    int elementType1D;                  /**< 1D type of the element*/ //Store it only once
 
     std::vector<double> determinant2D;  /**< Determinant of the variable change for Gauss integration,
                                              evaluated at each Gauss point*/
