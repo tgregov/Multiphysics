@@ -6,6 +6,7 @@
 #endif // M_PI
 // #include <gmsh.h>
 #include "Mesh2D.hpp"
+#include "displayMesh.hpp"
 
 int main(int argc, char **argv)
 {
@@ -23,6 +24,8 @@ int main(int argc, char **argv)
                     << argv[1] << std::endl;
         return -1;
     }
+
+    displayMesh(mesh);
 
     return 0;
 }
