@@ -16,8 +16,6 @@
  * The function does not try to load them twice if it already exists.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
- * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)
- * (will be droped).
  */
 static void loadElementProperties(std::map<int, ElementProperty>& meshElementProp,
                                     const std::vector<int>& eleTypes,
@@ -79,11 +77,47 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge)
  * \brief Compute the outward normal of an edge
  * \param element the parent element
  * \param nodesTagsEdge Node tags per edge of the element
+ * \param baryCenter  Barycenter of the parent element
  */
 static void computeEdgeNormal(Element2D& element,
-                                const std::vector<int>& nodesTagsEdge)
+                                const std::vector<int>& nodesTagsEdge,
+                                const std::vector<double>& baryCenter)
 {
-    // add barycenter as a field of an element Element2D, to be precomputed
+    std::pair<double, double> normal;
+
+    std::vector<double> coord1, dummyParametricCoord1;
+    gmsh::model::mesh::getNode(nodesTagsEdge[0], coord1,
+                                            dummyParametricCoord1);
+
+    // get the coordinates of the second node
+    std::vector<double> coord2, dummyParametricCoord2;
+    gmsh::model::mesh::getNode(nodesTagsEdge[1], coord2,
+                                dummyParametricCoord2);
+
+    // compute the normal
+    // if A:(x1, y1) and B:(x2, y2), then AB = (x2 - x1, y2 - y1) and a
+    // normal is given by n = (y2 - y1, x1 - x2)
+    double nx = coord2[1] - coord1[1];
+    double ny = coord1[0] - coord2[0];
+    double norm = sqrt(ny*ny + nx*nx);
+
+    // unfortunately, nodes per edge in nodes vector are not always in
+    // the same order (clockwise vs anticlockwise) => we need to check
+    // the orientation
+    double vx = baryCenter[0] - (coord2[0] + coord1[0])/2;
+    double vy = baryCenter[1] - (coord2[1] + coord1[1])/2;
+
+    if(nx*vx + ny*vy > 0)
+    {
+        nx = -nx;
+        ny = -ny;
+    }
+
+    // normalize the normal components
+    normal.first = nx/norm;
+    normal.second = ny/norm;
+
+    element.edgesNormal.push_back(normal);
 }
 
 
@@ -100,13 +134,12 @@ static void computeEdgeNormal(Element2D& element,
  * \param nodesTagsPerEdge Node tags of the element, per edge.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
- * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)
- * (will be droped).
  */
 static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         int eleType1D, std::vector<double> jacobians2D,
                         std::vector<double> determinants2D,
                         const std::vector<int>& nodesTagsPerEdge,
+                        const std::vector<double>& elementBarycenter,
                         const std::string& intScheme,
                         const std::string& basisFuncType)
 {
@@ -122,7 +155,8 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
     {
         std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i,
                                         nodesTagsPerEdge.begin() + 2*(i + 1));
-        computeEdgeNormal(element, nodesTagsEdge);
+
+        computeEdgeNormal(element, nodesTagsEdge, elementBarycenter);
         addEdge(element, nodesTagsEdge);
     }
 
@@ -136,8 +170,6 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
  * \param entityHandle Entity dimTags to add.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
- * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)
- * (will be droped).
  */
 static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
                       const std::string& intScheme, const std::string& basisFuncType)
@@ -169,6 +201,9 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
         gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodesTagPerEdge,
                                                 entityHandle.second);
         entity.nodesTagsPerEdge2D[eleType2D] = nodesTagPerEdge;
+
+        std::vector<double> baryCenters;
+        gmsh::model::mesh::getBarycenters(eleType2D, entityHandle.second, false, true, baryCenters);
 
         // add 1D entity to store all the lines associated to elements of the same
         // order
@@ -204,10 +239,14 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
             std::vector<int> nodesTagPerEdgeElement(
                                 nodesTagPerEdge.begin() + 2*numNodes*i,
                                 nodesTagPerEdge.begin() + 2*numNodes*(i + 1));
+
+            std::vector<double> elementBarycenter(baryCenters.begin() + 3*i, baryCenters.begin() + 3*(i + 1));
+
             addElement(entity, elementTags[i], eleType2D, eleType1D,
                         std::move(jacobiansElement2D),
                         std::move(determinantsElement2D),
-                        nodesTagPerEdgeElement, intScheme, basisFuncType);
+                        nodesTagPerEdgeElement,
+                        elementBarycenter, intScheme, basisFuncType);
         }
     }
 
