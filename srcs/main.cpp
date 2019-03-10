@@ -18,9 +18,9 @@ int main(int argc, char **argv)
 
     Mesh2D mesh;
 
-    if(!readMesh2D(mesh, std::string(argv[1]), "Gauss1", "Lagrange", "GradLagrange"))
+    if(!readMesh2D(mesh, std::string(argv[1]), "Gauss1", "Lagrange"))
     {
-        std::cerr   << "Something went wrong when reading mesh file: " 
+        std::cerr   << "Something went wrong when reading mesh file: "
                     << argv[1] << std::endl;
         return -1;
     }

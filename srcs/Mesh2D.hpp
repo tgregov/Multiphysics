@@ -94,7 +94,6 @@ struct Mesh2D
  * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)(will be droped).
  */
 bool readMesh2D(Mesh2D& mesh2D, const std::string& fileName,
-                const std::string& intScheme, const std::string& basisFuncType,
-                const std::string& basisFuncGradType);
+                const std::string& intScheme, const std::string& basisFuncType);
 
 #endif // Mesh2D_hpp_included

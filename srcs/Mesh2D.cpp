@@ -22,8 +22,7 @@
 static void loadElementProperties(std::map<int, ElementProperty>& meshElementProp,
                                     const std::vector<int>& eleTypes,
                                     const std::string& intScheme,
-                                    const std::string& basisFuncType,
-                                    const std::string& basisFuncGradType)
+                                    const std::string& basisFuncType)
 {
     for(unsigned int i = 0 ; i < eleTypes.size() ; ++i)
     {
@@ -48,7 +47,7 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
             std::vector<double> dummyIntPoints;
             int dummyNumComp;
             gmsh::model::mesh::getBasisFunctions(eleTypes[i], intScheme,
-                                                    basisFuncGradType,
+                                                    std::string("Grad" + basisFuncType),
                                                     dummyIntPoints,
                                                     dummyNumComp,
                                                     elementProperty.basisFuncGrad);
@@ -109,8 +108,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         std::vector<double> determinants2D,
                         const std::vector<int>& nodesTagsPerEdge,
                         const std::string& intScheme,
-                        const std::string& basisFuncType,
-                        const std::string& basisFuncGradType)
+                        const std::string& basisFuncType)
 {
     Element2D element;
     element.elementTag = elementTag;
@@ -142,8 +140,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
  * (will be droped).
  */
 static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
-                      const std::string& intScheme, const std::string& basisFuncType,
-                      const std::string& basisFuncGradType)
+                      const std::string& intScheme, const std::string& basisFuncType)
 {
     // add the current 2D entity
     Entity2D entity;
@@ -156,7 +153,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
     gmsh::model::mesh::getElementTypes(eleTypes2D, entityHandle.first,
                                         entityHandle.second);
     loadElementProperties(mesh.elementProperties2D, eleTypes2D,
-                          intScheme, basisFuncType, basisFuncGradType);
+                          intScheme, basisFuncType);
 
     // loop over the element types in the current 2D entity
     for(auto eleType2D : eleTypes2D)
@@ -182,7 +179,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
 
         loadElementProperties(mesh.elementProperties1D,
                                 std::vector<int>(1, eleType1D), intScheme,
-                                basisFuncType, basisFuncGradType);
+                                basisFuncType);
 
         std::vector<double> jacobians2D, determinants2D, dummyPoints2D;
         gmsh::model::mesh::getJacobians(eleType2D, intScheme, jacobians2D,
@@ -210,8 +207,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
             addElement(entity, elementTags[i], eleType2D, eleType1D,
                         std::move(jacobiansElement2D),
                         std::move(determinantsElement2D),
-                        nodesTagPerEdgeElement, intScheme, basisFuncType,
-                        basisFuncGradType);
+                        nodesTagPerEdgeElement, intScheme, basisFuncType);
         }
     }
 
@@ -262,8 +258,7 @@ static bool IsMesh2D()
 
 // documentation in .hpp file
 bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
-                const std::string& intScheme, const std::string& basisFuncType,
-                const std::string& basisFuncGradType)
+                const std::string& intScheme, const std::string& basisFuncType)
 {
     gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
@@ -282,7 +277,7 @@ bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
 
     for(auto entityHandle : entityHandles)
     {
-        addEntity(mesh, entityHandle, intScheme, basisFuncType, basisFuncGradType);
+        addEntity(mesh, entityHandle, intScheme, basisFuncType);
     }
 
     gmsh::finalize();
