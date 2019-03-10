@@ -19,38 +19,38 @@
  * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)
  * (will be droped).
  */
-static void loadElementProperties(std::map<int, ElementProperty>& meshElementProp, 
+static void loadElementProperties(std::map<int, ElementProperty>& meshElementProp,
                                     const std::vector<int>& eleTypes,
-                                    const std::string& intScheme, 
+                                    const std::string& intScheme,
                                     const std::string& basisFuncType,
                                     const std::string& basisFuncGradType)
 {
     for(unsigned int i = 0 ; i < eleTypes.size() ; ++i)
     {
-        // if the element type has already been considered, there is no need to 
+        // if the element type has already been considered, there is no need to
         // add its properties in the map meshElementProp
         if(meshElementProp.count(eleTypes[i]) == 0)
         {
             ElementProperty elementProperty;
-            gmsh::model::mesh::getElementProperties(eleTypes[i], 
-                                                    elementProperty.name, 
+            gmsh::model::mesh::getElementProperties(eleTypes[i],
+                                                    elementProperty.name,
                                                     elementProperty.dim,
-                                                    elementProperty.order, 
+                                                    elementProperty.order,
                                                     elementProperty.numNodes,
                                                     elementProperty.paramCoord);
 
-            gmsh::model::mesh::getBasisFunctions(eleTypes[i], intScheme, 
-                                                    basisFuncType, 
+            gmsh::model::mesh::getBasisFunctions(eleTypes[i], intScheme,
+                                                    basisFuncType,
                                                     elementProperty.intPoints,
-                                                    elementProperty.numComp, 
+                                                    elementProperty.numComp,
                                                     elementProperty.basisFunc);
 
             std::vector<double> dummyIntPoints;
             int dummyNumComp;
-            gmsh::model::mesh::getBasisFunctions(eleTypes[i], intScheme, 
-                                                    basisFuncGradType, 
+            gmsh::model::mesh::getBasisFunctions(eleTypes[i], intScheme,
+                                                    basisFuncGradType,
                                                     dummyIntPoints,
-                                                    dummyNumComp, 
+                                                    dummyNumComp,
                                                     elementProperty.basisFuncGrad);
 
             meshElementProp[eleTypes[i]] = elementProperty;
@@ -67,7 +67,7 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge)
 {
 
-    Edge edge; 
+    Edge edge;
     edge.nodeTags.first = nodesTagsEdge[0];
     edge.nodeTags.second = nodesTagsEdge[1];
     element.edges.push_back(edge);
@@ -81,7 +81,7 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge)
  * \param element the parent element
  * \param nodesTagsEdge Node tags per edge of the element
  */
-static void computeEdgeNormal(Element2D& element, 
+static void computeEdgeNormal(Element2D& element,
                                 const std::vector<int>& nodesTagsEdge)
 {
     // add barycenter as a field of an element Element2D, to be precomputed
@@ -104,12 +104,12 @@ static void computeEdgeNormal(Element2D& element,
  * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)
  * (will be droped).
  */
-static void addElement(Entity2D& entity, int elementTag, int eleType2D, 
-                        int eleType1D, std::vector<double> jacobians2D, 
-                        std::vector<double> determinants2D, 
-                        std::vector<int> nodesTagsPerEdge, 
-                        const std::string& intScheme, 
-                        const std::string& basisFuncType, 
+static void addElement(Entity2D& entity, int elementTag, int eleType2D,
+                        int eleType1D, std::vector<double> jacobians2D,
+                        std::vector<double> determinants2D,
+                        const std::vector<int>& nodesTagsPerEdge,
+                        const std::string& intScheme,
+                        const std::string& basisFuncType,
                         const std::string& basisFuncGradType)
 {
     Element2D element;
@@ -117,12 +117,12 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
     element.elementType2D = eleType2D;
     element.elementType1D = eleType1D;
 
-    element.determinant2D = determinants2D;
-    element.jacobian2D = jacobians2D;
+    element.determinant2D = std::move(determinants2D);
+    element.jacobian2D = std::move(jacobians2D);
 
     for(unsigned int i = 0 ; i < nodesTagsPerEdge.size()/2 ; ++i)
     {
-        std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i, 
+        std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i,
                                         nodesTagsPerEdge.begin() + 2*(i + 1));
         computeEdgeNormal(element, nodesTagsEdge);
         addEdge(element, nodesTagsEdge);
@@ -142,10 +142,10 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
  * (will be droped).
  */
 static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
-                      const std::string& intScheme, const std::string& basisFuncType, 
+                      const std::string& intScheme, const std::string& basisFuncType,
                       const std::string& basisFuncGradType)
 {
-    // add the current 2D entity 
+    // add the current 2D entity
     Entity2D entity;
     entity.entityTag2D = entityHandle.second;
     int c = gmsh::model::addDiscreteEntity(1);
@@ -153,7 +153,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
 
     // get the element types in the current 2D entity
     std::vector<int> eleTypes2D;
-    gmsh::model::mesh::getElementTypes(eleTypes2D, entityHandle.first, 
+    gmsh::model::mesh::getElementTypes(eleTypes2D, entityHandle.first,
                                         entityHandle.second);
     loadElementProperties(mesh.elementProperties2D, eleTypes2D,
                           intScheme, basisFuncType, basisFuncGradType);
@@ -163,30 +163,30 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
     {
         // get the elements of type eleType2D
         std::vector<int> nodeTags, elementTags;
-        gmsh::model::mesh::getElementsByType(eleType2D, elementTags, nodeTags, 
+        gmsh::model::mesh::getElementsByType(eleType2D, elementTags, nodeTags,
                                                 entityHandle.second);
         entity.elementTags2D[eleType2D] = elementTags;
         entity.nodesTags2D[eleType2D] = nodeTags;
 
         std::vector<int> nodesTagPerEdge;
-        gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodesTagPerEdge, 
+        gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodesTagPerEdge,
                                                 entityHandle.second);
         entity.nodesTagsPerEdge2D[eleType2D] = nodesTagPerEdge;
-        
-        // add 1D entity to store all the lines associated to elements of the same 
+
+        // add 1D entity to store all the lines associated to elements of the same
         // order
         // TO DO: Problem Q4 and T3 element have the same order ?
-        int eleType1D = gmsh::model::mesh::getElementType("line", 
+        int eleType1D = gmsh::model::mesh::getElementType("line",
                                         mesh.elementProperties2D[eleType2D].order);
         gmsh::model::mesh::setElementsByType(1, c, eleType1D, {}, nodesTagPerEdge);
 
-        loadElementProperties(mesh.elementProperties1D, 
-                                std::vector<int>(1, eleType1D), intScheme, 
+        loadElementProperties(mesh.elementProperties1D,
+                                std::vector<int>(1, eleType1D), intScheme,
                                 basisFuncType, basisFuncGradType);
 
         std::vector<double> jacobians2D, determinants2D, dummyPoints2D;
-        gmsh::model::mesh::getJacobians(eleType2D, intScheme, jacobians2D, 
-                                        determinants2D, dummyPoints2D, 
+        gmsh::model::mesh::getJacobians(eleType2D, intScheme, jacobians2D,
+                                        determinants2D, dummyPoints2D,
                                         entityHandle.second);
 
         unsigned int nGP2D = mesh.elementProperties2D[eleType2D].intPoints.size()/4;
@@ -199,18 +199,18 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
         for(unsigned int i = 0 ; i < elementTags.size() ; ++i)
         {
             std::vector<double> jacobiansElement2D(
-                                            jacobians2D.begin() + 9*nGP2D*i, 
+                                            jacobians2D.begin() + 9*nGP2D*i,
                                             jacobians2D.begin() + 9*nGP2D*(1 + i));
             std::vector<double> determinantsElement2D(
-                                            determinants2D.begin() + nGP2D*i, 
+                                            determinants2D.begin() + nGP2D*i,
                                             determinants2D.begin() + nGP2D*(1 + i));
             std::vector<int> nodesTagPerEdgeElement(
-                                nodesTagPerEdge.begin() + 2*numNodes*i, 
+                                nodesTagPerEdge.begin() + 2*numNodes*i,
                                 nodesTagPerEdge.begin() + 2*numNodes*(i + 1));
-            addElement(entity, elementTags[i], eleType2D, eleType1D, 
-                        std::move(jacobiansElement2D), 
-                        std::move(determinantsElement2D), 
-                        std::move(nodesTagPerEdgeElement), intScheme, basisFuncType, 
+            addElement(entity, elementTags[i], eleType2D, eleType1D,
+                        std::move(jacobiansElement2D),
+                        std::move(determinantsElement2D),
+                        nodesTagPerEdgeElement, intScheme, basisFuncType,
                         basisFuncGradType);
         }
     }
@@ -243,7 +243,7 @@ static bool IsMesh2D()
                 break;
             default:
                 elementDim = i;
-                std::cerr   << "Hybrid meshes not handled in this example!" 
+                std::cerr   << "Hybrid meshes not handled in this example!"
                             << std::endl;
                 return false;
         }
