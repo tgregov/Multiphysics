@@ -75,7 +75,9 @@ struct ElementProperty
     unsigned int nGP;   /**< Number of GP */
     unsigned int nSF;   /**< Number of SF */
     std::vector<std::vector<double>> prodFunc;  /**< Cross-product w_k*l_i*l_j evaluated at each GP */
+    std::vector<std::vector<double>> pondFunc;  /**< Cross-product w_k*l_i* evaluated at each GP */
     std::vector<std::pair<unsigned int, unsigned int>> IJ;  /**< Index list of the elements of prodFunc */
+
 };
 
 /**

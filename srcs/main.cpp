@@ -7,6 +7,7 @@
 // #include <gmsh.h>
 #include "Mesh2D.hpp"
 #include "buildM.hpp"
+#include "buildS.hpp"
 #include "displayMesh.hpp"
 
 int main(int argc, char **argv)
@@ -30,8 +31,13 @@ int main(int argc, char **argv)
 
     unsigned long numNodes = getNumNodes(mesh);
     Eigen::SparseMatrix<double> M(numNodes, numNodes);
+    Eigen::SparseMatrix<double> Sx(numNodes, numNodes);
+    Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
     buildM(mesh, M);
-    std::cout << M << std::endl;
+    buildS(mesh, Sx, Sy);
+    std::cout << "Matrix [M]:\n" << M << std::endl;
+    std::cout << "Matrix [Sx]:\n" << Sx << std::endl;
+    std::cout << "Matrix [Sy]:\n" << Sy << std::endl;
 
 
     return 0;

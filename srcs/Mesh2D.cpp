@@ -52,14 +52,20 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
 
 
             // add the products prodFunc[k][i,j] = w_k*l_i(x_k)*l_j(x_k)
+            // add the products pondFunc[k][i] = w_k*l_i(x_k)
             elementProperty.nGP = elementProperty.intPoints.size()/4;
             elementProperty.nSF = elementProperty.basisFunc.size()/elementProperty.nGP;
             for(unsigned int k = 0 ; k < elementProperty.nGP ; ++k)
             {
-                std::vector<double> t;
+                std::vector<double> wll;
+                std::vector<double> wl;
 
                 for(unsigned int i = 0 ; i < elementProperty.nSF ; ++i)
                 {
+
+                    wl.push_back(elementProperty.intPoints[4*k + 3]
+                            *elementProperty.basisFunc[elementProperty.nSF*k + i]);
+
                     for(unsigned int j = i ; j < elementProperty.nSF ; ++j)
                     {
                         if(k == 0)
@@ -68,13 +74,14 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
                                 std::pair<unsigned int, unsigned int>(i, j));
                         }
 
-                        t.push_back(elementProperty.intPoints[4*k + 3]
+                        wll.push_back(elementProperty.intPoints[4*k + 3]
                             *elementProperty.basisFunc[elementProperty.nSF*k + i]
                             *elementProperty.basisFunc[elementProperty.nSF*k + j]);
                     }
                 }
 
-                elementProperty.prodFunc.push_back(t);
+                elementProperty.pondFunc.push_back(wl);
+                elementProperty.prodFunc.push_back(wll);
             }
 
 
