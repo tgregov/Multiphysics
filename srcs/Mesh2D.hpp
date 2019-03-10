@@ -91,7 +91,6 @@ struct Mesh2D
  * \param fileName The name of the file to load.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
- * \param basisFuncGradType The type of basis function you will use ("Grad" prefix)(will be droped).
  */
 bool readMesh2D(Mesh2D& mesh2D, const std::string& fileName,
                 const std::string& intScheme, const std::string& basisFuncType);
