@@ -50,6 +50,34 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
                                                     dummyNumComp,
                                                     elementProperty.basisFuncGrad);
 
+
+            // add the products prodFunc[k][i,j] = w_k*l_i(x_k)*l_j(x_k)
+            elementProperty.nGP = elementProperty.intPoints.size()/4;
+            elementProperty.nSF = elementProperty.basisFunc.size()/elementProperty.nGP;
+            for(unsigned int k = 0 ; k < elementProperty.nGP ; ++k)
+            {
+                std::vector<double> t;
+
+                for(unsigned int i = 0 ; i < elementProperty.nSF ; ++i)
+                {
+                    for(unsigned int j = i ; j < elementProperty.nSF ; ++j)
+                    {
+                        if(k == 0)
+                        {
+                            elementProperty.IJ.push_back(
+                                std::pair<unsigned int, unsigned int>(i, j));
+                        }
+
+                        t.push_back(elementProperty.intPoints[4*k + 3]
+                            *elementProperty.basisFunc[elementProperty.nSF*k + i]
+                            *elementProperty.basisFunc[elementProperty.nSF*k + j]);
+                    }
+                }
+
+                elementProperty.prodFunc.push_back(t);
+            }
+
+
             meshElementProp[eleTypes[i]] = elementProperty;
         }
     }
@@ -293,6 +321,29 @@ static bool IsMesh2D()
 
     return true;
 }
+
+
+// documentation in .hpp file
+unsigned long getNumNodes(const Mesh2D& mesh2D)
+{
+    unsigned long numNodes = 0;
+
+    // loop over the entities
+    for(unsigned int ent = 0 ; ent < mesh2D.entities.size() ; ++ent)
+    {
+        Entity2D entity = mesh2D.entities[ent];
+
+        // loop over the elements
+        for(unsigned int elm = 0 ; elm < entity.elements.size() ; ++elm)
+        {
+            // the number of nodes for an element equals its number of edges
+            numNodes += entity.elements[elm].edges.size();
+        }
+    }
+
+    return numNodes;
+}
+
 
 
 // documentation in .hpp file

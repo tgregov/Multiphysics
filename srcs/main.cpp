@@ -6,6 +6,7 @@
 #endif // M_PI
 // #include <gmsh.h>
 #include "Mesh2D.hpp"
+#include "buildM.hpp"
 #include "displayMesh.hpp"
 
 int main(int argc, char **argv)
@@ -26,6 +27,12 @@ int main(int argc, char **argv)
     }
 
     displayMesh(mesh);
+
+    unsigned long numNodes = getNumNodes(mesh);
+    Eigen::SparseMatrix<double> M(numNodes, numNodes);
+    buildM(mesh, M);
+    std::cout << M << std::endl;
+
 
     return 0;
 }

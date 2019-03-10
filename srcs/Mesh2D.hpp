@@ -71,6 +71,11 @@ struct ElementProperty
     std::vector<double> basisFuncGrad;  /**< Basis functions gradient evaluated at each Gauss point in the reference axis */
     std::vector<double> intPoints;      /**< Integration points for Gauss integration */
     int numComp;
+
+    unsigned int nGP;   /**< Number of GP */
+    unsigned int nSF;   /**< Number of SF */
+    std::vector<std::vector<double>> prodFunc;  /**< Cross-product w_k*l_i*l_j evaluated at each GP */
+    std::vector<std::pair<unsigned int, unsigned int>> IJ;  /**< Index list of the elements of prodFunc */
 };
 
 /**
@@ -84,6 +89,14 @@ struct Mesh2D
 
     std::vector<Entity2D> entities; /**< List of entities inside the mesh */
 };
+
+
+/**
+ * \brief Get the number of nodes (i.e. of unknowns) given a mesh.
+ * \param mesh2D The structure that contains the mesh.
+ */
+unsigned long getNumNodes(const Mesh2D& mesh2D);
+
 
 /**
  * \brief Read a mesh from a file.msh
