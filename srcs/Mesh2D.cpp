@@ -96,12 +96,14 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
  * \param element The parent element
  * \param nodesTagsEdge Node tags per edge of the element
  */
-static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge)
+static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
+                    std::vector<double> determinant1D)
 {
 
     Edge edge;
     edge.nodeTags.first = nodesTagsEdge[0];
     edge.nodeTags.second = nodesTagsEdge[1];
+    edge.determinant1D = std::move(determinant1D);
     element.edges.push_back(edge);
     // we still need to add its tag & det
 
@@ -173,6 +175,8 @@ static void computeEdgeNormal(Element2D& element,
 static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         int eleType1D, std::vector<double> jacobians2D,
                         std::vector<double> determinants2D,
+                        std::vector<double> determinants1D,
+                        unsigned int nGP2D,
                         const std::vector<int>& nodesTagsPerEdge,
                         const std::vector<double>& elementBarycenter,
                         const std::string& intScheme,
@@ -191,8 +195,10 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
         std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i,
                                         nodesTagsPerEdge.begin() + 2*(i + 1));
 
+        std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP2D*i, determinants1D.begin() + nGP2D*(i + 1));
+
         computeEdgeNormal(element, nodesTagsEdge, elementBarycenter);
-        addEdge(element, nodesTagsEdge);
+        addEdge(element, nodesTagsEdge, std::move(determinantsEdge1D));
     }
 
     entity.elements.push_back(element);
@@ -256,6 +262,12 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
                                         determinants2D, dummyPoints2D,
                                         entityHandle.second);
 
+        //Attention: assume one eleType2D per entity !! (Same eleType1D for T3 and Q4 -> bug)
+        std::vector<double> dummyJacobians1D, determinants1D, dummyPoints1D;
+        gmsh::model::mesh::getJacobians(eleType1D, intScheme, dummyJacobians1D,
+                                        determinants1D, dummyPoints1D,
+                                        c);
+
         unsigned int nGP2D = mesh.elementProperties2D[eleType2D].intPoints.size()/4;
         // TO DO: check
         // unsigned int nEdgePerNode = nodesTagPerEdge.size()/nodeTags.size();
@@ -271,6 +283,9 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
             std::vector<double> determinantsElement2D(
                                             determinants2D.begin() + nGP2D*i,
                                             determinants2D.begin() + nGP2D*(1 + i));
+            std::vector<double> determinantElement1D(
+                                            determinants1D.begin() + numNodes*nGP2D*i,
+                                            determinants2D.begin() + numNodes*nGP2D*(1 + i));
             std::vector<int> nodesTagPerEdgeElement(
                                 nodesTagPerEdge.begin() + 2*numNodes*i,
                                 nodesTagPerEdge.begin() + 2*numNodes*(i + 1));
@@ -280,6 +295,8 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
             addElement(entity, elementTags[i], eleType2D, eleType1D,
                         std::move(jacobiansElement2D),
                         std::move(determinantsElement2D),
+                        std::move(determinantElement1D),
+                        nGP2D,
                         nodesTagPerEdgeElement,
                         elementBarycenter, intScheme, basisFuncType);
         }
