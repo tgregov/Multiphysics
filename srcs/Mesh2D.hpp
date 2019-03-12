@@ -31,6 +31,8 @@ struct Element2D
     int elementType2D;                  /**< 2D type of the element*/
     int elementType1D;                  /**< 1D type of the element*/ //Store it only once
 
+    unsigned int offsetInU;
+
     std::vector<double> determinant2D;  /**< Determinant of the variable change for Gauss integration,
                                              evaluated at each Gauss point*/
     std::vector<double> jacobian2D;     /**< Jacobian of the variable change for Gauss integration,

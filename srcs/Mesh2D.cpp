@@ -206,7 +206,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         int eleType1D, std::vector<double> jacobians2D,
                         std::vector<double> determinants2D,
                         std::vector<double> determinants1D,
-                        unsigned int nGP2D,
+                        unsigned int nGP2D, unsigned int offsetInU,
                         const std::vector<int>& nodesTagsPerEdge,
                         const std::vector<double>& elementBarycenter,
                         const std::string& intScheme,
@@ -216,6 +216,8 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
     element.elementTag = elementTag;
     element.elementType2D = eleType2D;
     element.elementType1D = eleType1D;
+
+    element.offsetInU = offsetInU;
 
     element.determinant2D = std::move(determinants2D);
     element.jacobian2D = std::move(jacobians2D);
@@ -244,7 +246,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
  */
-static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
+static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, unsigned int& currentOffset,
                       const std::string& intScheme, const std::string& basisFuncType)
 {
     // add the current 2D entity
@@ -328,9 +330,11 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
                         std::move(jacobiansElement2D),
                         std::move(determinantsElement2D),
                         std::move(determinantElement1D),
-                        nGP2D,
+                        nGP2D, currentOffset,
                         nodesTagPerEdgeElement,
                         elementBarycenter, intScheme, basisFuncType);
+
+            currentOffset += nodesTagPerEdgeElement.size();
         }
     }
 
@@ -421,9 +425,11 @@ bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
     std::vector<std::pair<int, int>> entityHandles;
     gmsh::model::getEntities(entityHandles, 2);
 
+    unsigned int currentOffset = 0;
+
     for(auto entityHandle : entityHandles)
     {
-        addEntity(mesh, entityHandle, intScheme, basisFuncType);
+        addEntity(mesh, entityHandle, currentOffset, intScheme, basisFuncType);
     }
 
     gmsh::finalize();

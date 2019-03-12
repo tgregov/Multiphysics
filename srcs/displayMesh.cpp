@@ -34,7 +34,8 @@ void displayMesh(const Mesh2D& mesh)
 			std::cout 	<< "\t[Element (" << j << ")]:" << std::endl
 						<< "\t\t- Tag: " << element.elementTag << std::endl
 			 			<< "\t\t- 2D type: " << element.elementType2D << std::endl
-						<< "\t\t- 1D type: " << element.elementType1D << std::endl;
+						<< "\t\t- 1D type: " << element.elementType1D << std::endl
+						<< "\t\t- Offset in u: " << element.offsetInU << std::endl;
 
 			for(unsigned int k = 0 ; k < element.determinant2D.size() ; ++k)
 			{
