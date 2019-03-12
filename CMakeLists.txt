@@ -1,4 +1,4 @@
-PROJECT(GMSHAPI CXX)
+PROJECT(MULTIPHYSICS CXX)
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
 
 # build type is "" by default in Linux
@@ -21,7 +21,7 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 IF(UNIX AND CMAKE_CXX_COMPILER_ID STREQUAL GNU)
     # allows gcc5/ubuntu to link against the c++ interface
     # (this does not work with mingw)
-    ADD_DEFINITIONS(-D_GLIBCXX_USE_CXX11_ABI=0) # libgmsh is linked to libgcc4 (pbl with std::string) 
+    ADD_DEFINITIONS(-D_GLIBCXX_USE_CXX11_ABI=0) # libgmsh is linked to libgcc4 (pbl with std::string)
 ELSEIF(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_WARNINGS)
     ADD_DEFINITIONS(-D_USE_MATH_DEFINES) # for M_PI
