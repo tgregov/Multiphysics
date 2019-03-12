@@ -30,8 +30,8 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 
 	// the type of form is stored in factor
 	float factor;
-	if(typeForm.compare("strong")) 		factor = -1.0;
-	else if(typeForm.compare("weak")) 	factor = +1.0;
+	if(!typeForm.compare("strong")) 	factor = -1.0;
+	else if(!typeForm.compare("weak"))	factor = +1.0;
 	else
 	{
 		std::cerr 	<< "The form  " << typeForm  << "does not exist !"

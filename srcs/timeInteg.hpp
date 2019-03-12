@@ -11,7 +11,7 @@ Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::SparseMatrix<double> invM
 
 
 bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h, 
-	const int& nbrTimeSteps, const std::string& typeForm, 
+	const unsigned int& nbrTimeSteps, const std::string& typeForm, 
 	const std::string& fileName);
 
 #endif /* timeInteg_hpp */

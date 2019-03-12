@@ -25,7 +25,7 @@ Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::SparseMatrix<double> invM
 
 
 bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h, 
-	const int& nbrTimeSteps, const std::string& typeForm, 
+	const unsigned int& nbrTimeSteps, const std::string& typeForm, 
 	const std::string& fileName)
 {
 
@@ -72,34 +72,34 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
     std::string dataType = "NodeData";
 	
 	// numerical integration
-	if(scheme.compare("RK1")) // Runge-Kutta of order 1 (i.e. explicit Euler)
+	if(!scheme.compare("RK1")) // Runge-Kutta of order 1 (i.e. explicit Euler)
 	{ 
 		double t = 0.0;
+		
+		std::vector<std::vector<double>> uDisplay(numNodes);
 
-		std::vector<double> uDisplay;
-		for(unsigned int count; count < u.size(); ++count)
+		for(unsigned int count = 0; count < u.size(); ++count)
 		{
-			uDisplay.push_back(u[count]);
+			uDisplay[count].resize(1);
+			uDisplay[count][0] = u[count];
 		}
-		gmsh::view::addModelData(viewTag, 0, modelName, dataType, nodeTags, uDisplay,
-			t);
+		gmsh::view::addModelData(viewTag, 0, modelName, dataType, nodeTags,
+			uDisplay, t);
 
-		for(int nbrStep = 1 ; nbrStep < nbrTimeSteps + 1 ; nbrStep++)
+		for(unsigned int nbrStep = 1 ; nbrStep < nbrTimeSteps + 1 ; nbrStep++)
 		{
 			u += F(t, u, invM, Sx, Sy, numNodes, mesh, typeForm)*h;
 			t += h;
-
-			std::vector<double> uDisplay;
-			for(unsigned int count; count < u.size(); ++count)
+			
+			for(unsigned int count = 0; count < u.size(); ++count)
 			{
-				uDisplay.push_back(u[count]);
+				uDisplay[count].resize(1);
+				uDisplay[count][0] = u[count];
 			}
-
 			gmsh::view::addModelData(viewTag, nbrStep, modelName, dataType, nodeTags,
 				uDisplay, t);
 		}
-
-	} else if(scheme.compare("RK4")){ // Runge-Kutta of order 4
+	} else if(!scheme.compare("RK4")){ // Runge-Kutta of order 4
 		/*
 
 		// k1, k2, k3, k4 are the same dimensions as u[i] => get the best type 
@@ -116,8 +116,7 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
 			u[i] = u[i-1] + (k1 + 2*k2 + 2*k3 + k4)*h/6;
 			t += h;
-		}
-		*/
+		}*/
 	} else{
 		std::cerr 	<< "The integration scheme " << scheme 
 					<< " is not implemented" << std::endl;
@@ -125,7 +124,7 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 	}
 	
 	// write the results & finalize
-    gmsh::view::write(viewTag, std::string(fileName + "_results"));
+    gmsh::view::write(viewTag, std::string("results.msh"));
     gmsh::finalize();
 
 	return true;
