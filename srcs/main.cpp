@@ -1,10 +1,6 @@
 #include <iostream>
 #include <string>
 #include <Eigen/Sparse>
-#ifndef M_PI
-    #define M_PI 3.14159265358979323846
-#endif // M_PI
-// #include <gmsh.h>
 #include "Mesh2D.hpp"
 #include "buildM.hpp"
 #include "buildS.hpp"
@@ -20,7 +16,7 @@ int main(int argc, char **argv)
 
     Mesh2D mesh;
 
-    if(!readMesh2D(mesh, std::string(argv[1]), "Gauss1", "Lagrange"))
+    if(!readMesh2D(mesh, std::string(argv[1]), "Gauss3", "Lagrange"))
     {
         std::cerr   << "Something went wrong when reading mesh file: "
                     << argv[1] << std::endl;

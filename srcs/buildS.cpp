@@ -1,18 +1,15 @@
 #include <iostream>
-#ifndef M_PI
-    #define M_PI 3.14159265358979323846
-#endif // M_PI
 #include <Eigen/Sparse>
 #include "buildS.hpp"
 #include "Mesh2D.hpp"
 
 // same comment as buildM for const Mesh2D& mesh: wtf
-void buildS(Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx, 
+void buildS(Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 			Eigen::SparseMatrix<double>& Sy)
 {
 
-    // indexx, indexy are vectors of triplets that contains the coordinates in the 
-    // [Sx], [Sy] matrices of each ot their components; the offsetMatrix is the 
+    // indexx, indexy are vectors of triplets that contains the coordinates in the
+    // [Sx], [Sy] matrices of each ot their components; the offsetMatrix is the
     // upper-left coordinate at which the current element matrix should be added
 	std::vector<Eigen::Triplet<double>> indexx, indexy;
     unsigned int offsetMatrix = 0;
@@ -73,28 +70,28 @@ void buildS(Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 						double dljdeta = elmProp.basisFuncGrad
 							[k*elmProp.nSF*3 + j*3 + 1];
 
-						sxElm[i*elmProp.nSF + j] 
+						sxElm[i*elmProp.nSF + j]
 							+= pondFunc[k][i]*(dljdxi*dxidx + dljdeta*detadx);
-						syElm[i*elmProp.nSF + j] 
+						syElm[i*elmProp.nSF + j]
 							+= pondFunc[k][i]*(dljdxi*dxidy + dljdeta*detady);
 
 
-						// if we have calculated the sum for all the GP, we can 
+						// if we have calculated the sum for all the GP, we can
 						// save the computed components
 						if(k == elmProp.nGP - 1)
 						{
 							indexx.push_back(Eigen::Triplet<double>
-                				(i + offsetMatrix, j + offsetMatrix, 
+                				(i + offsetMatrix, j + offsetMatrix,
                 					sxElm[i*elmProp.nSF + j]));
 
     						indexy.push_back(Eigen::Triplet<double>
-                				(i + offsetMatrix, j + offsetMatrix, 
+                				(i + offsetMatrix, j + offsetMatrix,
                 					syElm[i*elmProp.nSF + j]));
 						}
 					}
 				}
 			}
-			
+
 			offsetMatrix += elmProp.nSF;
 		}
    	}

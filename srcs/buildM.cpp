@@ -1,7 +1,4 @@
 #include <iostream>
-#ifndef M_PI
-    #define M_PI 3.14159265358979323846
-#endif // M_PI
 #include <Eigen/Sparse>
 #include "buildM.hpp"
 #include "Mesh2D.hpp"
@@ -12,7 +9,7 @@ void buildM(Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
 {
 
     // the index is a vector of triplets that contains the coordinates in the [M]
-    // matrix of each ot its components; the offsetMatrix is the upper-left 
+    // matrix of each ot its components; the offsetMatrix is the upper-left
     // coordinate at which the current element matrix should be added
     std::vector<Eigen::Triplet<double>> index;
     unsigned int offsetMatrix = 0;
@@ -45,18 +42,18 @@ void buildM(Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
 
                 // add the sum to the index vector
                 index.push_back(Eigen::Triplet<double>
-                    (IJ[l].first + offsetMatrix, 
-                    IJ[l].second + offsetMatrix, 
+                    (IJ[l].first + offsetMatrix,
+                    IJ[l].second + offsetMatrix,
                     sum));
 
-                // if we are not on the diagonal, we add the symmetric part of the 
+                // if we are not on the diagonal, we add the symmetric part of the
                 // matrix (indeed, since [M] is symmetric, the products w_k*l_i*l_j
                 // were only computed once
                 if(IJ[l].first != IJ[l].second)
                 {
                     index.push_back(Eigen::Triplet<double>
-                        (IJ[l].second + offsetMatrix, 
-                          IJ[l].first + offsetMatrix, 
+                        (IJ[l].second + offsetMatrix,
+                          IJ[l].first + offsetMatrix,
                          sum));
                 }
             }
@@ -66,5 +63,5 @@ void buildM(Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
     }
 
     // add the triplets in the sparse matrix
-    M.setFromTriplets(index.begin(), index.end());    
+    M.setFromTriplets(index.begin(), index.end());
 }
