@@ -334,7 +334,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                         nodesTagPerEdgeElement,
                         elementBarycenter, intScheme, basisFuncType);
 
-            currentOffset += nodesTagPerEdgeElement.size();
+            currentOffset += nodesTagPerEdgeElement.size()/2;
         }
     }
 

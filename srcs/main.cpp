@@ -35,10 +35,8 @@ int main(int argc, char **argv)
     std::cout << "Matrix [M]:\n" << M << std::endl;
     std::cout << "Matrix [Sx]:\n" << Sx << std::endl;
     std::cout << "Matrix [Sy]:\n" << Sy << std::endl;*/
-    Eigen::VectorXd I(numNodes);
-    I.setZero();
-    Eigen::VectorXd u(numNodes);
-    u.setZero();
+    Eigen::VectorXd I(numNodes); I.setZero();
+    Eigen::VectorXd u(numNodes); u.setZero();
     buildFlux(mesh, I, u, "weak", numNodes);
     std::cout << "Vector I: \n" << I << std::endl;
 

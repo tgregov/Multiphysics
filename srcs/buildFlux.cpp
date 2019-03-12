@@ -37,45 +37,62 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I,
 
 			// get the properties of the current element type
             ElementProperty elmProp = mesh.elementProperties1D[element.elementType1D];
+            ElementProperty elmProp2D = mesh.elementProperties2D[element.elementType2D];
+
 
 			// we will build the vector I_j, j = 0, ..., nSF-1, corresponding to the
 			// fluxes in the current element
-			Eigen::VectorXd partialI(elmProp.nSF);
+			Eigen::VectorXd partialI(elmProp2D.nSF);
 			partialI.setZero();
 
 
-			//creation of matrix M
-			Eigen::SparseMatrix<double> dM(elmProp.nSF, elmProp.nSF);
+
 			
 			double lala = 0.0;
 			double lalb = 0.0;
 			//only works with linear shape functions
-			for (unsigned int k = 0 ; k < elmProp.nGP ; k++)
+			for (unsigned int k = 0 ; k < elmProp.nGP ; ++k)
 			{
 				lala += elmProp.pondFunc[k][0]*elmProp.pondFunc[k][0];
 				lalb += elmProp.pondFunc[k][1]*elmProp.pondFunc[k][0];
 			}
-				
-			// loop, for each element, over the edges
+		
+
+			//Computation of matrix delta M
+
+			//creation of matrix M
+			Eigen::SparseMatrix<double> dM(elmProp2D.nSF, elmProp2D.nSF);
+			std::vector<Eigen::Triplet<double>> indices;
+
 			unsigned int nSigma = element.edges.size();
 			for(unsigned int s = 0; s < nSigma; s++)
 			{
-				Edge edge = element.edges[s];
-
-				//Computation of matrix delta M
-				std::vector<Eigen::Triplet<double>> indices;
 				indices.push_back(Eigen::Triplet<double>(s, s, lala));
 				indices.push_back(Eigen::Triplet<double>(s, (s+1) % nSigma, lalb));
 				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, s, lalb));
 				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, (s+1) % nSigma, lala));
+			}
+			dM.setFromTriplets(indices.begin(), indices.end());
 
-				dM.setFromTriplets(indices.begin(), indices.end());
 
+			
+			// loop, for each element, over the edges
+			
+			for(unsigned int s = 0 ; s < nSigma ; ++s)
+			{
+
+
+				
+				Edge edge = element.edges[s];
+				
 				// we first compute the matrix-vector product of dM with gx and gy
-				Eigen::VectorXd dMgx(elmProp.nSF), dMgy(elmProp.nSF);
-				Eigen::VectorXd gx(elmProp.nSF), gy(elmProp.nSF);
+				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
+				Eigen::VectorXd gx(elmProp2D.nSF), gy(elmProp2D.nSF);
 
-				for(unsigned int j = 0; j < elmProp.nSF; j++)
+				
+
+				
+				for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
 				{
 
 					// the type of form implies a different rhs vector
@@ -96,12 +113,13 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I,
 					// /!\Check for nonlinear elements
 					if (std::get<0>(edge.edgeInFront) == -1)
 					{
-						gx[j] = 0;
-						gy[j] = 0;
+						gx[j] = 0.0;
+						gy[j] = 0.0;
 					}else{
 						unsigned int frontOffsetInU = entity.elements[std::get<0>(edge.edgeInFront)].offsetInU;
 						unsigned int frontJ = std::get<1>(edge.edgeInFront);
 						//DO NOT forget BC !!!
+
 						gx[j] = -(factor*fx(u[element.offsetInU + j]) + fx(u[frontOffsetInU + frontJ]))/2
 								- C*element.edgesNormal[s].first*(u[element.offsetInU + j]) - u[frontOffsetInU + frontJ]/2;
 
@@ -110,13 +128,13 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I,
 					}
 
 				}
-
+				
+				
 				dMgx = dM*gx;
 				dMgy = dM*gy;
 
 				// then we apply a scalar product and sum the current contribution
 				// "+=" seems to work
-				// /!\ nDet not disponible yet
 				// constant determinant 
 				partialI += edge.determinant1D[0]*(element.edgesNormal[s].first*dMgx + element.edgesNormal[s].second*dMgx);
 
@@ -124,10 +142,12 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I,
 
 			//Building of the vector I from the partialI
 			// maybe there is some Eigen function that allows to do that
-			for(unsigned int j = 0; j < elmProp.nSF ; j++)
+			
+			for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
 			{
 				I[element.offsetInU + j] = partialI[j];
 			}
+
 		}
 	}
 
