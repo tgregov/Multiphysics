@@ -18,6 +18,7 @@ struct Edge
                                             evaluated at each Gauss point*/
 
     std::pair<int, int> nodeTags;       /**< Node tags for each point of the edge*/
+    std::tuple<int, int, bool> edgeInFront =  std::make_tuple(-1, -1, true);
 };
 
 /**

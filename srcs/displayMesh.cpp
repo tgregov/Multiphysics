@@ -19,7 +19,7 @@ void displayMesh(const Mesh2D& mesh)
 		Entity2D entitity =  mesh.entities[i];
 
 		std::cout 	<< "[Entity (" << i << ")]:" << std::endl
-					<< "\t- Tag of the 2D entity: " << entitity.entityTag2D 
+					<< "\t- Tag of the 2D entity: " << entitity.entityTag2D
 					<< std::endl
 					<< "\t- Tag of the 1D entity: " << entitity.entityTag1D
 					<< std::endl;
@@ -39,7 +39,7 @@ void displayMesh(const Mesh2D& mesh)
 			for(unsigned int k = 0 ; k < element.determinant2D.size() ; ++k)
 			{
 				std::cout	<< "\t\t- [at GP (" << k << ")]:" << std::endl
-							<< "\t\t\t- det = " << element.determinant2D[k] 
+							<< "\t\t\t- det = " << element.determinant2D[k]
 							<< std::endl;
 				for(unsigned int l = 0 ; l < 9 ; ++l)
 				{
@@ -53,14 +53,18 @@ void displayMesh(const Mesh2D& mesh)
 			for(unsigned int k = 0 ; k < edges.size() ; ++k)
 			{
 				std::cout	<< "\t\t- [Edge (" << k << ")]:" << std::endl
-							<< "\t\t\t- Tag A: " << edges[k].nodeTags.first 
+							<< "\t\t\t- Tag A: " << edges[k].nodeTags.first
 							<< std::endl
 							<< "\t\t\t- Tag B: " << edges[k].nodeTags.second
 							<< std::endl
 							<< "\t\t\t- Normal: (" << element.edgesNormal[k].first
 							<< ", " << element.edgesNormal[k].second << ")"
 							<< std::endl
-							<< "\t\t\t- Det: " << edges[k].determinant1D[0] 
+							<< "\t\t\t- Det: " << edges[k].determinant1D[0]
+							<< std::endl
+							<< "\t\t\t- Edge in front: " << "element " << std::get<0>(edges[k].edgeInFront)<<", "
+							<< "edge " << std::get<1>(edges[k].edgeInFront)<<", "
+							<< "inverted " << std::get<2>(edges[k].edgeInFront)
 							<< std::endl;
 			}
 		}

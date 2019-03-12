@@ -157,6 +157,36 @@ static void computeEdgeNormal(Element2D& element,
     element.edgesNormal.push_back(normal);
 }
 
+static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int edgePos)
+{
+    bool found = false;
+    unsigned int elVecSize = entity.elements.size();
+    unsigned int nEdgePerEl = entity.elements[0].edges.size();
+    for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
+    {
+        if(!found)
+        {
+            for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
+            {
+                    if(entity.elements[elm].edges[k].nodeTags.first == currentEdge.nodeTags.first
+                       && entity.elements[elm].edges[k].nodeTags.second == currentEdge.nodeTags.second)
+                    {
+                        currentEdge.edgeInFront =  std::make_tuple(elm, k, false);
+                        entity.elements[elm].edges[k].edgeInFront = std::make_tuple(elVecSize, edgePos, false);
+                        found = true;
+                    }
+                    else if(entity.elements[elm].edges[k].nodeTags.first == currentEdge.nodeTags.second
+                       && entity.elements[elm].edges[k].nodeTags.second == currentEdge.nodeTags.first)
+                    {
+                        currentEdge.edgeInFront =  std::make_tuple(elm, k, true);
+                        entity.elements[elm].edges[k].edgeInFront = std::make_tuple(elVecSize, edgePos, true);
+                        found = true;
+                    }
+            }
+        }
+    }
+}
+
 
 /**
  * \brief Add an element to a certain entity (filling the required fields).
@@ -199,6 +229,8 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
         computeEdgeNormal(element, nodesTagsEdge, elementBarycenter);
         addEdge(element, nodesTagsEdge, std::move(determinantsEdge1D));
+        if(entity.elements.size() != 0)
+            findInFrontEdge(entity, element.edges[i], i);
     }
 
     entity.elements.push_back(element);
