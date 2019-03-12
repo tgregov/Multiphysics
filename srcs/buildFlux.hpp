@@ -2,7 +2,6 @@
 #define buildFlux_hpp
 
 #include <Eigen/Dense>
-#include "readMesh.hpp"
 
 void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 			const Eigen::VectorXd& u);

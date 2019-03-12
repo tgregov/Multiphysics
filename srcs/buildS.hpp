@@ -2,7 +2,6 @@
 #define buildS_hpp
 
 #include <Eigen/Sparse>
-#include "readMesh.hpp"
 #include "Mesh2D.hpp"
 
 

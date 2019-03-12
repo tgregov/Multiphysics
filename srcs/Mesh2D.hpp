@@ -83,6 +83,7 @@ struct ElementProperty
 
 };
 
+
 /**
  * \struct Mesh2D
  * \brief Represents a 2D mesh.
@@ -100,7 +101,14 @@ struct Mesh2D
  * \brief Get the number of nodes (i.e. of unknowns) given a mesh.
  * \param mesh2D The structure that contains the mesh.
  */
-unsigned long getNumNodes(const Mesh2D& mesh2D);
+unsigned int getNumNodes(const Mesh2D& mesh2D);
+
+
+/**
+ * \brief Get the tags of nodes (i.e. of unknowns) given a mesh.
+ * \param mesh2D The structure that contains the mesh.
+ */
+std::vector<int> getTags(const Mesh2D& mesh2D);
 
 
 /**

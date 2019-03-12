@@ -384,9 +384,9 @@ static bool IsMesh2D()
 
 
 // documentation in .hpp file
-unsigned long getNumNodes(const Mesh2D& mesh2D)
+unsigned int getNumNodes(const Mesh2D& mesh2D)
 {
-    unsigned long numNodes = 0;
+    unsigned int numNodes = 0;
 
     // loop over the entities
     for(unsigned int ent = 0 ; ent < mesh2D.entities.size() ; ++ent)
@@ -404,6 +404,29 @@ unsigned long getNumNodes(const Mesh2D& mesh2D)
     return numNodes;
 }
 
+
+// documentation in .hpp file
+std::vector<int> getTags(const Mesh2D& mesh2D)
+{
+    std::vector<int> listTags;
+
+    // loop over the entities
+    for(unsigned int ent = 0 ; ent < mesh2D.entities.size() ; ++ent)
+    {
+        Entity2D entity = mesh2D.entities[ent];
+
+        // loop over the nodes
+        for(std::pair<int, std::vector<int>> nodes : entity.nodesTagsPerEdge2D)
+        {
+            for(unsigned int i = 0 ; i < nodes.second.size()/2 ; ++i)
+            {
+                listTags.push_back(nodes.second[2*i]);
+            }
+        }
+    }
+
+    return listTags;
+}
 
 
 // documentation in .hpp file
