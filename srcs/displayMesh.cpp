@@ -59,6 +59,8 @@ void displayMesh(const Mesh2D& mesh)
 							<< std::endl
 							<< "\t\t\t- Normal: (" << element.edgesNormal[k].first
 							<< ", " << element.edgesNormal[k].second << ")"
+							<< std::endl
+							<< "\t\t\t- Det: " << edges[k].determinant1D[0] 
 							<< std::endl;
 			}
 		}

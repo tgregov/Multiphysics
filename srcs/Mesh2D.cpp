@@ -285,7 +285,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle,
                                             determinants2D.begin() + nGP2D*(1 + i));
             std::vector<double> determinantElement1D(
                                             determinants1D.begin() + numNodes*nGP2D*i,
-                                            determinants2D.begin() + numNodes*nGP2D*(1 + i));
+                                            determinants1D.begin() + numNodes*nGP2D*(1 + i));
             std::vector<int> nodesTagPerEdgeElement(
                                 nodesTagPerEdge.begin() + 2*numNodes*i,
                                 nodesTagPerEdge.begin() + 2*numNodes*(i + 1));
