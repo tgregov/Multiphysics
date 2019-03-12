@@ -4,9 +4,9 @@
 #include <Eigen/Dense>
 #include "readMesh.hpp"
 
-void flux(Eigen::VectorXd<double>& fx, Eigen::VectorXd<double>& fy, double& C, 
-			const Eigen::VectorXd<double>& u);
-bool buildFlux(const MeshParams& meshParams, Eigen::VectorXd<double>& I,
-				const Eigen::VectorXd<double>& u, const std::string& typeForm);
+void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
+			const Eigen::VectorXd& u);
+bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I,
+				const Eigen::VectorXd& u, const std::string& typeForm, unsigned int numNodes);
 
 #endif /* buildFlux_hpp */

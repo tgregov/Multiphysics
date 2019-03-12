@@ -9,6 +9,7 @@
 #include "buildM.hpp"
 #include "buildS.hpp"
 #include "displayMesh.hpp"
+#include "buildFlux.hpp"
 
 int main(int argc, char **argv)
 {
@@ -30,14 +31,20 @@ int main(int argc, char **argv)
     displayMesh(mesh);
 
     unsigned long numNodes = getNumNodes(mesh);
-    Eigen::SparseMatrix<double> M(numNodes, numNodes);
+    /*Eigen::SparseMatrix<double> M(numNodes, numNodes);
     Eigen::SparseMatrix<double> Sx(numNodes, numNodes);
     Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
     buildM(mesh, M);
     buildS(mesh, Sx, Sy);
     std::cout << "Matrix [M]:\n" << M << std::endl;
     std::cout << "Matrix [Sx]:\n" << Sx << std::endl;
-    std::cout << "Matrix [Sy]:\n" << Sy << std::endl;
+    std::cout << "Matrix [Sy]:\n" << Sy << std::endl;*/
+    Eigen::VectorXd I(numNodes);
+    I.setZero();
+    Eigen::VectorXd u(numNodes);
+    u.setZero();
+    buildFlux(mesh, I, u, "weak", numNodes);
+    std::cout << "Vector I: \n" << I << std::endl;
 
 
     return 0;
