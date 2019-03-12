@@ -37,6 +37,7 @@ void buildS(Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 
 			for(unsigned int k = 0 ; k < elmProp.nGP ; ++k)
 			{
+
 				// only the 2D case here; ideally it should be more general
 				// [TO CHECK] in the SDK, it is said that jacobian is stored as
 				// [Jxx, Jxy, Jxz, ...]. However, it seems that it is reversed:
@@ -92,9 +93,9 @@ void buildS(Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 						}
 					}
 				}
-
-				offsetMatrix += elmProp.nSF;
 			}
+			
+			offsetMatrix += elmProp.nSF;
 		}
    	}
 
