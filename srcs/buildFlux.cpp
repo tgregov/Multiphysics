@@ -19,135 +19,140 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 }
 
 
-bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I,
-				const Eigen::VectorXd& u, const std::string& typeForm, unsigned int numNodes)
+bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u, 
+	const std::string& typeForm, unsigned int numNodes)
 {
-	//loop over the entities
+
+	// compute the physical flux for the current u vector
+	Eigen::VectorXd fx(numNodes), fy(numNodes);
+	double C;
+	flux(fx, fy, C, u);
+
+	// the type of form is stored in factor
+	float factor;
+	if(typeForm.compare("strong")) 		factor = -1.0;
+	else if(typeForm.compare("weak")) 	factor = +1.0;
+	else
+	{
+		std::cerr 	<< "The form  " << typeForm  << "does not exist !"
+					<< std::endl;
+		return false;
+	}
+
+	// loop over the entities
 	for(unsigned int ent = 0 ; ent < mesh.entities.size() ; ent++)
 	{
+		// current entity 
 		Entity2D entity = mesh.entities[ent];
-		Eigen::VectorXd fx(numNodes), fy(numNodes);
-		double C;
-		flux(fx, fy, C, u);
 
-		//loop over the elements
+		// loop over the elements
 		for(unsigned int elm = 0 ; elm < entity.elements.size() ; elm++)
 		{
+			// current element
 			Element2D element = entity.elements[elm];
 
 			// get the properties of the current element type
-            ElementProperty elmProp = mesh.elementProperties1D[element.elementType1D];
+            ElementProperty elmProp1D = mesh.elementProperties1D[element.elementType1D];
             ElementProperty elmProp2D = mesh.elementProperties2D[element.elementType2D];
 
-
-			// we will build the vector I_j, j = 0, ..., nSF-1, corresponding to the
-			// fluxes in the current element
-			Eigen::VectorXd partialI(elmProp2D.nSF);
-			partialI.setZero();
+			// partial rhs vector
+			Eigen::VectorXd partialI(elmProp2D.nSF); partialI.setZero();
 
 
-
-			
+			// I. BUILD THE DELTAM MATRIX
+			// compute sum_k{w_k*l_i*l_j}
+			// [TO DO]: only works for linear SF
+			// [TO DO]: put it in mesh2D
 			double lala = 0.0;
 			double lalb = 0.0;
-			//only works with linear shape functions
-			for (unsigned int k = 0 ; k < elmProp.nGP ; ++k)
+			for (unsigned int k = 0 ; k < elmProp1D.nGP ; ++k)
 			{
-				lala += elmProp.pondFunc[k][0]*elmProp.pondFunc[k][0];
-				lalb += elmProp.pondFunc[k][1]*elmProp.pondFunc[k][0];
-			}
-		
+				lala += elmProp1D.prodFunc[k][0];
+				lalb += elmProp1D.prodFunc[k][1];
+			}	
 
-			//Computation of matrix delta M
-
-			//creation of matrix M
-			Eigen::SparseMatrix<double> dM(elmProp2D.nSF, elmProp2D.nSF);
-			std::vector<Eigen::Triplet<double>> indices;
-
+			// compute the indices of the components
 			unsigned int nSigma = element.edges.size();
-			for(unsigned int s = 0; s < nSigma; s++)
+			std::vector<Eigen::SparseMatrix<double>> dM;
+
+
+			for(unsigned int s = 0 ; s < nSigma ; s++)
 			{
+				Eigen::SparseMatrix<double> dMs(elmProp2D.nSF, elmProp2D.nSF);
+				std::vector<Eigen::Triplet<double>> indices;
+
 				indices.push_back(Eigen::Triplet<double>(s, s, lala));
 				indices.push_back(Eigen::Triplet<double>(s, (s+1) % nSigma, lalb));
 				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, s, lalb));
 				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, (s+1) % nSigma, lala));
+				dMs.setFromTriplets(indices.begin(), indices.end());
+
+				dM.push_back(dMs);
 			}
-			dM.setFromTriplets(indices.begin(), indices.end());
 
 
-			
+			// II. COMPUTE THE RHS
+			// [TO DO] optmize x2
 			// loop, for each element, over the edges
-			
 			for(unsigned int s = 0 ; s < nSigma ; ++s)
-			{
-
-
-				
+			{	
+				// current edge
 				Edge edge = element.edges[s];
 				
 				// we first compute the matrix-vector product of dM with gx and gy
-				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
 				Eigen::VectorXd gx(elmProp2D.nSF), gy(elmProp2D.nSF);
+				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
 
-				
-
-				
+				// loop over the SF
 				for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
 				{
-
-					// the type of form implies a different rhs vector
-					float factor;
-
-					if(typeForm.compare("strong"))
-					{
-						factor = -1.0;
-					} else if(typeForm.compare("weak"))
-					{
-						factor = +1.0;
-					}
-					else{
-						std::cerr 	<< "The form  " << typeForm  << "does not exist !"
-									<< std::endl;
-						return false;
-					}
-					// /!\Check for nonlinear elements
+					// [TO DO]: only works for linear elements
+					// Boundary condition case
 					if (std::get<0>(edge.edgeInFront) == -1)
 					{
-						gx[j] = 0.0;
-						gy[j] = 0.0;
-					}else{
+						if(elm == 1)
+						{
+							gx[j] = 100.0;
+							gy[j] = 0.0;							
+						}
+						else
+						{
+							gx[j] = 0.0;
+							gy[j] = 0.0;
+						}
+					} 
+					else
+					{
+						// [TO DO]: neighbours in other entities
 						unsigned int frontOffsetInU = entity.elements[std::get<0>(edge.edgeInFront)].offsetInU;
 						unsigned int frontJ = std::get<1>(edge.edgeInFront);
-						//DO NOT forget BC !!!
 
 						gx[j] = -(factor*fx(u[element.offsetInU + j]) + fx(u[frontOffsetInU + frontJ]))/2
-								- C*element.edgesNormal[s].first*(u[element.offsetInU + j]) - u[frontOffsetInU + frontJ]/2;
+								- C*element.edgesNormal[s].first*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
 
 						gy[j] = -(factor*fy(u[element.offsetInU + j]) + fy(u[frontOffsetInU + frontJ]))/2
-								- C*element.edgesNormal[s].second*u[element.offsetInU + j] - u[frontOffsetInU + frontJ]/2;
+								- C*element.edgesNormal[s].second*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
 					}
 
 				}
 				
-				
-				dMgx = dM*gx;
-				dMgy = dM*gy;
+				dMgx = dM[s]*gx;
+				dMgy = dM[s]*gy;
 
 				// then we apply a scalar product and sum the current contribution
 				// "+=" seems to work
-				// constant determinant 
-				partialI += edge.determinant1D[0]*(element.edgesNormal[s].first*dMgx + element.edgesNormal[s].second*dMgx);
-
+				// [TO DO]: constant determinant 
+				partialI += edge.determinant1D[0]*(
+					element.edgesNormal[s].first*dMgx 
+					+ element.edgesNormal[s].second*dMgy);
 			}
 
-			//Building of the vector I from the partialI
+			// Building of the vector I from the partialI
 			// maybe there is some Eigen function that allows to do that
-			
 			for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
 			{
 				I[element.offsetInU + j] = partialI[j];
 			}
-
 		}
 	}
 
