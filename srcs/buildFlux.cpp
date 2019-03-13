@@ -20,13 +20,9 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 
 
 bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u, 
+	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
 	const std::string& typeForm, unsigned int numNodes)
 {
-
-	// compute the physical flux for the current u vector
-	Eigen::VectorXd fx(numNodes), fy(numNodes);
-	double C;
-	flux(fx, fy, C, u);
 
 	// the type of form is stored in factor
 	float factor;

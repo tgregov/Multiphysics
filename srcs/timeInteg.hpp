@@ -5,7 +5,8 @@
 
 
 // [TO DO]: comment & describe
-Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::SparseMatrix<double> invM, 
+Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx, 
+	Eigen::VectorXd& fy, Eigen::SparseMatrix<double> invM, 
 	Eigen::SparseMatrix<double> Sx, Eigen::SparseMatrix<double> Sy, 
 	unsigned int numNodes, Mesh2D& mesh, const std::string& typeForm);
 

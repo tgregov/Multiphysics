@@ -9,18 +9,36 @@
 #include "buildFlux.hpp"
 
 
-Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::SparseMatrix<double> invM, 
+Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx, 
+	Eigen::VectorXd& fy, Eigen::SparseMatrix<double> invM, 
 	Eigen::SparseMatrix<double> Sx, Eigen::SparseMatrix<double> Sy, 
 	unsigned int numNodes, Mesh2D& mesh, const std::string& typeForm)
 {
 	
-	Eigen::VectorXd I(numNodes); I.setZero();
- 	buildFlux(mesh, I, u, typeForm, numNodes);
-	
-	Eigen::VectorXd F(numNodes);
-	F = invM*(I - Sx*u - Sy*u);
+ 	// compute the nodal physical fluxes
+ 	double C;
+ 	flux(fx, fy, C, u);
 
-	return F;
+	// compute the right-hand side of the master equation (phi or psi)
+	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
+ 	buildFlux(mesh, I, u, fx, fy, C, typeForm, numNodes);
+
+	// compute the vector F to be integrated in time
+	Eigen::VectorXd vectorF(numNodes);
+	if(!typeForm.compare("strong"))
+	{
+		vectorF = invM*(I - Sx*fx - Sy*fy);
+	} 
+	else if(!typeForm.compare("weak")) 
+	{
+		vectorF = invM*(I + Sx.transpose()*fx + Sy.transpose()*fy);
+	} 
+	else 
+	{
+		std::cerr 	<< "The form  " << typeForm  << "does not exist !" << std::endl;
+	}
+
+	return vectorF;
 }
 
 
@@ -61,6 +79,10 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
     // initial condition [TO DO]: generalize for u != 0
     Eigen::VectorXd u(numNodes); u.setZero();
 
+    // vectors of physical flux
+    Eigen::VectorXd fx(numNodes);
+    Eigen::VectorXd fy(numNodes);
+
     // launch gmsh
     gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
@@ -88,7 +110,7 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
 		for(unsigned int nbrStep = 1 ; nbrStep < nbrTimeSteps + 1 ; nbrStep++)
 		{
-			u += F(t, u, invM, Sx, Sy, numNodes, mesh, typeForm)*h;
+			u += F(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, typeForm)*h;
 			t += h;
 			
 			for(unsigned int count = 0; count < u.size(); ++count)
