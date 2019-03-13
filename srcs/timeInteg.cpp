@@ -110,9 +110,13 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
 		for(unsigned int nbrStep = 1 ; nbrStep < nbrTimeSteps + 1 ; nbrStep++)
 		{
+			
+			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
+
 			u += F(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, typeForm)*h;
 			t += h;
 			
+
 			for(unsigned int count = 0; count < u.size(); ++count)
 			{
 				uDisplay[count].resize(1);

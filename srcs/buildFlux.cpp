@@ -106,15 +106,25 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					// Boundary condition case
 					if (std::get<0>(edge.edgeInFront) == -1)
 					{
+
+						unsigned int frontOffsetInU = entity.elements[std::get<0>(edge.edgeInFront)].offsetInU;
+						unsigned int frontJ = std::get<1>(edge.edgeInFront);
+
 						if(elm == 1)
 						{
-							gx[j] = 100.0;
-							gy[j] = 0.0;							
+						gx[j] = 1;
+
+						gy[j] = 0;
+							
 						}
 						else
 						{
-							gx[j] = 0.0;
-							gy[j] = 0.0;
+
+						gx[j] = -(factor*fx[element.offsetInU + j] + 0)/2
+								- C*element.edgesNormal[s].first*(u[element.offsetInU + j] - 0)/2;
+
+						gy[j] = 0;
+
 						}
 					} 
 					else
@@ -123,10 +133,10 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 						unsigned int frontOffsetInU = entity.elements[std::get<0>(edge.edgeInFront)].offsetInU;
 						unsigned int frontJ = std::get<1>(edge.edgeInFront);
 
-						gx[j] = -(factor*fx(u[element.offsetInU + j]) + fx(u[frontOffsetInU + frontJ]))/2
+						gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
 								- C*element.edgesNormal[s].first*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
 
-						gy[j] = -(factor*fy(u[element.offsetInU + j]) + fy(u[frontOffsetInU + frontJ]))/2
+						gy[j] = -(factor*fy[element.offsetInU + j] + fy[frontOffsetInU + frontJ])/2
 								- C*element.edgesNormal[s].second*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
 					}
 
@@ -141,6 +151,7 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				partialI += edge.determinant1D[0]*(
 					element.edgesNormal[s].first*dMgx 
 					+ element.edgesNormal[s].second*dMgy);
+
 			}
 
 			// Building of the vector I from the partialI
@@ -148,6 +159,7 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
 			{
 				I[element.offsetInU + j] = partialI[j];
+				std::cout << "elm = " << elm << " | node = " << j << " => " << partialI[j] << std::endl;
 			}
 		}
 	}

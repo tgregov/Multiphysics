@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     }
 
     // displayMesh(mesh);
-    if(!timeInteg(mesh, "RK1", 0.1, 10, "strong", std::string(argv[1])))
+    if(!timeInteg(mesh, "RK1", 0.1, 2, "strong", std::string(argv[1])))
     {
         std::cerr   << "Something went wrong when time integrating" << std::endl;
         return -1;        
