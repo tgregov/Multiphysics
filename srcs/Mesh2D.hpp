@@ -18,7 +18,12 @@ struct Edge
                                             evaluated at each Gauss point*/
 
     std::pair<int, int> nodeTags;       /**< Node tags for each point of the edge*/
-    std::tuple<int, int, bool> edgeInFront =  std::make_tuple(-1, -1, true);
+    std::tuple<int, int, bool> edgeInFront =  std::make_tuple(-1, -1, true); //std::optional :cry:
+
+    std::pair<double, double> normal;     /**< Edge normal point outwards the element*/
+    std::pair<std::pair<double, double>, std::pair<double, double>> nodeCoordinate;
+
+    std::string bcName; //std::optional :cry:
 };
 
 /**
@@ -39,7 +44,6 @@ struct Element2D
                                              evaluated at each Gauss point*/
 
     std::vector<Edge> edges;            /**< List of edge which compose the element */
-    std::vector<std::pair<double, double>> edgesNormal;     /**< List of edge normal point outwards the element*/
 };
 
 /**
@@ -92,6 +96,9 @@ struct Mesh2D
 {
     std::map<int, ElementProperty> elementProperties2D; /**< Store element properties for each 2D element type */
     std::map<int, ElementProperty> elementProperties1D; /**< Store element properties for each 1D element type */
+
+    std::map<std::string, std::vector<int>> nodesTagBoundary;
+    //std::map<std::string, std::vector<double>> coordNodesBoundary;
 
     std::vector<Entity2D> entities; /**< List of entities inside the mesh */
 };

@@ -117,19 +117,18 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
  * \param nodesTagsEdge Node tags per edge of the element
  * \param baryCenter  Barycenter of the parent element
  */
-static void computeEdgeNormal(Element2D& element,
-                                const std::vector<int>& nodesTagsEdge,
-                                const std::vector<double>& baryCenter)
+static void computeEdgeNormalCoord(Edge& edge,
+                              const std::vector<double>& baryCenter)
 {
     std::pair<double, double> normal;
 
     std::vector<double> coord1, dummyParametricCoord1;
-    gmsh::model::mesh::getNode(nodesTagsEdge[0], coord1,
+    gmsh::model::mesh::getNode(edge.nodeTags.first, coord1,
                                             dummyParametricCoord1);
 
     // get the coordinates of the second node
     std::vector<double> coord2, dummyParametricCoord2;
-    gmsh::model::mesh::getNode(nodesTagsEdge[1], coord2,
+    gmsh::model::mesh::getNode(edge.nodeTags.second, coord2,
                                 dummyParametricCoord2);
 
     // compute the normal
@@ -155,7 +154,11 @@ static void computeEdgeNormal(Element2D& element,
     normal.first = nx/norm;
     normal.second = ny/norm;
 
-    element.edgesNormal.push_back(normal);
+    edge.normal = normal;
+    edge.nodeCoordinate.first.first = coord1[0];
+    edge.nodeCoordinate.first.second = coord1[1];
+    edge.nodeCoordinate.second.first = coord2[0];
+    edge.nodeCoordinate.second.second = coord2[1];
 }
 
 /**
@@ -194,6 +197,29 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
     }
 }
 
+static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagBoundaries, Edge& edge)
+{
+    for(std::pair<std::string, std::vector<int>> nodeTagBoundary : nodesTagBoundaries)
+    {
+        if(edge.nodeTags.first == nodeTagBoundary.second[0]
+           && edge.nodeTags.second == nodeTagBoundary.second[1])
+        {
+            edge.bcName=nodeTagBoundary.first;
+
+            return true;
+        }
+
+        else if(edge.nodeTags.first == nodeTagBoundary.second[1]
+           && edge.nodeTags.second == nodeTagBoundary.second[0])
+        {
+            edge.bcName=nodeTagBoundary.first;
+
+            return true;
+        }
+    }
+    return false;
+}
+
 
 /**
  * \brief Add an element to a certain entity (filling the required fields).
@@ -221,7 +247,8 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         const std::vector<int>& nodesTagsPerEdge,
                         const std::vector<double>& elementBarycenter,
                         const std::string& intScheme,
-                        const std::string& basisFuncType)
+                        const std::string& basisFuncType,
+                        const std::map<std::string, std::vector<int>>& nodesTagBoundary)
 {
     Element2D element;
     element.elementTag = elementTag;
@@ -240,10 +267,19 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
         std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP2D*i, determinants1D.begin() + nGP2D*(i + 1));
 
-        computeEdgeNormal(element, nodesTagsEdge, elementBarycenter);
         addEdge(element, nodesTagsEdge, std::move(determinantsEdge1D));
         if(entity.elements.size() != 0)
-            findInFrontEdge(entity, element.edges[i], i);
+        {
+            if(!IsBounbdary(nodesTagBoundary, element.edges[i]))
+                findInFrontEdge(entity, element.edges[i], i);
+
+        }
+        else
+        {
+            IsBounbdary(nodesTagBoundary, element.edges[i]);
+        }
+
+        computeEdgeNormalCoord(element.edges[i], elementBarycenter);
     }
 
     entity.elements.push_back(element);
@@ -344,7 +380,8 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                         std::move(determinantElement1D),
                         nGP2D, currentOffset,
                         nodesTagPerEdgeElement,
-                        elementBarycenter, intScheme, basisFuncType);
+                        elementBarycenter, intScheme, basisFuncType,
+                        mesh.nodesTagBoundary);
 
             currentOffset += nodesTagPerEdgeElement.size()/2;
         }
@@ -440,7 +477,6 @@ std::vector<int> getTags(const Mesh2D& mesh2D)
     return listTags;
 }
 
-
 // documentation in .hpp file
 bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
                 const std::string& intScheme, const std::string& basisFuncType)
@@ -456,9 +492,39 @@ bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
         return false;
     }
 
+    //Can we retrieve info with phys group tag, or is it by chance than physgroupTag = entityTag ?
     // collect the information contained in the gmsh file
+    std::vector<std::pair<int, int>> physGroupHandles;
+    gmsh::model::getPhysicalGroups(physGroupHandles, 2);
+
+    std::vector<std::pair<int, int>> BCHandles;
+    gmsh::model::getPhysicalGroups(BCHandles, 1);
+
+    for(unsigned int i = 0 ; i < BCHandles.size() ; ++i)
+    {
+        std::string name;
+        gmsh::model::getPhysicalName(1, BCHandles[i].second, name);
+        std::vector<int> nodesTags;
+        std::vector<double> coord;
+        gmsh::model::mesh::getNodesForPhysicalGroup(1, BCHandles[i].second,
+                                                    nodesTags, coord);
+        mesh.nodesTagBoundary[name] = nodesTags;
+        //mesh.coordNodesBoundary[name] = coord;
+    }
+
+    //Assume 1 2D physical group, might change later
+    //New structure ?
+    std::vector<int> entitiesTag;
+    gmsh::model::getEntitiesForPhysicalGroup(physGroupHandles[0].first,
+                                             physGroupHandles[0].second,
+                                             entitiesTag);
+
+    //Modify addEntity ?
     std::vector<std::pair<int, int>> entityHandles;
-    gmsh::model::getEntities(entityHandles, 2);
+    for(auto entityTag : entitiesTag)
+    {
+        entityHandles.push_back(std::pair<int, int>(physGroupHandles[0].first, entityTag));
+    }
 
     unsigned int currentOffset = 0;
 

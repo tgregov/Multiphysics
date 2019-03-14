@@ -2,6 +2,8 @@
 #define timeInteg_hpp_included
 
 #include <string>
+#include<Eigen/Dense>
+#include<Eigen/Sparse>
 #include "Mesh2D.hpp"
 
 // [TO DO]: comment & describe

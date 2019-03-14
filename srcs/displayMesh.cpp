@@ -58,16 +58,21 @@ void displayMesh(const Mesh2D& mesh)
 							<< std::endl
 							<< "\t\t\t- Tag B: " << edges[k].nodeTags.second
 							<< std::endl
-							<< "\t\t\t- Normal: (" << element.edgesNormal[k].first
-							<< ", " << element.edgesNormal[k].second << ")"
+							<< "\t\t\t- Normal: (" << element.edges[k].normal.first
+							<< ", " << element.edges[k].normal.second << ")"
 							<< std::endl
 							<< "\t\t\t- Det: " << edges[k].determinant1D[0]
-							<< std::endl
-							<< "\t\t\t- Edge in front: " << "element "
-							<< std::get<0>(edges[k].edgeInFront)<<", "
-							<< "edge " << std::get<1>(edges[k].edgeInFront)<<", "
-							<< "inverted " << std::get<2>(edges[k].edgeInFront)
 							<< std::endl;
+                if(std::get<0>(edges[k].edgeInFront) != -1)
+                {
+                    std::cout << "\t\t\t- Edge in front: " << "element "
+                                << std::get<0>(edges[k].edgeInFront)<<", "
+                                << "edge " << std::get<1>(edges[k].edgeInFront)<<", "
+                                << "inverted " << std::get<2>(edges[k].edgeInFront)
+                                << std::endl;
+                }
+                else
+                    std::cout << "\t\t\t- BC: " << edges[k].bcName <<std::endl;
 			}
 		}
 	}
