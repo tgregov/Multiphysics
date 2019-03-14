@@ -1,20 +1,18 @@
 #include <iostream>
-#include <string>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <gmsh.h>
-#include "Mesh2D.hpp"
 #include "buildM.hpp"
 #include "buildS.hpp"
 #include "buildFlux.hpp"
 
 
-Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx, 
-	Eigen::VectorXd& fy, Eigen::SparseMatrix<double> invM, 
-	Eigen::SparseMatrix<double> Sx, Eigen::SparseMatrix<double> Sy, 
+Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
+	Eigen::VectorXd& fy, Eigen::SparseMatrix<double> invM,
+	Eigen::SparseMatrix<double> Sx, Eigen::SparseMatrix<double> Sy,
 	unsigned int numNodes, Mesh2D& mesh, const std::string& typeForm)
 {
-	
+
  	// compute the nodal physical fluxes
  	double C;
  	flux(fx, fy, C, u);
@@ -28,12 +26,12 @@ Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 	if(!typeForm.compare("strong"))
 	{
 		vectorF = invM*(I - Sx*fx - Sy*fy);
-	} 
-	else if(!typeForm.compare("weak")) 
+	}
+	else if(!typeForm.compare("weak"))
 	{
 		vectorF = invM*(I + Sx.transpose()*fx + Sy.transpose()*fy);
-	} 
-	else 
+	}
+	else
 	{
 		std::cerr 	<< "The form  " << typeForm  << "does not exist !" << std::endl;
 	}
@@ -42,8 +40,8 @@ Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 }
 
 
-bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h, 
-	const unsigned int& nbrTimeSteps, const std::string& typeForm, 
+bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
+	const unsigned int& nbrTimeSteps, const std::string& typeForm,
 	const std::string& fileName)
 {
 
@@ -57,7 +55,7 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
     Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
     buildM(mesh, M);
     buildS(mesh, Sx, Sy);
-	
+
 	// invert [M]
 	Eigen::SparseMatrix<double> eye(numNodes, numNodes);
 	eye.setIdentity();
@@ -92,12 +90,12 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
     gmsh::model::list(names);
     std::string modelName = names[0];
     std::string dataType = "NodeData";
-	
+
 	// numerical integration
 	if(!scheme.compare("RK1")) // Runge-Kutta of order 1 (i.e. explicit Euler)
-	{ 
+	{
 		double t = 0.0;
-		
+
 		std::vector<std::vector<double>> uDisplay(numNodes);
 
 		for(unsigned int count = 0; count < u.size(); ++count)
@@ -110,12 +108,12 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
 		for(unsigned int nbrStep = 1 ; nbrStep < nbrTimeSteps + 1 ; nbrStep++)
 		{
-			
+
 			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
 
 			u += F(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, typeForm)*h;
 			t += h;
-			
+
 
 			for(unsigned int count = 0; count < u.size(); ++count)
 			{
@@ -128,7 +126,7 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 	} else if(!scheme.compare("RK4")){ // Runge-Kutta of order 4
 		/*
 
-		// k1, k2, k3, k4 are the same dimensions as u[i] => get the best type 
+		// k1, k2, k3, k4 are the same dimensions as u[i] => get the best type
 		// in Eigen
 		Eigen::VectorXd k1, k2, k3, k4;
 
@@ -144,11 +142,11 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 			t += h;
 		}*/
 	} else{
-		std::cerr 	<< "The integration scheme " << scheme 
+		std::cerr 	<< "The integration scheme " << scheme
 					<< " is not implemented" << std::endl;
 		return false;
 	}
-	
+
 	// write the results & finalize
     gmsh::view::write(viewTag, std::string("results.msh"));
     gmsh::finalize();

@@ -1,11 +1,7 @@
 #include <iostream>
-#include <Eigen/Sparse>
 #include "buildM.hpp"
-#include "Mesh2D.hpp"
 
-
-// note to myself: wtf with const& mesh and [] for elementProperties2D ?
-void buildM(Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
+void buildM(const Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
 {
 
     // the index is a vector of triplets that contains the coordinates in the [M]
@@ -25,7 +21,7 @@ void buildM(Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
             Element2D element = entity.elements[elm];
 
             // get the properties of the current element type
-            ElementProperty elmProp = mesh.elementProperties2D[element.elementType2D];
+            ElementProperty elmProp = mesh.elementProperties2D.at(element.elementType2D);
             std::vector<std::vector<double>> prodFunc = elmProp.prodFunc;
             std::vector<std::pair<unsigned int, unsigned int>> IJ = elmProp.IJ;
 

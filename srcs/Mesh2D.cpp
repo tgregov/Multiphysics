@@ -93,8 +93,9 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
 
 /**
  * \brief Add an edge to a certain element (filling the required fields).
- * \param element The parent element
- * \param nodesTagsEdge Node tags per edge of the element
+ * \param element The parent element.
+ * \param nodesTagsEdge Node tags per edge of the element.
+ * \param determinant1D Determinant associated with the edge of the element.
  */
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
                     std::vector<double> determinant1D)
@@ -157,6 +158,12 @@ static void computeEdgeNormal(Element2D& element,
     element.edgesNormal.push_back(normal);
 }
 
+/**
+ * \brief Compute the outward normal of an edge
+ * \param entity The parent entity.
+ * \param currentEdge The edge of which you want to find the neighbor.
+ * \param edgePos Index of the edge in his element.
+ */
 static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int edgePos)
 {
     bool found = false;
@@ -198,6 +205,10 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
  * evaluated at each Gauss points.
  * \param determinants2D Determinant of the variable change of the element
  * evaluated at each Gauss points.
+ * \param determinants1D Determinant of the variable change of the element's edges
+ * evaluated at each Gauss points.
+ * \param nGP2D Number of Gauss point for integration.
+ * \param offsetInU Offset of the element in the u unknown vector.
  * \param nodesTagsPerEdge Node tags of the element, per edge.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
@@ -243,6 +254,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
  * \brief Add an entity to a certain 2D mesh (filling the required fields).
  * \param mesh The parent mesh.
  * \param entityHandle Entity dimTags to add.
+ * \param currentOffset Offset in u unknown vector.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
  */

@@ -1,10 +1,7 @@
 #include <iostream>
-#include <Eigen/Sparse>
 #include "buildS.hpp"
-#include "Mesh2D.hpp"
 
-// same comment as buildM for const Mesh2D& mesh: wtf
-void buildS(Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
+void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 			Eigen::SparseMatrix<double>& Sy)
 {
 
@@ -25,7 +22,7 @@ void buildS(Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
             Element2D element = entity.elements[elm];
 
             // get the properties of the current element type
-            ElementProperty elmProp = mesh.elementProperties2D[element.elementType2D];
+            ElementProperty elmProp = mesh.elementProperties2D.at(element.elementType2D);
             std::vector<std::vector<double>> pondFunc = elmProp.pondFunc;
 
             // matrices [Sx], [Sy] for the current element, represented as vectors

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cmath>
-#include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "Mesh2D.hpp"
 
@@ -19,7 +18,7 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 }
 
 
-bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u, 
+bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
 	const std::string& typeForm, unsigned int numNodes)
 {
@@ -38,7 +37,7 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	// loop over the entities
 	for(unsigned int ent = 0 ; ent < mesh.entities.size() ; ent++)
 	{
-		// current entity 
+		// current entity
 		Entity2D entity = mesh.entities[ent];
 
 		// loop over the elements
@@ -48,8 +47,8 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			Element2D element = entity.elements[elm];
 
 			// get the properties of the current element type
-            ElementProperty elmProp1D = mesh.elementProperties1D[element.elementType1D];
-            ElementProperty elmProp2D = mesh.elementProperties2D[element.elementType2D];
+            ElementProperty elmProp1D = mesh.elementProperties1D.at(element.elementType1D);
+            ElementProperty elmProp2D = mesh.elementProperties2D.at(element.elementType2D);
 
 			// partial rhs vector
 			Eigen::VectorXd partialI(elmProp2D.nSF); partialI.setZero();
@@ -65,7 +64,7 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			{
 				lala += elmProp1D.prodFunc[k][0];
 				lalb += elmProp1D.prodFunc[k][1];
-			}	
+			}
 
 			// compute the indices of the components
 			unsigned int nSigma = element.edges.size();
@@ -91,10 +90,10 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			// [TO DO] optmize x2
 			// loop, for each element, over the edges
 			for(unsigned int s = 0 ; s < nSigma ; ++s)
-			{	
+			{
 				// current edge
 				Edge edge = element.edges[s];
-				
+
 				// we first compute the matrix-vector product of dM with gx and gy
 				Eigen::VectorXd gx(elmProp2D.nSF), gy(elmProp2D.nSF);
 				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
@@ -115,7 +114,7 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 						gx[j] = 1;
 
 						gy[j] = 0;
-							
+
 						}
 						else
 						{
@@ -126,7 +125,7 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 						gy[j] = 0;
 
 						}
-					} 
+					}
 					else
 					{
 						// [TO DO]: neighbours in other entities
@@ -141,15 +140,15 @@ bool buildFlux(Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					}
 
 				}
-				
+
 				dMgx = dM[s]*gx;
 				dMgy = dM[s]*gy;
 
 				// then we apply a scalar product and sum the current contribution
 				// "+=" seems to work
-				// [TO DO]: constant determinant 
+				// [TO DO]: constant determinant
 				partialI += edge.determinant1D[0]*(
-					element.edgesNormal[s].first*dMgx 
+					element.edgesNormal[s].first*dMgx
 					+ element.edgesNormal[s].second*dMgy);
 
 			}

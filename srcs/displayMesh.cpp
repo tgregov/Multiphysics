@@ -1,5 +1,5 @@
 /**
- * \file dispalyMesh.cpp
+ * \file displayMesh.cpp
  * \brief Implementation of the required function to display a Mesh2D struct.
  */
 
@@ -63,7 +63,7 @@ void displayMesh(const Mesh2D& mesh)
 							<< std::endl
 							<< "\t\t\t- Det: " << edges[k].determinant1D[0]
 							<< std::endl
-							<< "\t\t\t- Edge in front: " << "element " 
+							<< "\t\t\t- Edge in front: " << "element "
 							<< std::get<0>(edges[k].edgeInFront)<<", "
 							<< "edge " << std::get<1>(edges[k].edgeInFront)<<", "
 							<< "inverted " << std::get<2>(edges[k].edgeInFront)
