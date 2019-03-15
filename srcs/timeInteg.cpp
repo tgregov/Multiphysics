@@ -36,6 +36,10 @@ Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 		std::cerr 	<< "The form  " << typeForm  << "does not exist !" << std::endl;
 	}
 
+	for(size_t i = 0; i < vectorF.size(); i++){
+		std::cout << "vF[" << i << "]: " <<  vectorF[i] << std::endl;
+	}
+
 	return vectorF;
 }
 
@@ -89,39 +93,77 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
     std::vector<std::string> names;
     gmsh::model::list(names);
     std::string modelName = names[0];
-    std::string dataType = "NodeData";
+    std::string dataType = "ElementNodeData";
+
+    // collect the element tags & their length
+    std::vector<int> elementTags;
+    std::vector<unsigned int> elementNumNodes;
+    for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
+    {
+        Entity2D entity = mesh.entities[ent];
+
+        for(size_t i = 0 ; i < entity.elements.size() ; ++i)
+        {
+        	Element2D element = entity.elements[i];
+        	elementTags.push_back(element.elementTag);
+        	// [TO DO]: only works for T3 :(
+        	elementNumNodes.push_back(element.edges.size());
+        }
+    }
 
 	// numerical integration
 	if(!scheme.compare("RK1")) // Runge-Kutta of order 1 (i.e. explicit Euler)
 	{
 		double t = 0.0;
 
-		std::vector<std::vector<double>> uDisplay(numNodes);
-
-		for(unsigned int count = 0; count < u.size(); ++count)
+		std::vector<std::vector<double>> uDisplay;
+		unsigned int index = 0;
+		
+		for(size_t count = 0 ; count < elementTags.size() ; ++count)
 		{
-			uDisplay[count].resize(1);
-			uDisplay[count][0] = u[count];
-		}
-		gmsh::view::addModelData(viewTag, 0, modelName, dataType, nodeTags,
-			uDisplay, t);
 
+			std::vector<double> temp;
+			for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
+			{
+				temp.push_back(u[index]);
+				++index;
+			}
+
+			uDisplay.push_back(temp);
+		}
+
+		gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
+			uDisplay, t, 1);
+
+		
 		for(unsigned int nbrStep = 1 ; nbrStep < nbrTimeSteps + 1 ; nbrStep++)
 		{
 
 			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
 
 			u += F(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, typeForm)*h;
+
+			for(size_t i = 0; i < u.size(); i++){
+				std::cout << "u after TS [" << i << "]: " <<  u[i] << std::endl;
+			}
+
+
 			t += h;
 
+			std::vector<std::vector<double>> uDisplay;
 
-			for(unsigned int count = 0; count < u.size(); ++count)
+			for(unsigned int count = 0; count < u.size()/3; ++count)
 			{
-				uDisplay[count].resize(1);
-				uDisplay[count][0] = u[count];
+			std::vector<double> temp;
+			temp.push_back(u[3*count]);
+			temp.push_back(u[3*count+1]);
+			temp.push_back(u[3*count+2]);
+
+			uDisplay.push_back(temp);
 			}
-			gmsh::view::addModelData(viewTag, nbrStep, modelName, dataType, nodeTags,
-				uDisplay, t);
+
+			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
+				uDisplay, t, 1);
 		}
 	} else if(!scheme.compare("RK4")){ // Runge-Kutta of order 4
 		/*

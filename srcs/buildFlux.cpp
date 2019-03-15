@@ -18,6 +18,20 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 }
 
 
+double valueAtBC(const std::string& bcName,
+					double x, double y, double z, double t)
+{
+	if(!bcName.compare("BC_Left"))
+	{
+		return sin(20*t);
+	}
+	else
+	{
+		return 0.0;
+	}
+}
+
+
 bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
 	const std::string& typeForm, unsigned int numNodes)
@@ -111,20 +125,29 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					{
 						if(elm == 1)
 						{
-                            gx[j] = 1;
-
-                            gy[j] = 0;
+							gx[j] = 1.0;
+							gy[j] = 0.0;
 						}
 						else
 						{
-                            gx[j] = -(factor*fx[element.offsetInU + j] + 0)/2
-                                    - C*element.edges[s].normal.first*(u[element.offsetInU + j] - 0)/2;
-
-                            gy[j] = 0;
+							gx[j] = 0.0;
+							gy[j] = 0.0;
 						}
+						/*
+						if(edge.nodeTags.first == )
+
+
+						gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
+								- C*element.edges[s].normal.first*(u[element.offsetInU + j] - valueAtBC())/2;
+
+						gy[j] = -(factor*fy[element.offsetInU + j] + fy[frontOffsetInU + frontJ])/2
+								- C*element.edges[s].normal.second*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
+						*/
 					}
 					else
 					{
+
+						// BUg
 						gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
 								- C*element.edges[s].normal.first*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
 
