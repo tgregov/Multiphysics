@@ -1,5 +1,5 @@
-#ifndef SOLVER_HPP_INCLUDED
-#define SOLVER_HPP_INCLUDED
+#ifndef Solver_hpp_included
+#define Solver_hpp_included
 
 #include <string>
 
@@ -26,4 +26,4 @@ struct SolverParams
  */
 bool loadSolverParams(const std::string& fileName, SolverParams& solverParams);
 
-#endif // SOLVER_HPP_INCLUDED
+#endif // Solver_hpp_included
