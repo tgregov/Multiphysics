@@ -233,7 +233,7 @@ static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagB
  * evaluated at each Gauss points.
  * \param determinants1D Determinant of the variable change of the element's edges
  * evaluated at each Gauss points.
- * \param nGP2D Number of Gauss point for integration.
+ * \param nGP1D Number of Gauss point for integration.
  * \param offsetInU Offset of the element in the u unknown vector.
  * \param nodesTagsPerEdge Node tags of the element, per edge.
  * \param intScheme Integration scheme for the basis functions evaluation.
@@ -243,7 +243,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         int eleType1D, std::vector<double> jacobians2D,
                         std::vector<double> determinants2D,
                         std::vector<double> determinants1D,
-                        unsigned int nGP2D, unsigned int offsetInU,
+                        unsigned int nGP1D, unsigned int offsetInU,
                         const std::vector<int>& nodesTagsPerEdge,
                         const std::vector<double>& elementBarycenter,
                         const std::string& intScheme,
@@ -265,7 +265,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
         std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i,
                                         nodesTagsPerEdge.begin() + 2*(i + 1));
 
-        std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP2D*i, determinants1D.begin() + nGP2D*(i + 1));
+        std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP1D*i, determinants1D.begin() + nGP1D*(i + 1));
 
         addEdge(element, nodesTagsEdge, std::move(determinantsEdge1D));
         if(entity.elements.size() != 0)
@@ -350,7 +350,9 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                                         determinants1D, dummyPoints1D,
                                         c);
 
-        unsigned int nGP2D = mesh.elementProperties2D[eleType2D].intPoints.size()/4;
+        unsigned int nGP2D = mesh.elementProperties2D[eleType2D].nGP;
+        unsigned int nGP1D = mesh.elementProperties1D[eleType1D].nGP;
+
         // TO DO: check
         // unsigned int nEdgePerNode = nodesTagPerEdge.size()/nodeTags.size();
         // std::cout << " ====> " << nEdgePerNode << std::endl;
@@ -366,8 +368,9 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                                             determinants2D.begin() + nGP2D*i,
                                             determinants2D.begin() + nGP2D*(1 + i));
             std::vector<double> determinantElement1D(
-                                            determinants1D.begin() + numNodes*nGP2D*i,
-                                            determinants1D.begin() + numNodes*nGP2D*(1 + i));
+                                            determinants1D.begin() + numNodes*nGP1D*i,
+                                            determinants1D.begin() + numNodes*nGP1D*(1 + i));
+
             std::vector<int> nodesTagPerEdgeElement(
                                 nodesTagPerEdge.begin() + 2*numNodes*i,
                                 nodesTagPerEdge.begin() + 2*numNodes*(i + 1));
@@ -378,7 +381,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                         std::move(jacobiansElement2D),
                         std::move(determinantsElement2D),
                         std::move(determinantElement1D),
-                        nGP2D, currentOffset,
+                        nGP1D, currentOffset,
                         nodesTagPerEdgeElement,
                         elementBarycenter, intScheme, basisFuncType,
                         mesh.nodesTagBoundary);
