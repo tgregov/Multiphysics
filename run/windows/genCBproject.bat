@@ -30,6 +30,7 @@ cd Release
 cmake ../../ -DCMAKE_BUILD_TYPE=Release  -G "CodeBlocks - MinGW Makefiles"
 copy "%GMSHSDK%\bin\gmsh-4.1.dll" "%cd%\bin"
 xcopy /E /I "../../Geometry" "%cd%\bin\Geometry"
+xcopy /E /I "../../Params" "%cd%\bin\Params"
 
 cd ../
 
@@ -38,6 +39,7 @@ cd Debug
 cmake ../../ -DCMAKE_BUILD_TYPE=Debug  -G "CodeBlocks - MinGW Makefiles"
 copy "%GMSHSDK%\bin\gmsh-4.1.dll" "%cd%\bin"
 xcopy /E /I "../../Geometry" "%cd%\bin\Geometry"
+xcopy /E /I "../../Params" "%cd%\bin\Params"
 
 cd ../../
 PAUSE
