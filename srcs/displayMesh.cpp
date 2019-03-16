@@ -61,8 +61,13 @@ void displayMesh(const Mesh2D& mesh)
 							<< "\t\t\t- Normal: (" << element.edges[k].normal.first
 							<< ", " << element.edges[k].normal.second << ")"
 							<< std::endl
-							<< "\t\t\t- Det: " << edges[k].determinant1D[0]
-							<< std::endl;
+							<< "\t\t\t- Det: ";
+                            for(unsigned int r = 0 ; r < edges[k].determinant1D.size() ; ++r)
+                            {
+                                    std::cout << edges[k].determinant1D[r]<<", ";
+                            }
+                            std::cout<<std::endl;
+
                 if(std::get<0>(edges[k].edgeInFront) != -1)
                 {
                     std::cout << "\t\t\t- Edge in front: " << "element "
