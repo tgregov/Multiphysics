@@ -21,7 +21,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     std::string temp;
     std::getline(paramFile, temp);
 
-    if(temp.find("Gauss") != 0)
+    if(temp.compare(0, 5, "Gauss") != 0) //improve check here
     {
         std::cerr << "Unexpected space integration type " << temp
                   << " in parameter file " << fileName << std::endl;
