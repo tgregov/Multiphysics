@@ -115,13 +115,9 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				// loop over the SF
 				for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
 				{
-                    // [TO DO]: neighbours in other entities
-                    unsigned int frontOffsetInU = entity.elements[std::get<0>(edge.edgeInFront)].offsetInU;
-                    unsigned int frontJ = std::get<1>(edge.edgeInFront);
-
 					// [TO DO]: only works for linear elements
 					// Boundary condition case
-					if (std::get<0>(edge.edgeInFront) == -1)
+					if (edge.edgeInFront.first == -1)
 					{
 						if(elm == 1)
 						{
@@ -146,6 +142,9 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					}
 					else
 					{
+					    // [TO DO]: neighbours in other entities
+                        unsigned int frontOffsetInU = entity.elements[edge.edgeInFront.first].offsetInU;
+                        unsigned int frontJ = edge.edgeInFront.second;
 
 						// BUg
 						gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
