@@ -51,27 +51,29 @@ void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 				double dydxi = element.jacobian2D[9*k + 1];
 				double dydeta = element.jacobian2D[9*k + 4];
 
+				// necessary for the quick computation of the inverse
+				double sign = element.jacobian2D[9*k + 8];
+
 				// N.B.: the dets simplify in the inverse of a 2x2 matrix !
-				double dxidx = dydeta;
-				double detadx = - dxdeta;
-				double dxidy = - dydxi;
-				double detady = dxdxi;
+				double dxidx 	= dydeta/sign;
+				double detadx 	= - dydxi/sign;
+				double dxidy 	= - dxdeta/sign;
+				double detady 	= dxdxi/sign;
 
 				for(unsigned int i = 0; i < elmProp.nSF; i++)
 				{
 					for(unsigned int j = 0; j < elmProp.nSF; j++)
 					{
 
-						double dljdxi = elmProp.basisFuncGrad
-							[k*elmProp.nSF*3 + j*3];
-						double dljdeta = elmProp.basisFuncGrad
-							[k*elmProp.nSF*3 + j*3 + 1];
+						double dlidxi = elmProp.basisFuncGrad
+							[k*elmProp.nSF*3 + i*3];
+						double dlideta = elmProp.basisFuncGrad
+							[k*elmProp.nSF*3 + i*3 + 1];
 
 						sxElm[i*elmProp.nSF + j]
-							+= pondFunc[k][i]*(dljdxi*dxidx + dljdeta*detadx);
+							+= pondFunc[k][j]*(dlidxi*dxidx + dlideta*detadx);
 						syElm[i*elmProp.nSF + j]
-							+= pondFunc[k][i]*(dljdxi*dxidy + dljdeta*detady);
-
+							+= pondFunc[k][j]*(dlidxi*dxidy + dlideta*detady);
 
 						// if we have calculated the sum for all the GP, we can
 						// save the computed components
