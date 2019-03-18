@@ -3,7 +3,7 @@
  * \brief Implementation of the required function to load a Mesh2D struct from file.
  */
 
- #include <algorithm>
+#include <algorithm>
 #include <iostream>
 #include <gmsh.h>
 #include "Mesh2D.hpp"
