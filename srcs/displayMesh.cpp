@@ -82,7 +82,15 @@ void displayMesh(const Mesh2D& mesh)
                                 << std::endl; //[TO DO]: put again inverted
                 }
                 else
-                    std::cout << "\t\t\t- BC: " << edges[k].bcName <<std::endl;
+                {
+                    if(edges[k].bcName.size() == 0)
+                    {
+                        std::cerr<<"BC node does not have a BC name !"<<std::endl;
+                        return;
+                    }
+                    else
+                        std::cout << "\t\t\t- BC: " << edges[k].bcName <<std::endl;
+                }
 			}
 		}
 	}

@@ -3,6 +3,7 @@
  * \brief Implementation of the required function to load a Mesh2D struct from file.
  */
 
+ #include <algorithm>
 #include <iostream>
 #include <gmsh.h>
 #include "Mesh2D.hpp"
@@ -216,20 +217,15 @@ static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagB
 {
     for(std::pair<std::string, std::vector<int>> nodeTagBoundary : nodesTagBoundaries)
     {
-        if(edge.nodeTags[0] == nodeTagBoundary.second[0]
-           && edge.nodeTags[1] == nodeTagBoundary.second[1])
+        for(unsigned int i = 0 ; i < nodesTagBoundaries.size()/2 ; ++i)
         {
-            edge.bcName=nodeTagBoundary.first;
+            if(std::count(nodeTagBoundary.second.begin(), nodeTagBoundary.second.end(), edge.nodeTags[0])
+               && std::count(nodeTagBoundary.second.begin(), nodeTagBoundary.second.end(), edge.nodeTags[1]))
+            {
+                edge.bcName=nodeTagBoundary.first;
 
-            return true;
-        }
-
-        else if(edge.nodeTags[0] == nodeTagBoundary.second[1]
-           && edge.nodeTags[1] == nodeTagBoundary.second[0])
-        {
-            edge.bcName=nodeTagBoundary.first;
-
-            return true;
+                return true;
+            }
         }
     }
     return false;
