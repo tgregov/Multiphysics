@@ -119,19 +119,20 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					unsigned int indexJ = element.offsetInU + edge.offsetInElm[j];
 					if (edge.edgeInFront.first == -1)
 					{
-						Eigen::VectorXd fx(1);
-						Eigen::VectorXd fy(1);
+						Eigen::VectorXd fxAtBC(1);
+						Eigen::VectorXd fyAtBC(1);
 						Eigen::VectorXd uAtBC(1);
 						uAtBC[0] = valueAtBC(edge.bcName, 
 							edge.nodeCoordinate[j].first, 
-							edge.nodeCoordinate[j].first, 
+							edge.nodeCoordinate[j].second, 
 							0.0, t);
+						
 						double dummyC;
-						flux(fx, fy, dummyC, uAtBC);
+						flux(fxAtBC, fyAtBC, dummyC, uAtBC);
 
-						gx[j] = -(factor*fx[indexJ] + fx[0])/2
+						gx[j] = -(factor*fx[indexJ] + fxAtBC[0])/2
 							- C*element.edges[s].normal.first*(u[indexJ] - uAtBC[0])/2;
-						gy[j] = -(factor*fy[indexJ] + fy[0])/2
+						gy[j] = -(factor*fy[indexJ] + fyAtBC[0])/2
 							- C*element.edges[s].normal.second*(u[indexJ] - uAtBC[0])/2;	
 					}
 					else
@@ -149,6 +150,7 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 							- C*element.edges[s].normal.first*(u[indexJ] - u[indexFrontJ])/2;
 						gy[j] = -(factor*fy[indexJ] + fy[indexFrontJ])/2
 							- C*element.edges[s].normal.second*(u[indexJ] - u[indexFrontJ])/2;
+						std::cout << "==========>" << gx[j] << std::endl;
 					}
 				}
 
