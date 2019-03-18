@@ -17,6 +17,17 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 	C = sqrt(a[0]*a[0] + a[1]*a[1]);
 }
 
+void flux(double& fx, double& fy, double u)
+{
+	// first basic flux: simple transport
+	std::vector<double> a;
+	a.push_back(1.0);
+	a.push_back(0.0);
+
+	fx = a[0]*u;
+	fy = a[1]*u;
+}
+
 
 double valueAtBC(const std::string& bcName,
 					double x, double y, double z, double t)
@@ -119,21 +130,18 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					unsigned int indexJ = element.offsetInU + edge.offsetInElm[j];
 					if (edge.edgeInFront.first == -1)
 					{
-						Eigen::VectorXd fxAtBC(1);
-						Eigen::VectorXd fyAtBC(1);
-						Eigen::VectorXd uAtBC(1);
-						uAtBC[0] = valueAtBC(edge.bcName, 
-							edge.nodeCoordinate[j].first, 
-							edge.nodeCoordinate[j].second, 
+						double fxAtBC, fyAtBC, uAtBC;
+						uAtBC = valueAtBC(edge.bcName,
+							edge.nodeCoordinate[j].first,
+							edge.nodeCoordinate[j].second,
 							0.0, t);
-						
-						double dummyC;
-						flux(fxAtBC, fyAtBC, dummyC, uAtBC);
 
-						gx[j] = -(factor*fx[indexJ] + fxAtBC[0])/2
-							- C*element.edges[s].normal.first*(u[indexJ] - uAtBC[0])/2;
-						gy[j] = -(factor*fy[indexJ] + fyAtBC[0])/2
-							- C*element.edges[s].normal.second*(u[indexJ] - uAtBC[0])/2;	
+						flux(fxAtBC, fyAtBC, uAtBC);
+
+						gx[j] = -(factor*fx[indexJ] + fxAtBC)/2
+							- C*element.edges[s].normal.first*(u[indexJ] - uAtBC)/2;
+						gy[j] = -(factor*fy[indexJ] + fyAtBC)/2
+							- C*element.edges[s].normal.second*(u[indexJ] - uAtBC)/2;
 					}
 					else
 					{
