@@ -67,6 +67,12 @@ void displayMesh(const Mesh2D& mesh)
                                     std::cout << edges[k].determinant1D[r]<<", ";
                             }
                             std::cout<<std::endl;
+                            for(unsigned int i = 0 ; i < edges[k].offsetInU.size() ; ++i)
+                            {
+                                std::cout 	<< "\t\t\t- OffsetInU of node (" << i << "): "
+                                            << edges[k].offsetInU[i]
+                                            << std::endl;
+                            }
 
                 if(edges[k].edgeInFront.first != -1)
                 {

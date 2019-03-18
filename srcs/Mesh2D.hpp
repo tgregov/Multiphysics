@@ -28,6 +28,8 @@ struct Edge
     std::vector<unsigned int> nodeIndexEdgeInFront;        /**< Track if the node are inverted in the edge in front*/
     std::string bcName; /**< Name of the physical group of the boundary condition
                              in which the edge is in (if any)*/
+
+    std::vector<unsigned int> offsetInU;
 };
 
 /**

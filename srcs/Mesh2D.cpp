@@ -98,15 +98,25 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
  * \param determinant1D Determinant associated with the edge of the element.
  */
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
-                    std::vector<double> determinant1D)
+                    std::vector<double> determinant1D, unsigned int nNodesElement)
 {
 
     Edge edge;
+    //Should be before movement !
+    for(unsigned int i = 0 ; i < nodesTagsEdge.size() ; ++i)
+    {
+        unsigned int offset = i+element.edges.size();
+        if(offset == nNodesElement)
+            offset = 0;
+
+        edge.offsetInU.push_back(offset);
+    }
+
     edge.nodeTags = std::move(nodesTagsEdge);
     edge.determinant1D = std::move(determinant1D);
-    element.edges.push_back(edge);
-    // we still need to add its tag & det
 
+    element.edges.push_back(edge);
+    // we still need to add its tag
 }
 
 
@@ -182,6 +192,8 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
                         entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
                         currentEdge.nodeIndexEdgeInFront.push_back(0);
                         currentEdge.nodeIndexEdgeInFront.push_back(1);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
                         found = true;
                     }
                     else if(entity.elements[elm].edges[k].nodeTags[0] == currentEdge.nodeTags[1]
@@ -191,6 +203,8 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
                         entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
                         currentEdge.nodeIndexEdgeInFront.push_back(1);
                         currentEdge.nodeIndexEdgeInFront.push_back(0);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
                         found = true;
                     }
             }
@@ -260,6 +274,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
     element.determinant2D = std::move(determinants2D);
     element.jacobian2D = std::move(jacobians2D);
+    unsigned int nNodesElement = nodesTagsPerEdge.size()/2; //Use elementProp map ?
 
     for(unsigned int i = 0 ; i < nodesTagsPerEdge.size()/2 ; ++i)
     {
@@ -268,7 +283,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
         std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP1D*i, determinants1D.begin() + nGP1D*(i + 1));
 
-        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D));
+        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), nNodesElement);
         if(entity.elements.size() != 0)
         {
             if(!IsBounbdary(nodesTagBoundary, element.edges[i]))
