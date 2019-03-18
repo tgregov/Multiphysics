@@ -29,7 +29,7 @@ struct Edge
     std::string bcName; /**< Name of the physical group of the boundary condition
                              in which the edge is in (if any)*/
 
-    std::vector<unsigned int> offsetInU;
+    std::vector<unsigned int> offsetInElm;
 };
 
 /**

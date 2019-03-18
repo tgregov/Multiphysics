@@ -23,7 +23,7 @@ double valueAtBC(const std::string& bcName,
 {
 	if(!bcName.compare("BC_Left"))
 	{
-		return sin(20*t);
+		return 0.01;//sin(20*t);
 	}
 	else
 	{
@@ -34,7 +34,7 @@ double valueAtBC(const std::string& bcName,
 
 bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
-	const std::string& typeForm, unsigned int numNodes)
+	const std::string& typeForm, unsigned int numNodes, double t)
 {
 
 	// the type of form is stored in factor
@@ -84,7 +84,6 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			unsigned int nSigma = element.edges.size();
 			std::vector<Eigen::SparseMatrix<double>> dM;
 
-
 			for(unsigned int s = 0 ; s < nSigma ; s++)
 			{
 				Eigen::SparseMatrix<double> dMs(elmProp2D.nSF, elmProp2D.nSF);
@@ -99,7 +98,6 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				dM.push_back(dMs);
 			}
 
-
 			// II. COMPUTE THE RHS
 			// [TO DO] optmize x2
 			// loop, for each element, over the edges
@@ -112,64 +110,45 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Eigen::VectorXd gx(elmProp2D.nSF), gy(elmProp2D.nSF);
 				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
 
-				// loop over the SF
-				for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
+				gx.setZero();
+				gy.setZero();
+
+				for(unsigned int j = 0 ; j < edge.offsetInElm.size() ; ++j)
 				{
-					
-					// TEMPORARY VERSION - ONLY WORKS FOR LINEAR ELEMENTS /!\
-					// check that the SF belongs to the edge
-					if(j == s || j == (s+1)%3)
+
+					unsigned int indexJ = element.offsetInU + edge.offsetInElm[j];
+					if (edge.edgeInFront.first == -1)
 					{
-						if (edge.edgeInFront.first == -1)
-						{
-							if(elm == 1)
-							{
-								gx[j] = 1.0;
-								gy[j] = 0.0;
-							}
-							else
-							{
-								gx[j] = 0.0;
-								gy[j] = 0.0;
-							}
-							/*
-							if(edge.nodeTags.first == )
+						Eigen::VectorXd fx(1);
+						Eigen::VectorXd fy(1);
+						Eigen::VectorXd uAtBC(1);
+						uAtBC[0] = valueAtBC(edge.bcName, 
+							edge.nodeCoordinate[j].first, 
+							edge.nodeCoordinate[j].first, 
+							0.0, t);
+						double dummyC;
+						flux(fx, fy, dummyC, uAtBC);
 
-
-							gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
-									- C*element.edges[s].normal.first*(u[element.offsetInU + j] - valueAtBC())/2;
-	
-							gy[j] = -(factor*fy[element.offsetInU + j] + fy[frontOffsetInU + frontJ])/2
-									- C*element.edges[s].normal.second*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
-							*/
-						} 
-						else
-						{
-					    	// [TO DO]: neighbours in other entities
-                        	unsigned int frontOffsetInU = entity.elements[edge.edgeInFront.first].offsetInU;
-                        	// the edge number (= number of precedent nodes) + the value within the edge
-                        	// @Imperator => it would be way easier to compute this in the following way:
-                        	//	we have a given edge, and in it a give node
-                        	// 	=> this node is linked to another node (in another edge, in another element)
-                        	// then, if we have an offestInU, it suffices to just put get that offset, then 
-                        	// we can just compute u[offestInU]...
-                        	// I think it might also be helpful in other areas of the code (e.g. we could probably 
-                        	// delete the offset parameter in the element)
-                        	// In any case, if would allow to make the link "node A" -> position in U in a easy way
-							unsigned int frontJ = edge.edgeInFront.second + edge.nodeIndexEdgeInFront[j];
-
-							gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
-								- C*element.edges[s].normal.first*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
-
-							gy[j] = -(factor*fy[element.offsetInU + j] + fy[frontOffsetInU + frontJ])/2
-								- C*element.edges[s].normal.second*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
-						}
+						gx[j] = -(factor*fx[indexJ] + fx[0])/2
+							- C*element.edges[s].normal.first*(u[indexJ] - uAtBC[0])/2;
+						gy[j] = -(factor*fy[indexJ] + fy[0])/2
+							- C*element.edges[s].normal.second*(u[indexJ] - uAtBC[0])/2;	
 					}
-					else 
+					else
 					{
-						// dummy values, the corresponding components in dM are null
-						gx[j] = 0.0;
-						gy[j] = 0.0;
+					    // [TO DO]: neighbours in other entities
+                       	unsigned int indexFrontJ = entity
+                       					.elements[edge.edgeInFront.first]
+                       					.offsetInU
+                       				+ entity
+                       					.elements[edge.edgeInFront.first]
+                       					.edges[edge.edgeInFront.second]
+                       					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
+
+						gx[j] = -(factor*fx[indexJ] + fx[indexFrontJ])/2
+							- C*element.edges[s].normal.first*(u[indexJ] - u[indexFrontJ])/2;
+						gy[j] = -(factor*fy[indexJ] + fy[indexFrontJ])/2
+							- C*element.edges[s].normal.second*(u[indexJ] - u[indexFrontJ])/2;
 					}
 				}
 

@@ -109,7 +109,7 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
         if(offset == nNodesElement)
             offset = 0;
 
-        edge.offsetInU.push_back(offset);
+        edge.offsetInElm.push_back(offset);
     }
 
     edge.nodeTags = std::move(nodesTagsEdge);
