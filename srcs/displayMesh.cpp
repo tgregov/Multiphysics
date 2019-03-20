@@ -80,6 +80,12 @@ void displayMesh(const Mesh2D& mesh)
                                 << edges[k].edgeInFront.first<<", "
                                 << "edge " << edges[k].edgeInFront.second<<", "
                                 << std::endl; //[TO DO]: put again inverted
+                    if((edges[k].normal.first != -entitity.elements[edges[k].edgeInFront.first].edges[edges[k].edgeInFront.second].normal.first)
+                       || (edges[k].normal.second != -entitity.elements[edges[k].edgeInFront.first].edges[edges[k].edgeInFront.second].normal.second))
+                    {
+                        std::cerr<<"Bug in the normal of that edge !"<<std::endl;
+                        return;
+                    }
                 }
                 else
                 {
