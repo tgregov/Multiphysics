@@ -97,6 +97,7 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
  * \param element The parent element.
  * \param nodesTagsEdge Node tags per edge of the element.
  * \param determinant1D Determinant associated with the edge of the element.
+ * \param nNodesElement Number of nodes of the parent element.
  */
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
                     std::vector<double> determinant1D, unsigned int nNodesElement)
@@ -122,10 +123,9 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
 
 
 /**
- * \brief Compute the outward normal of an edge
- * \param element the parent element
- * \param nodesTagsEdge Node tags per edge of the element
- * \param baryCenter  Barycenter of the parent element
+ * \brief Compute the outward normal of an edge.
+ * \param edge The edge of which the normal is computed.
+ * \param baryCenter  Barycenter of the parent element.
  */
 static void computeEdgeNormalCoord(Edge& edge,
                               const std::vector<double>& baryCenter)
@@ -170,10 +170,10 @@ static void computeEdgeNormalCoord(Edge& edge,
 }
 
 /**
- * \brief Compute the outward normal of an edge
+ * \brief Find the second position of the edge in the entity.
  * \param entity The parent entity.
  * \param currentEdge The edge of which you want to find the neighbor.
- * \param edgePos Index of the edge in his element.
+ * \param edgePos Index of the edge in its element.
  */
 static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int edgePos)
 {
@@ -213,6 +213,11 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
     }
 }
 
+/**
+ * \brief Check if an edge lies on a boundary (and which one)
+ * \param nodesTagBoundaries Map which stores the tags of the nodes belonging to a certain boundary.
+ * \param edge The edge which we check if it is a boundary.
+ */
 static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagBoundaries, Edge& edge)
 {
     for(std::pair<std::string, std::vector<int>> nodeTagBoundary : nodesTagBoundaries)
@@ -247,8 +252,9 @@ static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagB
  * \param nGP1D Number of Gauss point for integration.
  * \param offsetInU Offset of the element in the u unknown vector.
  * \param nodesTagsPerEdge Node tags of the element, per edge.
- * \param intScheme Integration scheme for the basis functions evaluation.
- * \param basisFuncType The type of basis function you will use.
+ * \param elementBarycenter Element barycenter coordinate.
+ * \param nodesTagBoundaries Map which stores the tags of the nodes belonging to a certain boundary.
+ * \param element2DProperty Structure containing informations about a certain element type.
  */
 static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         int eleType1D, std::vector<double> jacobians2D,
@@ -257,9 +263,8 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         unsigned int nGP1D, unsigned int offsetInU,
                         const std::vector<int>& nodesTagsPerEdge,
                         const std::vector<double>& elementBarycenter,
-                        const std::string& intScheme,
-                        const std::string& basisFuncType,
-                        const std::map<std::string, std::vector<int>>& nodesTagBoundary)
+                        const std::map<std::string, std::vector<int>>& nodesTagBoundaries,
+                        const ElementProperty& element2DProperty)
 {
     Element2D element;
     element.elementTag = elementTag;
@@ -270,7 +275,6 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
     element.determinant2D = std::move(determinants2D);
     element.jacobian2D = std::move(jacobians2D);
-    unsigned int nNodesElement = nodesTagsPerEdge.size()/2; //Use elementProp map ?
 
     for(unsigned int i = 0 ; i < nodesTagsPerEdge.size()/2 ; ++i)
     {
@@ -279,16 +283,16 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
         std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP1D*i, determinants1D.begin() + nGP1D*(i + 1));
 
-        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), nNodesElement);
+        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), element2DProperty.numNodes);
         if(entity.elements.size() != 0)
         {
-            if(!IsBounbdary(nodesTagBoundary, element.edges[i]))
+            if(!IsBounbdary(nodesTagBoundaries, element.edges[i]))
                 findInFrontEdge(entity, element.edges[i], i);
 
         }
         else
         {
-            IsBounbdary(nodesTagBoundary, element.edges[i]);
+            IsBounbdary(nodesTagBoundaries, element.edges[i]);
         }
 
         computeEdgeNormalCoord(element.edges[i], elementBarycenter);
@@ -396,8 +400,9 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                         std::move(determinantElement1D),
                         nGP1D, currentOffset,
                         nodesTagPerEdgeElement,
-                        elementBarycenter, intScheme, basisFuncType,
-                        mesh.nodesTagBoundary);
+                        elementBarycenter,
+                        mesh.nodesTagBoundary,
+                        mesh.elementProperties2D[eleType2D]);
 
             currentOffset += nodesTagPerEdgeElement.size()/2;
         }
