@@ -19,7 +19,7 @@ Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 
 	// compute the right-hand side of the master equation (phi or psi)
 	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
- 	buildFlux(mesh, I, u, fx, fy, C, typeForm, numNodes);
+ 	buildFlux(mesh, I, u, fx, fy, C, typeForm, numNodes, t);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(numNodes);

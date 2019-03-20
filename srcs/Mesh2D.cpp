@@ -3,6 +3,7 @@
  * \brief Implementation of the required function to load a Mesh2D struct from file.
  */
 
+#include <algorithm>
 #include <iostream>
 #include <gmsh.h>
 #include "Mesh2D.hpp"
@@ -98,16 +99,25 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
  * \param determinant1D Determinant associated with the edge of the element.
  */
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
-                    std::vector<double> determinant1D)
+                    std::vector<double> determinant1D, unsigned int nNodesElement)
 {
 
     Edge edge;
-    edge.nodeTags.first = nodesTagsEdge[0];
-    edge.nodeTags.second = nodesTagsEdge[1];
-    edge.determinant1D = std::move(determinant1D);
-    element.edges.push_back(edge);
-    // we still need to add its tag & det
+    //Should be before movement !
+    for(unsigned int i = 0 ; i < nodesTagsEdge.size() ; ++i)
+    {
+        unsigned int offset = i+element.edges.size();
+        if(offset == nNodesElement)
+            offset = 0;
 
+        edge.offsetInElm.push_back(offset);
+    }
+
+    edge.nodeTags = std::move(nodesTagsEdge);
+    edge.determinant1D = std::move(determinant1D);
+
+    element.edges.push_back(edge);
+    // we still need to add its tag
 }
 
 
@@ -123,12 +133,12 @@ static void computeEdgeNormalCoord(Edge& edge,
     std::pair<double, double> normal;
 
     std::vector<double> coord1, dummyParametricCoord1;
-    gmsh::model::mesh::getNode(edge.nodeTags.first, coord1,
+    gmsh::model::mesh::getNode(edge.nodeTags[0], coord1,
                                             dummyParametricCoord1);
 
     // get the coordinates of the second node
     std::vector<double> coord2, dummyParametricCoord2;
-    gmsh::model::mesh::getNode(edge.nodeTags.second, coord2,
+    gmsh::model::mesh::getNode(edge.nodeTags[1], coord2,
                                 dummyParametricCoord2);
 
     // compute the normal
@@ -155,10 +165,8 @@ static void computeEdgeNormalCoord(Edge& edge,
     normal.second = ny/norm;
 
     edge.normal = normal;
-    edge.nodeCoordinate.first.first = coord1[0];
-    edge.nodeCoordinate.first.second = coord1[1];
-    edge.nodeCoordinate.second.first = coord2[0];
-    edge.nodeCoordinate.second.second = coord2[1];
+    edge.nodeCoordinate.push_back(std::pair<double, double>(coord1[0], coord1[1]));
+    edge.nodeCoordinate.push_back(std::pair<double, double>(coord2[0], coord2[1]));
 }
 
 /**
@@ -178,18 +186,26 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
         {
             for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
             {
-                    if(entity.elements[elm].edges[k].nodeTags.first == currentEdge.nodeTags.first
-                       && entity.elements[elm].edges[k].nodeTags.second == currentEdge.nodeTags.second)
+                    if(entity.elements[elm].edges[k].nodeTags[0] == currentEdge.nodeTags[0]
+                       && entity.elements[elm].edges[k].nodeTags[1] == currentEdge.nodeTags[1])
                     {
-                        currentEdge.edgeInFront =  std::make_tuple(elm, k, false);
-                        entity.elements[elm].edges[k].edgeInFront = std::make_tuple(elVecSize, edgePos, false);
+                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
+                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
+                        currentEdge.nodeIndexEdgeInFront.push_back(0);
+                        currentEdge.nodeIndexEdgeInFront.push_back(1);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
                         found = true;
                     }
-                    else if(entity.elements[elm].edges[k].nodeTags.first == currentEdge.nodeTags.second
-                       && entity.elements[elm].edges[k].nodeTags.second == currentEdge.nodeTags.first)
+                    else if(entity.elements[elm].edges[k].nodeTags[0] == currentEdge.nodeTags[1]
+                       && entity.elements[elm].edges[k].nodeTags[1] == currentEdge.nodeTags[0])
                     {
-                        currentEdge.edgeInFront =  std::make_tuple(elm, k, true);
-                        entity.elements[elm].edges[k].edgeInFront = std::make_tuple(elVecSize, edgePos, true);
+                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
+                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
+                        currentEdge.nodeIndexEdgeInFront.push_back(1);
+                        currentEdge.nodeIndexEdgeInFront.push_back(0);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
                         found = true;
                     }
             }
@@ -201,20 +217,15 @@ static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagB
 {
     for(std::pair<std::string, std::vector<int>> nodeTagBoundary : nodesTagBoundaries)
     {
-        if(edge.nodeTags.first == nodeTagBoundary.second[0]
-           && edge.nodeTags.second == nodeTagBoundary.second[1])
+        for(unsigned int i = 0 ; i < nodesTagBoundaries.size()/2 ; ++i)
         {
-            edge.bcName=nodeTagBoundary.first;
+            if(std::count(nodeTagBoundary.second.begin(), nodeTagBoundary.second.end(), edge.nodeTags[0])
+               && std::count(nodeTagBoundary.second.begin(), nodeTagBoundary.second.end(), edge.nodeTags[1]))
+            {
+                edge.bcName=nodeTagBoundary.first;
 
-            return true;
-        }
-
-        else if(edge.nodeTags.first == nodeTagBoundary.second[1]
-           && edge.nodeTags.second == nodeTagBoundary.second[0])
-        {
-            edge.bcName=nodeTagBoundary.first;
-
-            return true;
+                return true;
+            }
         }
     }
     return false;
@@ -259,6 +270,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
     element.determinant2D = std::move(determinants2D);
     element.jacobian2D = std::move(jacobians2D);
+    unsigned int nNodesElement = nodesTagsPerEdge.size()/2; //Use elementProp map ?
 
     for(unsigned int i = 0 ; i < nodesTagsPerEdge.size()/2 ; ++i)
     {
@@ -267,7 +279,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
         std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP1D*i, determinants1D.begin() + nGP1D*(i + 1));
 
-        addEdge(element, nodesTagsEdge, std::move(determinantsEdge1D));
+        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), nNodesElement);
         if(entity.elements.size() != 0)
         {
             if(!IsBounbdary(nodesTagBoundary, element.edges[i]))
@@ -371,6 +383,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                                             determinants1D.begin() + numNodes*nGP1D*i,
                                             determinants1D.begin() + numNodes*nGP1D*(1 + i));
 
+            //[TO DO]: generalize for non-linear element
             std::vector<int> nodesTagPerEdgeElement(
                                 nodesTagPerEdge.begin() + 2*numNodes*i,
                                 nodesTagPerEdge.begin() + 2*numNodes*(i + 1));

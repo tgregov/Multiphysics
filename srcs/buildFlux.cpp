@@ -17,13 +17,24 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 	C = sqrt(a[0]*a[0] + a[1]*a[1]);
 }
 
+void flux(double& fx, double& fy, double u)
+{
+	// first basic flux: simple transport
+	std::vector<double> a;
+	a.push_back(1.0);
+	a.push_back(0.0);
+
+	fx = a[0]*u;
+	fy = a[1]*u;
+}
+
 
 double valueAtBC(const std::string& bcName,
 					double x, double y, double z, double t)
 {
 	if(!bcName.compare("BC_Left"))
 	{
-		return sin(20*t);
+		return 0.01;//sin(20*t);
 	}
 	else
 	{
@@ -34,7 +45,7 @@ double valueAtBC(const std::string& bcName,
 
 bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
-	const std::string& typeForm, unsigned int numNodes)
+	const std::string& typeForm, unsigned int numNodes, double t)
 {
 
 	// the type of form is stored in factor
@@ -84,7 +95,6 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			unsigned int nSigma = element.edges.size();
 			std::vector<Eigen::SparseMatrix<double>> dM;
 
-
 			for(unsigned int s = 0 ; s < nSigma ; s++)
 			{
 				Eigen::SparseMatrix<double> dMs(elmProp2D.nSF, elmProp2D.nSF);
@@ -99,7 +109,6 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				dM.push_back(dMs);
 			}
 
-
 			// II. COMPUTE THE RHS
 			// [TO DO] optmize x2
 			// loop, for each element, over the edges
@@ -112,47 +121,44 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Eigen::VectorXd gx(elmProp2D.nSF), gy(elmProp2D.nSF);
 				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
 
-				// loop over the SF
-				for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
+				gx.setZero();
+				gy.setZero();
+
+				for(unsigned int j = 0 ; j < edge.offsetInElm.size() ; ++j)
 				{
-                    // [TO DO]: neighbours in other entities
-                    unsigned int frontOffsetInU = entity.elements[std::get<0>(edge.edgeInFront)].offsetInU;
-                    unsigned int frontJ = std::get<1>(edge.edgeInFront);
 
-					// [TO DO]: only works for linear elements
-					// Boundary condition case
-					if (std::get<0>(edge.edgeInFront) == -1)
+					unsigned int indexJ = element.offsetInU + edge.offsetInElm[j];
+					if (edge.edgeInFront.first == -1)
 					{
-						if(elm == 1)
-						{
-							gx[j] = 1.0;
-							gy[j] = 0.0;
-						}
-						else
-						{
-							gx[j] = 0.0;
-							gy[j] = 0.0;
-						}
-						/*
-						if(edge.nodeTags.first == )
+						double fxAtBC, fyAtBC, uAtBC;
+						uAtBC = valueAtBC(edge.bcName,
+							edge.nodeCoordinate[j].first,
+							edge.nodeCoordinate[j].second,
+							0.0, t);
 
+						flux(fxAtBC, fyAtBC, uAtBC);
 
-						gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
-								- C*element.edges[s].normal.first*(u[element.offsetInU + j] - valueAtBC())/2;
-
-						gy[j] = -(factor*fy[element.offsetInU + j] + fy[frontOffsetInU + frontJ])/2
-								- C*element.edges[s].normal.second*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
-						*/
+						gx[j] = -(factor*fx[indexJ] + fxAtBC)/2
+							- C*element.edges[s].normal.first*(u[indexJ] - uAtBC)/2;
+						gy[j] = -(factor*fy[indexJ] + fyAtBC)/2
+							- C*element.edges[s].normal.second*(u[indexJ] - uAtBC)/2;
 					}
 					else
 					{
+					    // [TO DO]: neighbours in other entities
+                       	unsigned int indexFrontJ = entity
+                       					.elements[edge.edgeInFront.first]
+                       					.offsetInU
+                       				+ entity
+                       					.elements[edge.edgeInFront.first]
+                       					.edges[edge.edgeInFront.second]
+                       					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
 
-						// BUg
-						gx[j] = -(factor*fx[element.offsetInU + j] + fx[frontOffsetInU + frontJ])/2
-								- C*element.edges[s].normal.first*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
-
-						gy[j] = -(factor*fy[element.offsetInU + j] + fy[frontOffsetInU + frontJ])/2
-								- C*element.edges[s].normal.second*(u[element.offsetInU + j] - u[frontOffsetInU + frontJ])/2;
+						gx[j] = -(factor*fx[indexJ] + fx[indexFrontJ])/2
+							- C*element.edges[s].normal.first*(u[indexJ] - u[indexFrontJ])/2;
+						gy[j] = -(factor*fy[indexJ] + fy[indexFrontJ])/2
+							- C*element.edges[s].normal.second*(u[indexJ] - u[indexFrontJ])/2;
+						std::cout << "==========>" << gx[j] << std::endl;
 					}
 				}
 

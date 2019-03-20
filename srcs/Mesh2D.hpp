@@ -17,13 +17,19 @@ struct Edge
     std::vector<double> determinant1D;  /**< Determinant of the variable change for Gauss integration,
                                             evaluated at each Gauss point*/
 
-    std::pair<int, int> nodeTags;       /**< Node tags for each point of the edge*/
-    std::tuple<int, int, bool> edgeInFront =  std::make_tuple(-1, -1, true); //std::optional :cry:
+    std::vector<int> nodeTags;          /**< Node tags for each point of the edge*/
+    std::vector<std::pair<double, double>> nodeCoordinate; /**< 2D coordinate of the node*/
+    std::pair<double, double> normal;   /**< Edge normal point outwards the element*/
 
-    std::pair<double, double> normal;     /**< Edge normal point outwards the element*/
-    std::pair<std::pair<double, double>, std::pair<double, double>> nodeCoordinate;
+    //std::optional :cry:
+    std::pair<unsigned int, unsigned int> edgeInFront = std::pair<unsigned int, unsigned>(-1, -1); /**<
+                                                        Element index and edge index to find the
+                                                        second location of this edge in the mesh*/
+    std::vector<unsigned int> nodeIndexEdgeInFront;        /**< Track if the node are inverted in the edge in front*/
+    std::string bcName; /**< Name of the physical group of the boundary condition
+                             in which the edge is in (if any)*/
 
-    std::string bcName; //std::optional :cry:
+    std::vector<unsigned int> offsetInElm;
 };
 
 /**

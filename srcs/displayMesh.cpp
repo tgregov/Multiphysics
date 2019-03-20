@@ -54,9 +54,9 @@ void displayMesh(const Mesh2D& mesh)
 			for(unsigned int k = 0 ; k < edges.size() ; ++k)
 			{
 				std::cout	<< "\t\t- [Edge (" << k << ")]:" << std::endl
-							<< "\t\t\t- Tag A: " << edges[k].nodeTags.first
+							<< "\t\t\t- Tag A: " << edges[k].nodeTags[0]
 							<< std::endl
-							<< "\t\t\t- Tag B: " << edges[k].nodeTags.second
+							<< "\t\t\t- Tag B: " << edges[k].nodeTags[1]
 							<< std::endl
 							<< "\t\t\t- Normal: (" << element.edges[k].normal.first
 							<< ", " << element.edges[k].normal.second << ")"
@@ -67,17 +67,30 @@ void displayMesh(const Mesh2D& mesh)
                                     std::cout << edges[k].determinant1D[r]<<", ";
                             }
                             std::cout<<std::endl;
+                            for(unsigned int i = 0 ; i < edges[k].offsetInElm.size() ; ++i)
+                            {
+                                std::cout 	<< "\t\t\t- OffsetInElm of node (" << i << "): "
+                                            << edges[k].offsetInElm[i]
+                                            << std::endl;
+                            }
 
-                if(std::get<0>(edges[k].edgeInFront) != -1)
+                if(edges[k].edgeInFront.first != -1)
                 {
                     std::cout << "\t\t\t- Edge in front: " << "element "
-                                << std::get<0>(edges[k].edgeInFront)<<", "
-                                << "edge " << std::get<1>(edges[k].edgeInFront)<<", "
-                                << "inverted " << std::get<2>(edges[k].edgeInFront)
-                                << std::endl;
+                                << edges[k].edgeInFront.first<<", "
+                                << "edge " << edges[k].edgeInFront.second<<", "
+                                << std::endl; //[TO DO]: put again inverted
                 }
                 else
-                    std::cout << "\t\t\t- BC: " << edges[k].bcName <<std::endl;
+                {
+                    if(edges[k].bcName.size() == 0)
+                    {
+                        std::cerr<<"BC node does not have a BC name !"<<std::endl;
+                        return;
+                    }
+                    else
+                        std::cout << "\t\t\t- BC: " << edges[k].bcName <<std::endl;
+                }
 			}
 		}
 	}
