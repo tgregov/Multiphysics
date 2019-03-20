@@ -7,25 +7,23 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 			const Eigen::VectorXd& u)
 {
 	// first basic flux: simple transport
-	std::vector<double> a;
-	a.push_back(1.0);
-	a.push_back(0.0);
+	double ax = 1.0;
+	double ay = 0.0;
 
-	fx = a[0]*u;
-	fy = a[1]*u;
+	fx = ax*u;
+	fy = ay*u;
 
-	C = sqrt(a[0]*a[0] + a[1]*a[1]);
+	C = sqrt(ax*ax + ay*ay);
 }
 
 void flux(double& fx, double& fy, double u)
 {
 	// first basic flux: simple transport
-	std::vector<double> a;
-	a.push_back(1.0);
-	a.push_back(0.0);
+	double ax = 1.0;
+	double ay = 0.0;
 
-	fx = a[0]*u;
-	fy = a[1]*u;
+	fx = ax*u;
+	fy = ay*u;
 }
 
 
@@ -34,7 +32,7 @@ double valueAtBC(const std::string& bcName,
 {
 	if(!bcName.compare("BC_Left"))
 	{
-		return 0.01;//sin(20*t);
+		return exp(-(t-2)*(t-2)/0.1);
 	}
 	else
 	{
@@ -45,19 +43,10 @@ double valueAtBC(const std::string& bcName,
 
 bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
-	const std::string& typeForm, unsigned int numNodes, double t)
+	double factor, unsigned int numNodes, double t)
 {
 
 	// the type of form is stored in factor
-	float factor;
-	if(!typeForm.compare("strong")) 	factor = -1.0;
-	else if(!typeForm.compare("weak"))	factor = +1.0;
-	else
-	{
-		std::cerr 	<< "The form  " << typeForm  << "does not exist !"
-					<< std::endl;
-		return false;
-	}
 
 	// loop over the entities
 	for(unsigned int ent = 0 ; ent < mesh.entities.size() ; ent++)
@@ -136,11 +125,11 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 							edge.nodeCoordinate[j].second,
 							0.0, t);
 
-						flux(fxAtBC, fyAtBC, uAtBC);
+                        flux(fxAtBC, fyAtBC, uAtBC);
 
-						gx[j] = -(factor*fx[indexJ] + fxAtBC)/2
+						gx[edge.offsetInElm[j]] += -(factor*fx[indexJ] + fxAtBC)/2
 							- C*element.edges[s].normal.first*(u[indexJ] - uAtBC)/2;
-						gy[j] = -(factor*fy[indexJ] + fyAtBC)/2
+						gy[edge.offsetInElm[j]] += -(factor*fy[indexJ] + fyAtBC)/2
 							- C*element.edges[s].normal.second*(u[indexJ] - uAtBC)/2;
 					}
 					else
@@ -154,9 +143,9 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                        					.edges[edge.edgeInFront.second]
                        					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
 
-						gx[j] = -(factor*fx[indexJ] + fx[indexFrontJ])/2
+						gx[edge.offsetInElm[j]] += -(factor*fx[indexJ] + fx[indexFrontJ])/2
 							- C*element.edges[s].normal.first*(u[indexJ] - u[indexFrontJ])/2;
-						gy[j] = -(factor*fy[indexJ] + fy[indexFrontJ])/2
+						gy[edge.offsetInElm[j]] += -(factor*fy[indexJ] + fy[indexFrontJ])/2
 							- C*element.edges[s].normal.second*(u[indexJ] - u[indexFrontJ])/2;
 						std::cout << "==========>" << gx[j] << std::endl;
 					}
