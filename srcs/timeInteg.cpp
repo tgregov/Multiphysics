@@ -137,107 +137,83 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	Eigen::SparseMatrix<double> invM(numNodes, numNodes);
 	invM = solverM.solve(eye);
 
-  	// initial condition [TO DO]: use param.dat and bc struct
-  	Eigen::VectorXd u(numNodes); u.setZero();
+	// initial condition [TO DO]: use param.dat and bc struct
+	Eigen::VectorXd u(numNodes); u.setZero();
 
-  	// vectors of physical flux
-  	Eigen::VectorXd fx(numNodes);
-  	Eigen::VectorXd fy(numNodes);
+	// vectors of physical flux
+	Eigen::VectorXd fx(numNodes);
+	Eigen::VectorXd fy(numNodes);
 
-  	// launch gmsh
-  	gmsh::initialize();
-  	gmsh::option::setNumber("General.Terminal", 1);
-  	gmsh::open(fileName);
-  	int viewTag = gmsh::view::add("results");
-  	std::vector<std::string> names;
-  	gmsh::model::list(names);
-  	std::string modelName = names[0];
-  	std::string dataType = "ElementNodeData";
+	// launch gmsh
+	gmsh::initialize();
+	gmsh::option::setNumber("General.Terminal", 1);
+	gmsh::open(fileName);
+	int viewTag = gmsh::view::add("results");
+	std::vector<std::string> names;
+	gmsh::model::list(names);
+	std::string modelName = names[0];
+	std::string dataType = "ElementNodeData";
 
-  	// collect the element tags & their length
-  	std::vector<int> elementTags;
-  	std::vector<unsigned int> elementNumNodes;
-  	for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
-  	{
-      	Entity2D entity = mesh.entities[ent];
-
-      	for(size_t i = 0 ; i < entity.elements.size() ; ++i)
-      	{
-       	 	Element2D element = entity.elements[i];
-        	elementTags.push_back(element.elementTag);
-        	// [TO DO]: only works for T3 :(
-        	elementNumNodes.push_back(element.edges.size());
-      	}
-  	}
-
-  	double t = 0.0;
-
-  	//write initial condition
-  	std::vector<std::vector<double>> uDisplay;
-  	unsigned int index = 0;
-
-  	for(size_t count = 0 ; count < elementTags.size() ; ++count)
-  	{
-
-      	std::vector<double> temp;
-      	for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
-      	{
-          	temp.push_back(u[index]);
-          	++index;
-      	}
-
-      	uDisplay.push_back(temp);
-  	}
-
-  	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-      	uDisplay, t, 1);
-
-	// numerical integration
-	if(solverParams.timeIntType == "RK1") // Runge-Kutta of order 1 (i.e. explicit Euler)
+	// collect the element tags & their length
+	std::vector<int> elementTags;
+	std::vector<unsigned int> elementNumNodes;
+	for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
 	{
-		for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
-			nbrStep++)
+		Entity2D entity = mesh.entities[ent];
+
+		for(size_t i = 0 ; i < entity.elements.size() ; ++i)
 		{
-			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
-
-			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, 
-					solverParams.boundaryConditions)*solverParams.timeStep;
-
-			/*
-			for(size_t i = 0; i < u.size(); i++){
-				std::cout << "u after TS [" << i << "]: " <<  u[i] << std::endl;
-			}
-			*/
-
-			t += solverParams.timeStep;
-
-			std::vector<std::vector<double>> uDisplay;
-
-			for(unsigned int count = 0; count < u.size()/3; ++count)
-			{
-				std::vector<double> temp;
-				temp.push_back(u[3*count]);
-				temp.push_back(u[3*count+1]);
-				temp.push_back(u[3*count+2]);
-				uDisplay.push_back(temp);
-			}
-
-			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType,
-				elementTags, uDisplay, t, 1);
+			Element2D element = entity.elements[i];
+			elementTags.push_back(element.elementTag);
+			// [TO DO]: only works for T3 :(
+			elementNumNodes.push_back(element.edges.size());
 		}
 	}
-	else if(solverParams.timeIntType == "RK4") // Runge-Kutta of order 4
+
+	double t = 0.0;
+
+	//write initial condition
+	std::vector<std::vector<double>> uDisplay;
+	unsigned int index = 0;
+
+	for(size_t count = 0 ; count < elementTags.size() ; ++count)
 	{
-		// Temporary vectors necessary for the RK4
-		Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes);
-		Eigen::VectorXd temp(numNodes);
 
-		for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
-			nbrStep++)
+		std::vector<double> temp;
+		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
-			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
+			temp.push_back(u[index]);
+			++index;
+		}
+
+		uDisplay.push_back(temp);
+	}
+
+	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
+		uDisplay, t, 1);
 
 
+	// temporary vectors (only for RK4, but I don't want to define them at each time 
+	// iteration)
+	Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes), 
+	temp(numNodes);
+
+	// numerical integration
+	for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
+		nbrStep++)
+	{
+
+		std::cout << "[Time step: " << nbrStep << "]" << std::endl;
+
+		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
+		{
+			
+			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, 
+					solverParams.boundaryConditions)*solverParams.timeStep;
+		}
+		else if(solverParams.timeIntType == "RK4")
+		{
+			// could be optimized
 			k1 = usedF(t, u, fx, fy, invM, Sx, Sy, 
 						numNodes, mesh, solverParams.boundaryConditions);
 
@@ -254,22 +230,26 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			u += (k1 + 2*k2 + 2*k3 + k4)*solverParams.timeStep/6;
-			t += solverParams.timeStep;
 
-			std::vector<std::vector<double>> uDisplay;
-
-			for(unsigned int count = 0; count < u.size()/3; ++count)
-			{
-				std::vector<double> temp;
-				temp.push_back(u[3*count]);
-				temp.push_back(u[3*count+1]);
-				temp.push_back(u[3*count+2]);
-				uDisplay.push_back(temp);
-			}
-
-			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType,
-				elementTags, uDisplay, t, 1);
 		}
+
+		// add time step
+		t += solverParams.timeStep;
+
+		// display the results
+		std::vector<std::vector<double>> uDisplay;
+
+		for(unsigned int count = 0; count < u.size()/3; ++count)
+		{
+			std::vector<double> temp;
+			temp.push_back(u[3*count]);
+			temp.push_back(u[3*count+1]);
+			temp.push_back(u[3*count+2]);
+			uDisplay.push_back(temp);
+		}
+
+		gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
+			uDisplay, t, 1);
 	}
 
 	// write the results & finalize
