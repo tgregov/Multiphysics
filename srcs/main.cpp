@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <Eigen/Sparse>
+#include <Eigen/Core>
 #include "Mesh2D.hpp"
 #include "displayMesh.hpp"
 #include "timeInteg.hpp"
@@ -26,11 +26,13 @@ int main(int argc, char **argv)
         std::cerr   << "Something went wrong when reading mesh file: "
                     << argv[1] << std::endl;
         return -1;
-    }
+   }
 
-    displayMesh(mesh);
-    if(!timeInteg(mesh, solverParams.timeIntType, solverParams.timeStep,
-                  solverParams.nbrTimeSteps, solverParams.solverType, std::string(argv[1])))
+    omp_set_num_threads(2);
+    Eigen::setNbThreads(2);
+
+    //displayMesh(mesh);
+    if(!timeInteg(mesh, solverParams, std::string(argv[1])))
     {
         std::cerr   << "Something went wrong when time integrating" << std::endl;
         return -1;

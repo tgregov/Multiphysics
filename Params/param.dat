@@ -2,5 +2,17 @@ Gauss3
 Lagrange
 RK1
 strong
-300
+400
 0.01
+BC_Left
+	gaussian
+	1,1,0.1
+BC_Right
+	constant
+	0
+BC_Up
+	constant
+	0
+BC_Down
+	constant
+	0
