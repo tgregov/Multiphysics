@@ -37,7 +37,7 @@ Automatically build the code:
 Run the code:
 ```bash
 cd ..
-./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh
+./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh ./Params/param.dat
 ```
 
 

@@ -2,7 +2,7 @@
 #define buildM_hpp
 
 #include <Eigen/Sparse>
-#include "Mesh2D.hpp"
+#include "../mesh/Mesh2D.hpp"
 
 
 /**

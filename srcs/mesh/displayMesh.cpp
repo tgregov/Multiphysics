@@ -10,14 +10,18 @@
 
 void displayMesh(const Mesh2D& mesh)
 {
-	// display the information about the entities
+
+	// display the number of entities
 	std::cout 	<< "Number of entites in the mesh: " << mesh.entities.size()
 				<< std::endl;
 
+	// display the information of each entity
 	for(unsigned int i = 0 ; i < mesh.entities.size() ; ++i)
 	{
+
 		Entity2D entitity =  mesh.entities[i];
 
+		// general information about the current entity 
 		std::cout 	<< "[Entity (" << i << ")]:" << std::endl
 					<< "\t- Tag of the 2D entity: " << entitity.entityTag2D
 					<< std::endl
@@ -27,9 +31,11 @@ void displayMesh(const Mesh2D& mesh)
 		std::cout 	<< "\t- Number of 2D elements: "
 					<<  entitity.elements.size() << std::endl;
 
+		// display the information about each element
 		for(unsigned int j = 0 ; j < entitity.elements.size() ; ++j)
 		{
 
+			// display the information about the current element
 			Element2D element = mesh.entities[i].elements[j];
 			std::cout 	<< "\t[Element (" << j << ")]:" << std::endl
 						<< "\t\t- Tag: " << element.elementTag << std::endl
@@ -50,6 +56,7 @@ void displayMesh(const Mesh2D& mesh)
 
 			}
 
+			// display the information about the edges
 			std::vector<Edge> edges = element.edges;
 			for(unsigned int k = 0 ; k < edges.size() ; ++k)
 			{
@@ -62,28 +69,40 @@ void displayMesh(const Mesh2D& mesh)
 							<< ", " << element.edges[k].normal.second << ")"
 							<< std::endl
 							<< "\t\t\t- Det: ";
-                            for(unsigned int r = 0 ; r < edges[k].determinant1D.size() ; ++r)
-                            {
-                                    std::cout << edges[k].determinant1D[r]<<", ";
-                            }
-                            std::cout<<std::endl;
-                            for(unsigned int i = 0 ; i < edges[k].offsetInElm.size() ; ++i)
-                            {
-                                std::cout 	<< "\t\t\t- OffsetInElm of node (" << i << "): "
-                                            << edges[k].offsetInElm[i]
-                                            << std::endl;
-                            }
+				for(unsigned int r = 0 ; r < edges[k].determinant1D.size() ; ++r)
+               	{
+					std::cout << edges[k].determinant1D[r]; 
+					if(r != edges[k].determinant1D.size() - 1)
+					{
+						std::cout << ", ";
+					}
+					else
+					{
+						std::cout << std::endl;
+					}					
+				}
+				
+				for(unsigned int i = 0 ; i < edges[k].offsetInElm.size() ; ++i)
+				{
+				std::cout 	<< "\t\t\t- OffsetInElm of node (" << i << "): "
+							<< edges[k].offsetInElm[i]
+							<< std::endl;
+				}
 
                 if(edges[k].edgeInFront.first != -1)
                 {
                     std::cout << "\t\t\t- Edge in front: " << "element "
                                 << edges[k].edgeInFront.first<<", "
-                                << "edge " << edges[k].edgeInFront.second<<", "
+                                << "edge " << edges[k].edgeInFront.second << ", "
                                 << std::endl; //[TO DO]: put again inverted
-                    if((edges[k].normal.first != -entitity.elements[edges[k].edgeInFront.first].edges[edges[k].edgeInFront.second].normal.first)
-                       || (edges[k].normal.second != -entitity.elements[edges[k].edgeInFront.first].edges[edges[k].edgeInFront.second].normal.second))
+                    if((edges[k].normal.first != -entitity
+                    	.elements[edges[k].edgeInFront.first]
+                    	.edges[edges[k].edgeInFront.second].normal.first)
+                       || (edges[k].normal.second != -entitity
+                       	.elements[edges[k].edgeInFront.first].
+                       	edges[edges[k].edgeInFront.second].normal.second))
                     {
-                        std::cerr<<"Bug in the normal of that edge !"<<std::endl;
+                        std::cerr << "Bug in the normal of that edge !" << std::endl;
                         return;
                     }
                 }
@@ -91,11 +110,12 @@ void displayMesh(const Mesh2D& mesh)
                 {
                     if(edges[k].bcName.size() == 0)
                     {
-                        std::cerr<<"BC node does not have a BC name !"<<std::endl;
+                        std::cerr 	<< "BC node does not have a BC name !" 
+                        			<< std::endl;
                         return;
                     }
                     else
-                        std::cout << "\t\t\t- BC: " << edges[k].bcName <<std::endl;
+                        std::cout << "\t\t\t- BC: " << edges[k].bcName << std::endl;
                 }
 			}
 		}

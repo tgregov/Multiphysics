@@ -65,15 +65,15 @@ void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 					for(unsigned int j = 0; j < elmProp.nSF; j++)
 					{
 
-						double dlidxi = elmProp.basisFuncGrad
-							[k*elmProp.nSF*3 + i*3];
-						double dlideta = elmProp.basisFuncGrad
-							[k*elmProp.nSF*3 + i*3 + 1];
+						double dljdxi = elmProp.basisFuncGrad
+							[k*elmProp.nSF*3 + j*3];
+						double dljdeta = elmProp.basisFuncGrad
+							[k*elmProp.nSF*3 + j*3 + 1];
 
 						sxElm[i*elmProp.nSF + j]
-							+= pondFunc[k][j]*(dlidxi*dxidx + dlideta*detadx);
+							+= pondFunc[k][i]*(dljdxi*dxidx + dljdeta*detadx);
 						syElm[i*elmProp.nSF + j]
-							+= pondFunc[k][j]*(dlidxi*dxidy + dlideta*detady);
+							+= pondFunc[k][i]*(dljdxi*dxidy + dljdeta*detady);
 
 						// if we have calculated the sum for all the GP, we can
 						// save the computed components

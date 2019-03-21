@@ -3,14 +3,15 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <gmsh.h>
-#include "buildM.hpp"
-#include "buildS.hpp"
+#include "./matrices/buildM.hpp"
+#include "./matrices/buildS.hpp"
 #include "buildFlux.hpp"
 
 
 Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
-	const Eigen::SparseMatrix<double>& SxTranspose, const Eigen::SparseMatrix<double>& SyTranspose,
+	const Eigen::SparseMatrix<double>& SxTranspose, 
+	const Eigen::SparseMatrix<double>& SyTranspose,
 	unsigned int numNodes, const Mesh2D& mesh)
 {
 
@@ -20,16 +21,12 @@ Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 
 	// compute the right-hand side of the master equation (phi or psi)
 	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
- 	buildFlux(mesh, I, u, fx, fy, C, -1, numNodes, t);
+ 	buildFlux(mesh, I, u, fx, fy, C, 1, numNodes, t);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(numNodes);
 
-    vectorF = invM*(I - SxTranspose*fx - SyTranspose*fy);
-
-//	for(size_t i = 0; i < vectorF.size(); i++){
-//		std::cout << "vF[" << i << "]: " <<  vectorF[i] << std::endl;
-//	}
+    vectorF = invM*(I + SxTranspose*fx + SyTranspose*fy);
 
 	return vectorF;
 }
@@ -46,16 +43,12 @@ Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 
 	// compute the right-hand side of the master equation (phi or psi)
 	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
- 	buildFlux(mesh, I, u, fx, fy, C, 1, numNodes, t);
+ 	buildFlux(mesh, I, u, fx, fy, C, -1, numNodes, t);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(numNodes);
 
-    vectorF = invM*(I + Sx*fx + Sy*fy);
-
-//	for(size_t i = 0; i < vectorF.size(); i++){
-//		std::cout << "vF[" << i << "]: " <<  vectorF[i] << std::endl;
-//	}
+    vectorF = invM*(I - Sx*fx - Sy*fy);
 
 	return vectorF;
 }
@@ -79,13 +72,14 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
     std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
-	const Eigen::SparseMatrix<double>& SxTranspose, const Eigen::SparseMatrix<double>& SyTranspose,
+	const Eigen::SparseMatrix<double>& SxTranspose, 
+	const Eigen::SparseMatrix<double>& SyTranspose,
 	unsigned int numNodes, const Mesh2D& mesh)> usedF;
 
     if(typeForm == "weak")
     {
-        Sx=Sx.transpose();
-        Sy=Sy.transpose();
+        Sx = Sx.transpose();
+        Sy = Sy.transpose();
         usedF = Fweak;
     }
     else
@@ -106,10 +100,10 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 	invM = solverM.solve(eye);
 
 	// display the results
-//	std::cout << "Matrix [M]:\n" << M << std::endl;
-//	std::cout << "Matrix [M^-1]:\n" << invM << std::endl;
-//    std::cout << "Matrix [Sx]:\n" << Sx << std::endl;
-//    std::cout << "Matrix [Sy]:\n" << Sy << std::endl;
+	// std::cout << "Matrix [M]:\n" << M << std::endl;
+	// std::cout << "Matrix [M^-1]:\n" << invM << std::endl;
+	// std::cout << "Matrix [Sx]:\n" << Sx << std::endl;
+	// std::cout << "Matrix [Sy]:\n" << Sy << std::endl;
 
     // initial condition [TO DO]: generalize for u != 0
     Eigen::VectorXd u(numNodes); u.setZero();
@@ -176,9 +170,11 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
 			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh)*h;
 
+			/*
 			for(size_t i = 0; i < u.size(); i++){
 				std::cout << "u after TS [" << i << "]: " <<  u[i] << std::endl;
 			}
+			*/
 
 
 			t += h;
@@ -187,16 +183,15 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
 			for(unsigned int count = 0; count < u.size()/3; ++count)
 			{
-			std::vector<double> temp;
-			temp.push_back(u[3*count]);
-			temp.push_back(u[3*count+1]);
-			temp.push_back(u[3*count+2]);
-
-			uDisplay.push_back(temp);
+				std::vector<double> temp;
+				temp.push_back(u[3*count]);
+				temp.push_back(u[3*count+1]);
+				temp.push_back(u[3*count+2]);
+				uDisplay.push_back(temp);
 			}
 
-			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
-				uDisplay, t, 1);
+			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, 
+				elementTags, uDisplay, t, 1);
 		}
 	} else if(!scheme.compare("RK4")){ // Runge-Kutta of order 4
 		/*
@@ -218,7 +213,7 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 		}*/
 	} else{
 		std::cerr 	<< "The integration scheme " << scheme
-					<< " is not implemented" << std::endl;
+					<< " is not implemented." << std::endl;
 		return false;
 	}
 
