@@ -58,6 +58,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "constant")
             boundary.bcFunc = constant;
 
+        else if(bcType == "constantNeumann")
+            boundary.bcFunc = constantNeumann;
+
         else
         {
             std::cerr << "Unhandled boundary condtion type " << bcType

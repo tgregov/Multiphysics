@@ -107,7 +107,7 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 						bc boundary = boundaries.at(edge.bcName);
 						uAtBC = boundary.bcFunc(edge.nodeCoordinate[j].first,
 							edge.nodeCoordinate[j].second,
-							0.0, t, boundary.coefficients);
+							0.0, u[indexJ], t, boundary.coefficients);
 
                         flux(fxAtBC, fyAtBC, uAtBC);
 

@@ -8,11 +8,11 @@ BC_Left
 	gaussian
 	1,1,0.1
 BC_Right
-	constant
+	constantNeumann
 	0
 BC_Up
-	constant
+	constantNeumann
 	0
 BC_Down
-	constant
+	constantNeumann
 	0
