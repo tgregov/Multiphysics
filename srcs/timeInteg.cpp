@@ -99,14 +99,14 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	std::vector<int> nodeTags =  getTags(mesh);
 
 	// matrices of the DG method
-  Eigen::SparseMatrix<double> M(numNodes, numNodes);
-  Eigen::SparseMatrix<double> Sx(numNodes, numNodes);
-  Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
-  buildM(mesh, M);
-  buildS(mesh, Sx, Sy);
+  	Eigen::SparseMatrix<double> M(numNodes, numNodes);
+  	Eigen::SparseMatrix<double> Sx(numNodes, numNodes);
+  	Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
+  	buildM(mesh, M);
+  	buildS(mesh, Sx, Sy);
 
-  //Function pointer to the used function (weak vs strong form)
-  std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u,
+  	//Function pointer to the used function (weak vs strong form)
+  	std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u,
                                 Eigen::VectorXd& fx, Eigen::VectorXd& fy,
                                 const Eigen::SparseMatrix<double>& invM,
                                 const Eigen::SparseMatrix<double>& SxTranspose,
@@ -114,16 +114,16 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
                                 unsigned int numNodes, const Mesh2D& mesh,
                                 const std::map<std::string, bc>& boundaries)> usedF;
 
-  if(solverParams.solverType == "weak")
-  {
-      Sx = Sx.transpose();
-      Sy = Sy.transpose();
-      usedF = Fweak;
-  }
-  else
-  {
-      usedF = Fstrong;
-  }
+  	if(solverParams.solverType == "weak")
+  	{
+      	Sx = Sx.transpose();
+      	Sy = Sy.transpose();
+      	usedF = Fweak;
+  	}
+  	else
+  	{
+     	usedF = Fstrong;
+  	}
 
 	// invert [M]
 	Eigen::SparseMatrix<double> eye(numNodes, numNodes);
@@ -137,69 +137,71 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	Eigen::SparseMatrix<double> invM(numNodes, numNodes);
 	invM = solverM.solve(eye);
 
-  // initial condition [TO DO]: use param.dat and bc struct
-  Eigen::VectorXd u(numNodes); u.setZero();
+  	// initial condition [TO DO]: use param.dat and bc struct
+  	Eigen::VectorXd u(numNodes); u.setZero();
 
-  // vectors of physical flux
-  Eigen::VectorXd fx(numNodes);
-  Eigen::VectorXd fy(numNodes);
+  	// vectors of physical flux
+  	Eigen::VectorXd fx(numNodes);
+  	Eigen::VectorXd fy(numNodes);
 
-  // launch gmsh
-  gmsh::initialize();
-  gmsh::option::setNumber("General.Terminal", 1);
-  gmsh::open(fileName);
-  int viewTag = gmsh::view::add("results");
-  std::vector<std::string> names;
-  gmsh::model::list(names);
-  std::string modelName = names[0];
-  std::string dataType = "ElementNodeData";
+  	// launch gmsh
+  	gmsh::initialize();
+  	gmsh::option::setNumber("General.Terminal", 1);
+  	gmsh::open(fileName);
+  	int viewTag = gmsh::view::add("results");
+  	std::vector<std::string> names;
+  	gmsh::model::list(names);
+  	std::string modelName = names[0];
+  	std::string dataType = "ElementNodeData";
 
-  // collect the element tags & their length
-  std::vector<int> elementTags;
-  std::vector<unsigned int> elementNumNodes;
-  for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
-  {
-      Entity2D entity = mesh.entities[ent];
+  	// collect the element tags & their length
+  	std::vector<int> elementTags;
+  	std::vector<unsigned int> elementNumNodes;
+  	for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
+  	{
+      	Entity2D entity = mesh.entities[ent];
 
-      for(size_t i = 0 ; i < entity.elements.size() ; ++i)
-      {
-        Element2D element = entity.elements[i];
-        elementTags.push_back(element.elementTag);
-        // [TO DO]: only works for T3 :(
-        elementNumNodes.push_back(element.edges.size());
-      }
-  }
+      	for(size_t i = 0 ; i < entity.elements.size() ; ++i)
+      	{
+       	 	Element2D element = entity.elements[i];
+        	elementTags.push_back(element.elementTag);
+        	// [TO DO]: only works for T3 :(
+        	elementNumNodes.push_back(element.edges.size());
+      	}
+  	}
 
-  double t = 0.0;
+  	double t = 0.0;
 
-  //write initial condition
-  std::vector<std::vector<double>> uDisplay;
-  unsigned int index = 0;
+  	//write initial condition
+  	std::vector<std::vector<double>> uDisplay;
+  	unsigned int index = 0;
 
-  for(size_t count = 0 ; count < elementTags.size() ; ++count)
-  {
+  	for(size_t count = 0 ; count < elementTags.size() ; ++count)
+  	{
 
-      std::vector<double> temp;
-      for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
-      {
-          temp.push_back(u[index]);
-          ++index;
-      }
+      	std::vector<double> temp;
+      	for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
+      	{
+          	temp.push_back(u[index]);
+          	++index;
+      	}
 
-      uDisplay.push_back(temp);
-  }
+      	uDisplay.push_back(temp);
+  	}
 
-  gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-      uDisplay, t, 1);
+  	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
+      	uDisplay, t, 1);
 
 	// numerical integration
 	if(solverParams.timeIntType == "RK1") // Runge-Kutta of order 1 (i.e. explicit Euler)
 	{
-		for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; nbrStep++)
+		for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
+			nbrStep++)
 		{
 			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
 
-			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, solverParams.boundaryConditions)*solverParams.timeStep;
+			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, 
+					solverParams.boundaryConditions)*solverParams.timeStep;
 
 			/*
 			for(size_t i = 0; i < u.size(); i++){
@@ -224,24 +226,50 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 				elementTags, uDisplay, t, 1);
 		}
 	}
-	else if(solverParams.timeIntType == "RK4"){ // Runge-Kutta of order 4
-		/*
+	else if(solverParams.timeIntType == "RK4") // Runge-Kutta of order 4
+	{
+		// Temporary vectors necessary for the RK4
+		Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes);
+		Eigen::VectorXd temp(numNodes);
 
-		// k1, k2, k3, k4 are the same dimensions as u[i] => get the best type
-		// in Eigen
-		Eigen::VectorXd k1, k2, k3, k4;
-
-		for(int i = 1; i < nbrTimeSteps+1; i++)
+		for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
+			nbrStep++)
 		{
-			// To change to use the abilities of Eigen
-			k1 = F(t, u[i-1], M, S, uBC);
-			k2 = F(t + h/2, u[i-1] + h*k1/2, invM, Sx, Sy);
-			k3 = F(t + h/2, u[i-1] + h*k2/2, M, S, uBC);
-			k4 = F(t + h, u[i-1] + h*k3, M, S, uBC);
+			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
 
-			u[i] = u[i-1] + (k1 + 2*k2 + 2*k3 + k4)*h/6;
-			t += h;
-		}*/
+
+			k1 = usedF(t, u, fx, fy, invM, Sx, Sy, 
+						numNodes, mesh, solverParams.boundaryConditions);
+
+			temp = u + k1*solverParams.timeStep/2;
+			k2 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy, 
+						numNodes, mesh, solverParams.boundaryConditions);
+
+			temp = u + k2*solverParams.timeStep/2;
+			k3 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy, 
+						numNodes, mesh, solverParams.boundaryConditions);
+
+			temp = u + k3*solverParams.timeStep;
+			k4 = usedF(t + solverParams.timeStep, temp, fx, fy, invM, Sx, Sy, 
+						numNodes, mesh, solverParams.boundaryConditions);
+
+			u += (k1 + 2*k2 + 2*k3 + k4)*solverParams.timeStep/6;
+			t += solverParams.timeStep;
+
+			std::vector<std::vector<double>> uDisplay;
+
+			for(unsigned int count = 0; count < u.size()/3; ++count)
+			{
+				std::vector<double> temp;
+				temp.push_back(u[3*count]);
+				temp.push_back(u[3*count+1]);
+				temp.push_back(u[3*count+2]);
+				uDisplay.push_back(temp);
+			}
+
+			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType,
+				elementTags, uDisplay, t, 1);
+		}
 	}
 
 	// write the results & finalize
