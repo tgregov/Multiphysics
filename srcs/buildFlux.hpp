@@ -4,7 +4,7 @@
 #include <map>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include "Mesh2D.hpp"
+#include "mesh/Mesh2D.hpp"
 #include "bcFunction.hpp"
 
 

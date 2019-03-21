@@ -5,8 +5,8 @@
 
 #include <iostream>
 #include <gmsh.h>
-#include "./matrices/buildM.hpp"
-#include "./matrices/buildS.hpp"
+#include "matrices/buildM.hpp"
+#include "matrices/buildS.hpp"
 #include "buildFlux.hpp"
 #include "timeInteg.hpp"
 #include "bcFunction.hpp"
@@ -28,7 +28,7 @@
  */
 static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
-	const Eigen::SparseMatrix<double>& SxTranspose, 
+	const Eigen::SparseMatrix<double>& SxTranspose,
 	const Eigen::SparseMatrix<double>& SyTranspose,
 	unsigned int numNodes, const Mesh2D& mesh,
   const std::map<std::string, bc>& boundaries)
@@ -220,7 +220,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 				uDisplay.push_back(temp);
 			}
 
-			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, 
+			gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType,
 				elementTags, uDisplay, t, 1);
 		}
 	}
