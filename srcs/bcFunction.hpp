@@ -30,7 +30,7 @@ struct bc
  * \return Value of the function at (x, y , z, t).
  */
 double sinus(double x, double y, double z, double u,
-             double t, std::vector<double> coeffs);
+             double t, const std::vector<double>& coeffs);
 
 /**
  * \brief Compute a simple A*exp(-(t-t_peak)^2/var)
@@ -44,7 +44,7 @@ double sinus(double x, double y, double z, double u,
  * \return Value of the function at (x, y , z, t).
  */
 double gaussian(double x, double y, double z, double u,
-                double t, std::vector<double> coeffs);
+                double t, const std::vector<double>& coeffs);
 
 /**
  * \brief Compute a constant
@@ -57,7 +57,7 @@ double gaussian(double x, double y, double z, double u,
  * \return Value of the function at (x, y , z, t).
  */
 double constant(double x, double y, double z, double u,
-                double t, std::vector<double> coeffs);
+                double t, const std::vector<double>& coeffs);
 
 /**
  * \brief Compute a Von Neumann constant value
@@ -70,6 +70,6 @@ double constant(double x, double y, double z, double u,
  * \return u.
  */
 double constantNeumann(double x, double y, double z, double u,
-                       double t, std::vector<double> coeffs);
+                       double t, const std::vector<double>& coeffs);
 
 #endif // bcFunction_hpp_included

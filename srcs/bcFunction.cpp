@@ -3,7 +3,7 @@
 #include "bcFunction.hpp"
 
 double sinus(double x, double y, double z, double u,
-             double t, std::vector<double> coeffs)
+             double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 3);
 
@@ -11,7 +11,7 @@ double sinus(double x, double y, double z, double u,
 }
 
 double gaussian(double x, double y, double z, double u,
-                double t, std::vector<double> coeffs)
+                double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 3);
 
@@ -19,7 +19,7 @@ double gaussian(double x, double y, double z, double u,
 }
 
 double constant(double x, double y, double z, double u,
-                double t, std::vector<double> coeffs)
+                double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 1);
 
@@ -27,7 +27,7 @@ double constant(double x, double y, double z, double u,
 }
 
 double constantNeumann(double x, double y, double z, double u,
-                double t, std::vector<double> coeffs)
+                double t, const std::vector<double>& coeffs)
 {
     return u;
 }
