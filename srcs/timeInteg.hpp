@@ -2,25 +2,19 @@
 #define timeInteg_hpp_included
 
 #include <string>
-#include<Eigen/Dense>
-#include<Eigen/Sparse>
-#include "./mesh/Mesh2D.hpp"
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
+#include "mesh/Mesh2D.hpp"
+#include "Solver.hpp"
 
-// [TO DO]: comment & describe
-Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
-	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
-	const Eigen::SparseMatrix<double>& SxTranspose, 
-	const Eigen::SparseMatrix<double>& SyTranspose,
-	unsigned int numNodes, const Mesh2D& mesh);
-
-Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
-	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
-	const Eigen::SparseMatrix<double>& SxTranspose, 
-	const Eigen::SparseMatrix<double>& SyTranspose,
-	unsigned int numNodes, const Mesh2D& mesh);
-
-bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
-	const unsigned int& nbrTimeSteps, const std::string& typeForm,
-	const std::string& fileName);
+/**
+ * \brief Time integrate the equations (DG-FEM)
+ * \param mesh The mesh representing the domain of interest
+ * \param solverParams The structure in which the parameters of the solver are.
+ * \param fileName The name of the file containing the mesh.
+ * \return true if time integration happened without problems, false otherwise.
+ */
+bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
+	             const std::string& fileName);
 
 #endif /* timeInteg_hpp */

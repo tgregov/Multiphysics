@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cmath>
-#include <Eigen/Sparse>
-#include "./mesh/Mesh2D.hpp"
-
+#include "buildFlux.hpp"
 
 void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 			const Eigen::VectorXd& u)
@@ -28,24 +26,9 @@ void flux(double& fx, double& fy, double u)
 	fy = ay*u;
 }
 
-
-double valueAtBC(const std::string& bcName,
-					double x, double y, double z, double t)
-{
-	if(!bcName.compare("BC_Left"))
-	{
-		return exp(-(t-2)*(t-2)/0.1);
-	}
-	else
-	{
-		return 0.0;
-	}
-}
-
-
 bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
-	double factor, unsigned int numNodes, double t)
+	double factor, unsigned int numNodes, double t, const std::map<std::string, bc>& boundaries)
 {
 
 	// the type of form is stored in factor
@@ -125,10 +108,10 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					if (edge.edgeInFront.first == -1)
 					{
 						double fxAtBC, fyAtBC, uAtBC;
-						uAtBC = valueAtBC(edge.bcName,
-							edge.nodeCoordinate[j].first,
+						bc boundary = boundaries.at(edge.bcName);
+						uAtBC = boundary.bcFunc(edge.nodeCoordinate[j].first,
 							edge.nodeCoordinate[j].second,
-							0.0, t);
+							0.0, u[indexJ], t, boundary.coefficients);
 
                         flux(fxAtBC, fyAtBC, uAtBC);
 

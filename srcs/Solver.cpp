@@ -1,9 +1,109 @@
+/**
+ * \file Solver.cpp
+ * \brief Implementation of the required function to load a SolverParams struct from file.
+ */
+
 #include <iostream>
 #include <fstream>
 #include <cerrno> //Change with something more c++ ;-)
 #include <cstring>
+#include <vector>
 #include "Solver.hpp"
 
+/**
+ * \brief Load boundary conditions from a file
+ * \param paramFile The file which has been previously opened.
+ * \param solverParams The structure in which the parameters are loaded.
+ * \param fileName The name of the parameters file which has been opened (for debug output).
+ * \return true if the loading succeeds, false otherwise.
+ */
+static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solverParams,
+                                    const std::string& fileName)
+{
+    bc boundary;
+    unsigned int nBC = 0;
+
+    while(true)
+    {
+        std::string bcName;
+        std::string bcType;
+        std::string tempBcCoeff;
+        std::vector<double> bcCoeff;
+
+        if(paramFile.eof())
+        {
+            std::cout << "End of file reached." << std::endl;
+            break;
+        }
+        std::getline(paramFile, bcName);
+
+        bc currentBC;
+
+        std::getline(paramFile, bcType);
+        if(bcType[0] != '\t') //Let's make them tabulated for easier reading
+        {
+            std::cerr << "Bad type format for BC  " << bcName
+                      << " in parameter file " << fileName << std::endl;
+
+            return false;
+        }
+        bcType.erase(0,1);
+
+        if(bcType == "sinus")
+            boundary.bcFunc = sinus;
+
+        else if(bcType == "gaussian")
+            boundary.bcFunc = gaussian;
+
+        else if(bcType == "constant")
+            boundary.bcFunc = constant;
+
+        else if(bcType == "constantNeumann")
+            boundary.bcFunc = constantNeumann;
+
+        else
+        {
+            std::cerr << "Unhandled boundary condtion type " << bcType
+                      << " for boundary " << bcName << " in parameter file "
+                      << fileName <<std::endl;
+
+            return false;
+        }
+
+        std::getline(paramFile, tempBcCoeff);
+        if(tempBcCoeff[0] != '\t') //Let's make them tabulated for easier reading
+        {
+            std::cerr << "Bad coefficient format for BC  " << bcName
+                      << " in parameter file " << fileName << std::endl;
+
+            return false;
+        }
+        tempBcCoeff.erase(0,1);
+        unsigned int precComaPos = -1;
+        for(unsigned int i = 0 ; i < tempBcCoeff.size() ; ++i)
+        {
+            if(tempBcCoeff[i] == ',')
+            {
+                bcCoeff.push_back(std::stod(tempBcCoeff.substr(precComaPos + 1, i - precComaPos - 1)));
+                precComaPos = i;
+            }
+        }
+        //At the end, still one push_back to do
+        bcCoeff.push_back(std::stod(tempBcCoeff.substr(precComaPos+1, tempBcCoeff.size() - precComaPos - 1)));
+
+        boundary.coefficients = bcCoeff;
+
+        solverParams.boundaryConditions[bcName] = boundary;
+
+        nBC++;
+    }
+
+    std::cout << "Number of BC in file " << fileName << ": " << nBC << std::endl;
+
+    return true;
+}
+
+//Documentation in .hpp
 bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
 {
     std::ifstream paramFile(fileName);
@@ -21,7 +121,9 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     std::string temp;
     std::getline(paramFile, temp);
 
-    if(temp.compare(0, 5, "Gauss") != 0) //improve check here
+    if(temp.compare(0, 5, "Gauss") != 0
+       || !(temp.substr(5, temp.size() - 5).find_first_not_of("0123456789")
+            == std::string::npos))
     {
         std::cerr << "Unexpected space integration type " << temp
                   << " in parameter file " << fileName << std::endl;
@@ -29,6 +131,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         paramFile.close();
         return false;
     }
+
 
     solverParams.spaceIntType = temp;
 
@@ -101,6 +204,12 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     }
 
     solverParams.timeStep = std::stod(temp);
+
+    if(!handleBoundaryCondition(paramFile, solverParams, fileName))
+    {
+        paramFile.close();
+        return false;
+    }
 
     paramFile.close();
     return true;

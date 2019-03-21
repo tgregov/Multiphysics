@@ -2,6 +2,7 @@
 #define Solver_hpp_included
 
 #include <string>
+#include "bcFunction.hpp"
 
 /**
  * \struct SolverParams
@@ -17,12 +18,15 @@ struct SolverParams
 
     unsigned int nbrTimeSteps;  /**< Number of time steps for the simulation */  //Change it for duration ?
     double timeStep;            /**< Time steps for the simulation */
+
+    std::map<std::string, bc> boundaryConditions;
 };
 
 /**
  * \brief Load solver parameters from file in a structure
  * \param fileName The name of the parameters file to load.
  * \param solverParams The structure in which the parameters are loaded.
+ * \return true if the loading succeeds, false otherwise.
  */
 bool loadSolverParams(const std::string& fileName, SolverParams& solverParams);
 
