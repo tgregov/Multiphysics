@@ -29,7 +29,7 @@ struct Edge
     std::string bcName; /**< Name of the physical group of the boundary condition
                              in which the edge is in (if any)*/
 
-    std::vector<unsigned int> offsetInElm;
+    std::vector<unsigned int> offsetInElm;  /**< Offset of the edge nodes in the element*/
 };
 
 /**
@@ -42,7 +42,7 @@ struct Element2D
     int elementType2D;                  /**< 2D type of the element*/
     int elementType1D;                  /**< 1D type of the element*/ //Store it only once
 
-    unsigned int offsetInU;
+    unsigned int offsetInU;             /**< Offset of the element in the unknowns vector*/
 
     std::vector<double> determinant2D;  /**< Determinant of the variable change for Gauss integration,
                                              evaluated at each Gauss point*/
@@ -103,8 +103,7 @@ struct Mesh2D
     std::map<int, ElementProperty> elementProperties2D; /**< Store element properties for each 2D element type */
     std::map<int, ElementProperty> elementProperties1D; /**< Store element properties for each 1D element type */
 
-    std::map<std::string, std::vector<int>> nodesTagBoundary;
-    //std::map<std::string, std::vector<double>> coordNodesBoundary;
+    std::map<std::string, std::vector<int>> nodesTagBoundary;/**< Tags of the nodes per BC */
 
     std::vector<Entity2D> entities; /**< List of entities inside the mesh */
 };
@@ -113,6 +112,7 @@ struct Mesh2D
 /**
  * \brief Get the number of nodes (i.e. of unknowns) given a mesh.
  * \param mesh2D The structure that contains the mesh.
+ * \return The number of unknowns inside a mesh.
  */
 unsigned int getNumNodes(const Mesh2D& mesh2D);
 
@@ -120,6 +120,7 @@ unsigned int getNumNodes(const Mesh2D& mesh2D);
 /**
  * \brief Get the tags of nodes (i.e. of unknowns) given a mesh.
  * \param mesh2D The structure that contains the mesh.
+ * \return Vector containing all the tags of the nodes inside a mesh.
  */
 std::vector<int> getTags(const Mesh2D& mesh2D);
 

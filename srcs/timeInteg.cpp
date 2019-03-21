@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include <gmsh.h>
@@ -7,10 +8,10 @@
 #include "buildFlux.hpp"
 
 
-Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
-	Eigen::VectorXd& fy, Eigen::SparseMatrix<double> invM,
-	Eigen::SparseMatrix<double> Sx, Eigen::SparseMatrix<double> Sy,
-	unsigned int numNodes, Mesh2D& mesh, const std::string& typeForm)
+Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
+	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
+	const Eigen::SparseMatrix<double>& SxTranspose, const Eigen::SparseMatrix<double>& SyTranspose,
+	unsigned int numNodes, const Mesh2D& mesh)
 {
 
  	// compute the nodal physical fluxes
@@ -19,26 +20,42 @@ Eigen::VectorXd F(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 
 	// compute the right-hand side of the master equation (phi or psi)
 	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
- 	buildFlux(mesh, I, u, fx, fy, C, typeForm, numNodes, t);
+ 	buildFlux(mesh, I, u, fx, fy, C, -1, numNodes, t);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(numNodes);
-	if(!typeForm.compare("strong"))
-	{
-		vectorF = invM*(I - Sx*fx - Sy*fy);
-	}
-	else if(!typeForm.compare("weak"))
-	{
-		vectorF = invM*(I + Sx.transpose()*fx + Sy.transpose()*fy);
-	}
-	else
-	{
-		std::cerr 	<< "The form  " << typeForm  << "does not exist !" << std::endl;
-	}
 
-	for(size_t i = 0; i < vectorF.size(); i++){
-		std::cout << "vF[" << i << "]: " <<  vectorF[i] << std::endl;
-	}
+    vectorF = invM*(I - SxTranspose*fx - SyTranspose*fy);
+
+//	for(size_t i = 0; i < vectorF.size(); i++){
+//		std::cout << "vF[" << i << "]: " <<  vectorF[i] << std::endl;
+//	}
+
+	return vectorF;
+}
+
+Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
+	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
+	const Eigen::SparseMatrix<double>& Sx, const Eigen::SparseMatrix<double>& Sy,
+	unsigned int numNodes, const Mesh2D& mesh)
+{
+
+ 	// compute the nodal physical fluxes
+ 	double C;
+ 	flux(fx, fy, C, u);
+
+	// compute the right-hand side of the master equation (phi or psi)
+	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
+ 	buildFlux(mesh, I, u, fx, fy, C, 1, numNodes, t);
+
+	// compute the vector F to be integrated in time
+	Eigen::VectorXd vectorF(numNodes);
+
+    vectorF = invM*(I + Sx*fx + Sy*fy);
+
+//	for(size_t i = 0; i < vectorF.size(); i++){
+//		std::cout << "vF[" << i << "]: " <<  vectorF[i] << std::endl;
+//	}
 
 	return vectorF;
 }
@@ -60,6 +77,22 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
     buildM(mesh, M);
     buildS(mesh, Sx, Sy);
 
+    std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
+	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
+	const Eigen::SparseMatrix<double>& SxTranspose, const Eigen::SparseMatrix<double>& SyTranspose,
+	unsigned int numNodes, const Mesh2D& mesh)> usedF;
+
+    if(typeForm == "weak")
+    {
+        Sx=Sx.transpose();
+        Sy=Sy.transpose();
+        usedF = Fweak;
+    }
+    else
+    {
+        usedF = Fstrong;
+    }
+
 	// invert [M]
 	Eigen::SparseMatrix<double> eye(numNodes, numNodes);
 	eye.setIdentity();
@@ -73,10 +106,10 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 	invM = solverM.solve(eye);
 
 	// display the results
-	std::cout << "Matrix [M]:\n" << M << std::endl;
-	std::cout << "Matrix [M^-1]:\n" << invM << std::endl;
-    std::cout << "Matrix [Sx]:\n" << Sx << std::endl;
-    std::cout << "Matrix [Sy]:\n" << Sy << std::endl;
+//	std::cout << "Matrix [M]:\n" << M << std::endl;
+//	std::cout << "Matrix [M^-1]:\n" << invM << std::endl;
+//    std::cout << "Matrix [Sx]:\n" << Sx << std::endl;
+//    std::cout << "Matrix [Sy]:\n" << Sy << std::endl;
 
     // initial condition [TO DO]: generalize for u != 0
     Eigen::VectorXd u(numNodes); u.setZero();
@@ -118,7 +151,7 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 
 		std::vector<std::vector<double>> uDisplay;
 		unsigned int index = 0;
-		
+
 		for(size_t count = 0 ; count < elementTags.size() ; ++count)
 		{
 
@@ -135,13 +168,13 @@ bool timeInteg(Mesh2D& mesh, const std::string& scheme, const double& h,
 		gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
 			uDisplay, t, 1);
 
-		
+
 		for(unsigned int nbrStep = 1 ; nbrStep < nbrTimeSteps + 1 ; nbrStep++)
 		{
 
 			std::cout << "[Time step: " << nbrStep << "]" << std::endl;
 
-			u += F(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, typeForm)*h;
+			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh)*h;
 
 			for(size_t i = 0; i < u.size(); i++){
 				std::cout << "u after TS [" << i << "]: " <<  u[i] << std::endl;
