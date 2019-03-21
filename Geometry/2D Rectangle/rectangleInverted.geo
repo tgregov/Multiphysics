@@ -9,13 +9,13 @@ Point(3) = {0, y, 0, d};
 Point(4) = {x, y, 0, d};
 
 // List of lines
-Line(1) = {3, 1};
-Line(2) = {4, 3};
-Line(3) = {2, 4};
-Line(4) = {1, 2};
+Line(1) = {1, 3};
+Line(2) = {3, 4};
+Line(3) = {4, 2};
+Line(4) = {2, 1};
 
 // Surface
-Curve Loop(1) = {1, 4, 3, 2};
+Curve Loop(1) = {2, 3, 4, 1};
 Plane Surface(1) = {1};
 
 Physical Surface(1) = {1};
@@ -25,5 +25,5 @@ Physical Curve("BC_Up") = {2};
 Physical Curve("BC_Down") = {4};
 Physical Curve("BC_Right") = {3};
 
-//Transfinite Surface{1};
+Transfinite Surface{1};
 

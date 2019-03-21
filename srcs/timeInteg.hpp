@@ -15,6 +15,6 @@
  * \return true if time integration happened without problems, false otherwise.
  */
 bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
-	const std::string& fileName);
+	             const std::string& fileName);
 
 #endif /* timeInteg_hpp */
