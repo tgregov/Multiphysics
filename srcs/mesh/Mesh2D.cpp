@@ -375,8 +375,24 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
         unsigned int numNodes = mesh.elementProperties2D[eleType2D].numNodes;
         // std:: cout << numNodes << std::endl;
 
+        unsigned currentDecade = 0;
         for(unsigned int i = 0 ; i < elementTags.size() ; ++i)
         {
+
+            // display progress
+            if((int(100*double(i)/double(elementTags.size())) == currentDecade) 
+                || (i == elementTags.size()-1 && currentDecade == 100))
+            {
+                std::cout  << "\r" << "Entity [" << entity.entityTag2D << "]: "
+                            << currentDecade << "% elements computed"
+                            << std::flush;
+                currentDecade += 1;
+
+                if(currentDecade == 101){
+                    std::cout << std::endl;
+                }
+            }
+ 
             std::vector<double> jacobiansElement2D(
                                             jacobians2D.begin() + 9*nGP2D*i,
                                             jacobians2D.begin() + 9*nGP2D*(1 + i));

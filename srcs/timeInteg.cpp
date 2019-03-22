@@ -99,11 +99,15 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	std::vector<int> nodeTags =  getTags(mesh);
 
 	// matrices of the DG method
-  	Eigen::SparseMatrix<double> M(numNodes, numNodes);
+  	Eigen::SparseMatrix<double> invM(numNodes, numNodes);
   	Eigen::SparseMatrix<double> Sx(numNodes, numNodes);
   	Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
-  	buildM(mesh, M);
+  	std::cout << "Building the invM matrix...";
+  	buildM(mesh, invM);
+  	std::cout << "\rBuilding the invM matrix... 		Done" << std::endl;
+  	std::cout << "Building the Sx and Sy matrices...";
   	buildS(mesh, Sx, Sy);
+  	std::cout << "\rBuilding the Sx and Sy matrices... 	Done" << std::endl;
 
   	//Function pointer to the used function (weak vs strong form)
   	std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u,
@@ -124,18 +128,6 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	{
      	usedF = Fstrong;
   	}
-
-	// invert [M]
-	Eigen::SparseMatrix<double> eye(numNodes, numNodes);
-	eye.setIdentity();
-	Eigen::SimplicialLLT<Eigen::SparseMatrix<double>> solverM;
-	solverM.compute(M);
-	if(solverM.info() != Eigen::Success)
-	{
-		return false;
-	}
-	Eigen::SparseMatrix<double> invM(numNodes, numNodes);
-	invM = solverM.solve(eye);
 
 	// initial condition [TO DO]: use param.dat and bc struct
 	Eigen::VectorXd u(numNodes); u.setZero();
@@ -199,11 +191,24 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	temp(numNodes);
 
 	// numerical integration
+	unsigned int currentDecade = 0;
 	for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
 		nbrStep++)
 	{
 
-		std::cout << "[Time step: " << nbrStep << "]" << std::endl;
+  		// display progress
+        if((int(100*double(nbrStep-1)/double(solverParams.nbrTimeSteps)) 
+        	== currentDecade)
+            || (nbrStep == solverParams.nbrTimeSteps && currentDecade == 100))
+        {
+            std::cout  	<< "\r" << "Integrating: " << currentDecade << "%"
+            			<< " of the time steps done" << std::flush;
+            currentDecade += 1;
+
+            if(currentDecade == 101){
+                std::cout << std::endl;
+            }
+        }
 
 		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
 		{

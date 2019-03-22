@@ -18,11 +18,24 @@ int main(int argc, char **argv)
     }
 
     // load the solver parameters
+    std::cout   << "================================================================"
+                << std::endl
+                << "                   LOADING THE SOLVER PARAMETERS                "
+                << std::endl
+                << "================================================================"
+                << std::endl;
+
     SolverParams solverParams;
     if(!loadSolverParams(std::string(argv[2]), solverParams))
         return -1;
 
     // load the mesh
+    std::cout   << "================================================================"
+                << std::endl
+                << "                       LOADING THE MESH                         "
+                << std::endl
+                << "================================================================"
+                << std::endl;
     Mesh2D mesh;
     if(!readMesh2D(mesh, std::string(argv[1]), solverParams.spaceIntType, 
         solverParams.basisFuncType))
@@ -32,10 +45,16 @@ int main(int argc, char **argv)
         return -1;
    }
 
-    omp_set_num_threads(2);
-    Eigen::setNbThreads(2);
+    // omp_set_num_threads(2);
+    // Eigen::setNbThreads(2);
 
     //displayMesh(mesh);
+    std::cout   << "================================================================"
+                << std::endl
+                << "                     EXECUTING THE SOLVER                       "
+                << std::endl
+                << "================================================================"
+                << std::endl;   
     if(!timeInteg(mesh, solverParams, std::string(argv[1])))
     {
         std::cerr   << "Something went wrong when time integrating" << std::endl;

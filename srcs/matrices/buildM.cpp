@@ -2,7 +2,7 @@
 #include "buildM.hpp"
 
 
-void buildM(const Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
+void buildM(const Mesh2D& mesh, Eigen::SparseMatrix<double>& invM)
 {
 
     // the index is a vector of triplets that contains the coordinates in the [M]
@@ -26,6 +26,9 @@ void buildM(const Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
             std::vector<std::vector<double>> prodFunc = elmProp.prodFunc;
             std::vector<std::pair<unsigned int, unsigned int>> IJ = elmProp.IJ;
 
+            Eigen::MatrixXd MLocal(elmProp.nSF, elmProp.nSF);
+            MLocal.setZero();
+
             // construct the local [M] matrix for the current element
             for(unsigned int l = 0 ; l < elmProp.nSF*(elmProp.nSF+1)/2 ; ++l)
             {
@@ -37,22 +40,30 @@ void buildM(const Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
                     sum += prodFunc[k][l]*element.determinant2D[k];
                 }
 
-                // add the sum to the index vector
+                MLocal(IJ[l].first, IJ[l].second) = sum;
+                if(IJ[l].first != IJ[l].second)
+                {
+                    MLocal(IJ[l].second, IJ[l].first) = sum;
+                }   
+
+            }
+
+            // inverse local M matrix (which is also symmetric)
+            MLocal = MLocal.inverse();
+            for(unsigned int l = 0 ; l < elmProp.nSF*(elmProp.nSF+1)/2 ; ++l)
+            {
                 index.push_back(Eigen::Triplet<double>
                     (IJ[l].first + offsetMatrix,
-                    IJ[l].second + offsetMatrix,
-                    sum));
+                        IJ[l].second + offsetMatrix,
+                        MLocal(IJ[l].first, IJ[l].second)));   
 
-                // if we are not on the diagonal, we add the symmetric part of the
-                // matrix (indeed, since [M] is symmetric, the products w_k*l_i*l_j
-                // were only computed once
                 if(IJ[l].first != IJ[l].second)
                 {
                     index.push_back(Eigen::Triplet<double>
                         (IJ[l].second + offsetMatrix,
-                          IJ[l].first + offsetMatrix,
-                         sum));
-                }
+                            IJ[l].first + offsetMatrix,
+                            MLocal(IJ[l].first, IJ[l].second)));
+                }         
             }
 
             offsetMatrix += elmProp.nSF;
@@ -60,5 +71,5 @@ void buildM(const Mesh2D& mesh, Eigen::SparseMatrix<double>& M)
     }
 
     // add the triplets in the sparse matrix
-    M.setFromTriplets(index.begin(), index.end());
+    invM.setFromTriplets(index.begin(), index.end());
 }

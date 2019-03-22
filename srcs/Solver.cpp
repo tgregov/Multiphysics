@@ -212,5 +212,20 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     }
 
     paramFile.close();
+
+    // display the parameters
+    std::cout   << "Number of Gauss points: " << solverParams.spaceIntType
+                << std::endl
+                << "Type of basis function: " << solverParams.basisFuncType
+                << std::endl
+                << "Time intgeration scheme: " << solverParams.timeIntType
+                << std::endl
+                << "Formulation type: " << solverParams.solverType
+                << std::endl
+                << "Number of time steps: " << solverParams.nbrTimeSteps
+                << std::endl
+                << "Time step: " << solverParams.timeStep << "s"
+                << std::endl;
+
     return true;
 }

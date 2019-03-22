@@ -2,6 +2,7 @@
 #define buildM_hpp
 
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include "../mesh/Mesh2D.hpp"
 
 
@@ -12,8 +13,8 @@
  * computed in the mesh, it suffices to get the determinant of the elements,
  * calculate this sum, and store the result in a sparse matrix.
  * \param mesh2D The structure that contains the mesh.
- * \param M The Eigen::SparseMatrix in which the matrix components will be stored.
+ * \param invM The Eigen::SparseMatrix in which the matrix components will be stored.
  */
-void buildM(const Mesh2D& mesh2D, Eigen::SparseMatrix<double>& M);
+void buildM(const Mesh2D& mesh2D, Eigen::SparseMatrix<double>& invM);
 
 #endif /* buildM_hpp */
