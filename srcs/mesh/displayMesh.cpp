@@ -21,7 +21,7 @@ void displayMesh(const Mesh2D& mesh)
 
 		Entity2D entitity =  mesh.entities[i];
 
-		// general information about the current entity 
+		// general information about the current entity
 		std::cout 	<< "[Entity (" << i << ")]:" << std::endl
 					<< "\t- Tag of the 2D entity: " << entitity.entityTag2D
 					<< std::endl
@@ -41,7 +41,12 @@ void displayMesh(const Mesh2D& mesh)
 						<< "\t\t- Tag: " << element.elementTag << std::endl
 			 			<< "\t\t- 2D type: " << element.elementType2D << std::endl
 						<< "\t\t- 1D type: " << element.elementType1D << std::endl
-						<< "\t\t- Offset in u: " << element.offsetInU << std::endl;
+						<< "\t\t- Offset in u: " << element.offsetInU << std::endl
+						<< "\t\t- Nodes tag: ";
+            for(unsigned int p = 0 ; p < element.nodeTags.size() ; ++p)
+                std::cout<<element.nodeTags[p]<<", ";
+
+            std::cout   << std::endl;
 
 			for(unsigned int k = 0 ; k < element.determinant2D.size() ; ++k)
 			{
@@ -71,7 +76,7 @@ void displayMesh(const Mesh2D& mesh)
 							<< "\t\t\t- Det: ";
 				for(unsigned int r = 0 ; r < edges[k].determinant1D.size() ; ++r)
                	{
-					std::cout << edges[k].determinant1D[r]; 
+					std::cout << edges[k].determinant1D[r];
 					if(r != edges[k].determinant1D.size() - 1)
 					{
 						std::cout << ", ";
@@ -79,9 +84,9 @@ void displayMesh(const Mesh2D& mesh)
 					else
 					{
 						std::cout << std::endl;
-					}					
+					}
 				}
-				
+
 				for(unsigned int i = 0 ; i < edges[k].offsetInElm.size() ; ++i)
 				{
 				std::cout 	<< "\t\t\t- OffsetInElm of node (" << i << "): "
@@ -110,7 +115,7 @@ void displayMesh(const Mesh2D& mesh)
                 {
                     if(edges[k].bcName.size() == 0)
                     {
-                        std::cerr 	<< "BC node does not have a BC name !" 
+                        std::cerr 	<< "BC node does not have a BC name !"
                         			<< std::endl;
                         return;
                     }

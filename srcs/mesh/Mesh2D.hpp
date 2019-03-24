@@ -50,6 +50,7 @@ struct Element2D
                                              evaluated at each Gauss point*/
 
     std::vector<Edge> edges;            /**< List of edge which compose the element */
+    std::vector<int> nodeTags;
 };
 
 /**
@@ -63,9 +64,9 @@ struct Entity2D
 
     std::vector<Element2D> elements;    /**< List of the elements inside the entity*/
 
-    std::map<int, std::vector<int>> elementTags2D;      /**< Tag of the element inside the entity per element type */
-    std::map<int, std::vector<int>> nodesTags2D;        /**< Tag of the nodes inside the entity per element type */
-    std::map<int, std::vector<int>> nodesTagsPerEdge2D; /**< Tag of the nodes per edge inside the entity per element type */
+//    std::map<int, std::vector<int>> elementTags2D;      /**< Tag of the element inside the entity per element type */
+//    std::map<int, std::vector<int>> nodesTags2D;        /**< Tag of the nodes inside the entity per element type */
+//    std::map<int, std::vector<int>> nodesTagsPerEdge2D; /**< Tag of the nodes per edge inside the entity per element type */
 };
 
 /**
@@ -136,3 +137,4 @@ bool readMesh2D(Mesh2D& mesh2D, const std::string& fileName,
                 const std::string& intScheme, const std::string& basisFuncType);
 
 #endif // Mesh2D_hpp_included
+
