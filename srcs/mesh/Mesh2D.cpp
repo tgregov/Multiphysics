@@ -372,22 +372,18 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
         unsigned int nGP2D = mesh.elementProperties2D[eleType2D].nGP;
         unsigned int nGP1D = mesh.elementProperties1D[eleType1D].nGP;
 
-        unsigned currentDecade = 0;
+        unsigned ratio, currentDecade = 0;
         for(unsigned int i = 0 ; i < elementTags.size() ; ++i)
         {
 
             // display progress
-            if((int(100*double(i)/double(elementTags.size())) == currentDecade)
-                || (i == elementTags.size()-1 && currentDecade == 100))
+            ratio = int(100*double(i)/double(elementTags.size()));
+            if(ratio >= currentDecade)
             {
-                std::cout  << "\r" << "Entity [" << entity.entityTag2D << "]: "
-                            << currentDecade << "% elements computed"
+                std::cout   << "\r" << "Entity [" << entity.entityTag2D << "]: "
+                            << ratio << "% of the elements computed"
                             << std::flush;
-                currentDecade += 1;
-
-                if(currentDecade == 101){
-                    std::cout << std::endl;
-                }
+                currentDecade = ratio + 1;
             }
 
             std::vector<double> jacobiansElement2D(
@@ -425,6 +421,9 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
 
             currentOffset += elementOffset;
         }
+
+         std::cout  << "\r" << "Entity [" << entity.entityTag2D << "]: "
+                    << "100% of the elements computed" << std::flush << std::endl;
     }
 
     // add the entity to the mesh.entities field

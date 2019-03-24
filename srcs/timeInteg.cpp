@@ -185,53 +185,48 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		uDisplay, t, 1);
 
 
-	// temporary vectors (only for RK4, but I don't want to define them at each time 
+	// temporary vectors (only for RK4, but I don't want to define them at each time
 	// iteration)
-	Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes), 
+	Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes),
 	temp(numNodes);
 
 	// numerical integration
-	unsigned int currentDecade = 0;
-	for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
+	unsigned int ratio, currentDecade = 0;
+	for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ;
 		nbrStep++)
 	{
 
   		// display progress
-        if((int(100*double(nbrStep-1)/double(solverParams.nbrTimeSteps)) 
-        	== currentDecade)
-            || (nbrStep == solverParams.nbrTimeSteps && currentDecade == 100))
+        ratio = int(100*double(nbrStep - 1)/double(solverParams.nbrTimeSteps));
+        if(ratio >= currentDecade)
         {
-            std::cout  	<< "\r" << "Integrating: " << currentDecade << "%"
+            std::cout  	<< "\r" << "Integrating: " << ratio << "%"
             			<< " of the time steps done" << std::flush;
-            currentDecade += 1;
-
-            if(currentDecade == 101){
-                std::cout << std::endl;
-            }
+            currentDecade = ratio + 1;
         }
 
 		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
 		{
-			
-			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, 
+
+			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh,
 					solverParams.boundaryConditions)*solverParams.timeStep;
 		}
 		else if(solverParams.timeIntType == "RK4")
 		{
 			// could be optimized
-			k1 = usedF(t, u, fx, fy, invM, Sx, Sy, 
+			k1 = usedF(t, u, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			temp = u + k1*solverParams.timeStep/2;
-			k2 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy, 
+			k2 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			temp = u + k2*solverParams.timeStep/2;
-			k3 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy, 
+			k3 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			temp = u + k3*solverParams.timeStep;
-			k4 = usedF(t + solverParams.timeStep, temp, fx, fy, invM, Sx, Sy, 
+			k4 = usedF(t + solverParams.timeStep, temp, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			u += (k1 + 2*k2 + 2*k3 + k4)*solverParams.timeStep/6;
@@ -256,6 +251,9 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
 			uDisplay, t, 1);
 	}
+
+	std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush
+                << std::endl;
 
 	// write the results & finalize
     gmsh::view::write(viewTag, std::string("results.msh"));
