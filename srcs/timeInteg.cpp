@@ -191,23 +191,18 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	temp(numNodes);
 
 	// numerical integration
-	unsigned int currentDecade = 0;
+	unsigned int ratio, currentDecade = 0;
 	for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
 		nbrStep++)
 	{
 
   		// display progress
-        if((int(100*double(nbrStep-1)/double(solverParams.nbrTimeSteps)) 
-        	== currentDecade)
-            || (nbrStep == solverParams.nbrTimeSteps && currentDecade == 100))
+		ratio = int(100*double(nbrStep - 1)/double(solverParams.nbrTimeSteps));
+        if(ratio >= currentDecade)
         {
-            std::cout  	<< "\r" << "Integrating: " << currentDecade << "%"
+            std::cout  	<< "\r" << "Integrating: " << ratio << "%"
             			<< " of the time steps done" << std::flush;
-            currentDecade += 1;
-
-            if(currentDecade == 101){
-                std::cout << std::endl;
-            }
+            currentDecade = ratio + 1;
         }
 
 		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
@@ -256,6 +251,11 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
 			uDisplay, t, 1);
 	}
+
+	std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush
+	 			<< std::endl;
+
+
 
 	// write the results & finalize
     gmsh::view::write(viewTag, std::string("results.msh"));
