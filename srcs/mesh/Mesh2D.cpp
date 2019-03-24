@@ -7,7 +7,11 @@
 #include <iostream>
 #include <gmsh.h>
 #include "Mesh2D.hpp"
-
+//CMake drunk hack
+bool isPermutation(const std::vector<int>& vec1,
+	               const std::vector<int>& vec2,
+	               std::vector<unsigned int>& permutation1,
+	               std::vector<unsigned int>& permutation2);
 
 /**
  * \brief Loads the name order, dimension, number of nodes,
@@ -100,20 +104,21 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
  * \param nNodesElement Number of nodes of the parent element.
  */
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
-                    std::vector<double> determinant1D, unsigned int nNodesElement)
+                    std::vector<double> determinant1D,
+                    const std::vector<int>& nodesTagsElement)
 {
 
     Edge edge;
     //Should be before movement !
     for(unsigned int i = 0 ; i < nodesTagsEdge.size() ; ++i)
     {
-        unsigned int offset = i+element.edges.size();
-        if(offset == nNodesElement)
-            offset = 0;
+        for(unsigned int j = 0 ; j < nodesTagsElement.size() ; ++j)
+        {
+            if(nodesTagsEdge[i] == nodesTagsElement[j]) // We should always find it!
+                edge.offsetInElm.push_back(j);
 
-        edge.offsetInElm.push_back(offset);
+        }
     }
-
     edge.nodeTags = std::move(nodesTagsEdge);
     edge.determinant1D = std::move(determinant1D);
 
@@ -132,6 +137,7 @@ static void computeEdgeNormalCoord(Edge& edge,
 {
     std::pair<double, double> normal;
 
+    //Normally first and second node tags are vertex
     std::vector<double> coord1, dummyParametricCoord1;
     gmsh::model::mesh::getNode(edge.nodeTags[0], coord1,
                                             dummyParametricCoord1);
@@ -177,41 +183,24 @@ static void computeEdgeNormalCoord(Edge& edge,
  */
 static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int edgePos)
 {
-    bool found = false;
     unsigned int elVecSize = entity.elements.size();
     unsigned int nEdgePerEl = entity.elements[0].edges.size();
     for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
     {
-        if(!found)
+        for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
         {
-            for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
+            std::vector<int> nodesTagsInfront = entity.elements[elm].edges[k].nodeTags;
+            std::vector<unsigned int> permutation1, permutation2;
+
+            if(isPermutation(currentEdge.nodeTags, nodesTagsInfront, permutation1, permutation2))
             {
-                    if(entity.elements[elm].edges[k].nodeTags[0] == currentEdge.nodeTags[0]
-                       && entity.elements[elm].edges[k].nodeTags[1] == currentEdge.nodeTags[1])
-                    {
-                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
-                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
-                        currentEdge.nodeIndexEdgeInFront.push_back(0);
-                        currentEdge.nodeIndexEdgeInFront.push_back(1);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
-                        found = true;
-                    }
-                    else if(entity.elements[elm].edges[k].nodeTags[0] == currentEdge.nodeTags[1]
-                       && entity.elements[elm].edges[k].nodeTags[1] == currentEdge.nodeTags[0])
-                    {
-                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
-                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
-                        currentEdge.nodeIndexEdgeInFront.push_back(1);
-                        currentEdge.nodeIndexEdgeInFront.push_back(0);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
-                        found = true;
-                    }
+                currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
+                entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
+                currentEdge.nodeIndexEdgeInFront = std::move(permutation1);
+                entity.elements[elm].edges[k].nodeIndexEdgeInFront = std::move(permutation2);
+                return;
             }
         }
-        else
-            return;
     }
 }
 
@@ -280,14 +269,17 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
     element.jacobian2D = std::move(jacobians2D);
     element.nodeTags = std::move(nodesTags);
 
-    for(unsigned int i = 0 ; i < nodesTagsPerEdge.size()/2 ; ++i)
+    unsigned int nEdge = element2DProperty.numNodes/element2DProperty.order;
+    unsigned int nNodePerEdge = element2DProperty.order + 1;
+
+    for(unsigned int i = 0 ; i < nEdge ; ++i)
     {
-        std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i,
-                                        nodesTagsPerEdge.begin() + 2*(i + 1));
+        std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + nNodePerEdge*i,
+                                        nodesTagsPerEdge.begin() + nNodePerEdge*(i + 1));
 
         std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP1D*i, determinants1D.begin() + nGP1D*(i + 1));
 
-        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), element2DProperty.numNodes);
+        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), element.nodeTags);
         if(entity.elements.size() != 0)
         {
             if(!IsBounbdary(nodesTagBoundaries, element.edges[i]))

@@ -2,7 +2,7 @@ Gauss3
 Lagrange
 RK1
 strong
-400
+4
 0.01
 BC_Left
 	gaussian

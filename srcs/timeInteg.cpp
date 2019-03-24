@@ -93,6 +93,7 @@ static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx
 bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	const std::string& fileName)
 {
+    unsigned int nbreTimeSteps = static_cast<unsigned int>(solverParams.simTime/solverParams.timeStep);
 
 	// number of nodes and tags of the problem
 	unsigned int numNodes = getNumNodes(mesh);
@@ -192,12 +193,12 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 
 	// numerical integration
 	unsigned int ratio, currentDecade = 0;
-	for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ;
+	for(unsigned int nbrStep = 1 ; nbrStep < nbreTimeSteps + 1 ;
 		nbrStep++)
 	{
 
   		// display progress
-        ratio = int(100*double(nbrStep - 1)/double(solverParams.nbrTimeSteps));
+		ratio = int(100*double(nbrStep - 1)/double(nbreTimeSteps));
         if(ratio >= currentDecade)
         {
             std::cout  	<< "\r" << "Integrating: " << ratio << "%"
@@ -253,7 +254,9 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	}
 
 	std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush
-                << std::endl;
+	 			<< std::endl;
+
+
 
 	// write the results & finalize
     gmsh::view::write(viewTag, std::string("results.msh"));

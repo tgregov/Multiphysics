@@ -182,14 +182,14 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
 
     if(!(temp.find_first_not_of("0123456789") == std::string::npos)) //To improve
     {
-        std::cerr << "Unexpected number of time steps " << temp
+        std::cerr << "Unexpected simulation time duration " << temp
                   << " in parameter file " << fileName << std::endl;
 
         paramFile.close();
         return false;
     }
 
-    solverParams.nbrTimeSteps = std::stoi(temp);
+    solverParams.simTime = std::stoi(temp);
 
     temp.clear();
     std::getline(paramFile, temp);
@@ -222,7 +222,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << std::endl
                 << "Formulation type: " << solverParams.solverType
                 << std::endl
-                << "Number of time steps: " << solverParams.nbrTimeSteps
+                << "Simulation time duration: " << solverParams.simTime << "s"
                 << std::endl
                 << "Time step: " << solverParams.timeStep << "s"
                 << std::endl;
