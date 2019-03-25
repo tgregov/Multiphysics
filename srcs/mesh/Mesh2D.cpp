@@ -7,11 +7,7 @@
 #include <iostream>
 #include <gmsh.h>
 #include "Mesh2D.hpp"
-//CMake drunk hack
-bool isPermutation(const std::vector<int>& vec1,
-	               const std::vector<int>& vec2,
-	               std::vector<unsigned int>& permutation1,
-	               std::vector<unsigned int>& permutation2);
+#include "../utils.hpp"
 
 /**
  * \brief Loads the name order, dimension, number of nodes,

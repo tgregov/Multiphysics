@@ -58,13 +58,27 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			// I. BUILD THE DELTAM MATRIX
 			// compute sum_k{w_k*l_i*l_j}
 			// [TO DO]: only works for linear SF
-			// [TO DO]: put it in mesh2D
-			double lala = 0.0;
-			double lalb = 0.0;
-			for (unsigned int k = 0 ; k < elmProp1D.nGP ; ++k)
+			// [TO DO]: put it in mesh2D !!!!!!
+			std::vector<std::vector<double>> lalb(elmProp1D.nSF);
+			for(size_t l = 0 ; l < lalb.size() ; ++l)
 			{
-				lala += elmProp1D.prodFunc[k][0];
-				lalb += elmProp1D.prodFunc[k][1];
+				lalb[l].resize(elmProp1D.nSF);
+			}
+
+
+			for(unsigned int l = 0 ; l < elmProp1D.nSF*(elmProp1D.nSF+1)/2 ; ++l)
+			{
+				double  sum = 0.0;
+				for (unsigned int k = 0 ; k < elmProp1D.nGP ; ++k)
+				{
+					sum += elmProp1D.prodFunc[k][l];
+				}
+
+				lalb[elmProp1D.IJ[l].first][elmProp1D.IJ[l].second] = sum;
+				if(elmProp1D.IJ[l].first != elmProp1D.IJ[l].second)
+				{
+					lalb[elmProp1D.IJ[l].second][elmProp1D.IJ[l].first] = sum;
+				}
 			}
 
 			// compute the indices of the components
@@ -73,16 +87,23 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 
 			for(unsigned int s = 0 ; s < nSigma ; s++)
 			{
+
+				// current edge
+				Edge edge = element.edges[s];
+
 				Eigen::SparseMatrix<double> dMs(elmProp2D.nSF, elmProp2D.nSF);
 				std::vector<Eigen::Triplet<double>> indices;
 
-				indices.push_back(Eigen::Triplet<double>(s, s, lala));
-				indices.push_back(Eigen::Triplet<double>(s, (s+1) % nSigma, lalb));
-				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, s, lalb));
-				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma,
-									(s+1) % nSigma, lala));
-				dMs.setFromTriplets(indices.begin(), indices.end());
+				for(size_t nA = 0 ; nA <  edge.nodeTags.size() ; ++nA)
+				{
+					for(size_t nB = 0 ; nB <  edge.nodeTags.size() ; ++nB)
+					{
+						indices.push_back(Eigen::Triplet<double>
+							(edge.offsetInElm[nA], edge.offsetInElm[nB], lalb[nA][nB]));
+					}
+				}
 
+				dMs.setFromTriplets(indices.begin(), indices.end());
 				dM.push_back(dMs);
 			}
 

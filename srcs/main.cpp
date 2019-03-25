@@ -45,8 +45,8 @@ int main(int argc, char **argv)
         return -1;
    }
 
-    omp_set_num_threads(2);
-    Eigen::setNbThreads(2);
+    // omp_set_num_threads(2);
+    // Eigen::setNbThreads(2);
 
     //displayMesh(mesh);
     std::cout   << "================================================================"

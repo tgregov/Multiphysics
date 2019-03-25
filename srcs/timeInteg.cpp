@@ -105,11 +105,17 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
   	std::cout << "Building the invM matrix...";
   	buildM(mesh, invM);
-  	std::cout << "\rBuilding the invM matrix... 		Done" << std::endl;
+  	//std::cout << "invM:\n" << invM;
+  	std::cout 	<< "\rBuilding the invM matrix... 		Done" << std::flush 
+  				<< std::endl;
   	std::cout << "Building the Sx and Sy matrices...";
   	buildS(mesh, Sx, Sy);
-  	std::cout << "\rBuilding the Sx and Sy matrices... 	Done" << std::endl;
+  	//std::cout << "Sx:\n" << Sx;
+  	//std::cout << "Sy:\n" << Sy;
+  	std::cout 	<< "\rBuilding the Sx and Sy matrices... 	Done" << std::flush
+  				<< std::endl;
 
+  	
   	//Function pointer to the used function (weak vs strong form)
   	std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u,
                                 Eigen::VectorXd& fx, Eigen::VectorXd& fy,
@@ -149,6 +155,10 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
         }
     }
 
+	for(unsigned int i = 0; i < u.size(); i++){
+		std::cout << "u[" << i << "]:" << u[i] << std::endl;
+	}    
+
 	// vectors of physical flux
 	Eigen::VectorXd fx(numNodes);
 	Eigen::VectorXd fy(numNodes);
@@ -174,8 +184,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		{
 			Element2D element = entity.elements[i];
 			elementTags.push_back(element.elementTag);
-			// [TO DO]: only works for T3 :(
-			elementNumNodes.push_back(element.edges.size());
+			elementNumNodes.push_back(element.nodeTags.size());
 		}
 	}
 
@@ -255,13 +264,16 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 
 		// display the results
 		std::vector<std::vector<double>> uDisplay;
-
-		for(unsigned int count = 0; count < u.size()/3; ++count)
+		unsigned int offset = 0;
+		for(size_t count = 0; count < elementNumNodes.size(); ++count)
 		{
 			std::vector<double> temp;
-			temp.push_back(u[3*count]);
-			temp.push_back(u[3*count+1]);
-			temp.push_back(u[3*count+2]);
+			for (unsigned int countLocal = 0; countLocal < elementNumNodes[count]; 
+				++countLocal)
+			{
+				temp.push_back(u[countLocal+offset]);
+			}
+			offset += elementNumNodes[count];
 			uDisplay.push_back(temp);
 		}
 
@@ -273,10 +285,11 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	 			<< std::endl;
 
 
-
+	
 	// write the results & finalize
     gmsh::view::write(viewTag, std::string("results.msh"));
     gmsh::finalize();
+    
 
 	return true;
 }
