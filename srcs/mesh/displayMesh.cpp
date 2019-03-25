@@ -65,12 +65,12 @@ void displayMesh(const Mesh2D& mesh)
 			std::vector<Edge> edges = element.edges;
 			for(unsigned int k = 0 ; k < edges.size() ; ++k)
 			{
-				std::cout	<< "\t\t- [Edge (" << k << ")]:" << std::endl
-							<< "\t\t\t- Tag A: " << edges[k].nodeTags[0]
-							<< std::endl
-							<< "\t\t\t- Tag B: " << edges[k].nodeTags[1]
-							<< std::endl
-							<< "\t\t\t- Normal: (" << element.edges[k].normal.first
+				std::cout	<< "\t\t- [Edge (" << k << ")]:" << std::endl;
+				for(unsigned int b = 0 ; b < edges[k].nodeTags.size() ; ++b)
+                {
+                        std::cout << "\t\t\t- Tag " << b << ": " << edges[k].nodeTags[b] << std::endl;
+                }
+                std::cout   << "\t\t\t- Normal: (" << element.edges[k].normal.first
 							<< ", " << element.edges[k].normal.second << ")"
 							<< std::endl
 							<< "\t\t\t- Det: ";
