@@ -155,10 +155,6 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
         }
     }
 
-	for(unsigned int i = 0; i < u.size(); i++){
-		std::cout << "u[" << i << "]:" << u[i] << std::endl;
-	}    
-
 	// vectors of physical flux
 	Eigen::VectorXd fx(numNodes);
 	Eigen::VectorXd fy(numNodes);

@@ -7,7 +7,7 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 {
 	// first basic flux: simple transport
 	double ax = 1.0;
-	double ay = 1.0;
+	double ay = 0.0;
 
 	fx = ax*u;
 	fy = ay*u;
@@ -20,7 +20,7 @@ void flux(double& fx, double& fy, double u)
 {
 	// first basic flux: simple transport
 	double ax = 1.0;
-	double ay = 1.0;
+	double ay = 0.0;
 
 	fx = ax*u;
 	fy = ay*u;

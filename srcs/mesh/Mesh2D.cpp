@@ -394,7 +394,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
 
             std::vector<double> elementBarycenter(baryCenters.begin() + 3*i, baryCenters.begin() + 3*(i + 1));
 
-            unsigned int elementOffset = nodesTagPerEdgeElement.size()/2; //To check
+            unsigned int elementOffset = numNodes; //To check
 
             addElement(entity, elementTags[i], eleType2D, eleType1D,
                         std::move(jacobiansElement2D),
