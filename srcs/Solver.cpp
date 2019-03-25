@@ -61,6 +61,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "constantNeumann")
             boundary.bcFunc = constantNeumann;
 
+        else if(bcType == "gaussian2D")
+            boundary.bcFunc = gaussian2D;
+
         else
         {
             std::cerr << "Unhandled boundary condtion type " << bcType

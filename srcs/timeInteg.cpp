@@ -131,7 +131,23 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	}
 
 	// initial condition [TO DO]: use param.dat and bc struct
-	Eigen::VectorXd u(numNodes); u.setZero();
+	bc initCond = solverParams.boundaryConditions.at("Init_Cond");
+	Eigen::VectorXd u(numNodes);
+	for(auto entity : mesh.entities)
+    {
+        for(auto element : entity.elements)
+        {
+            for(auto edge : element.edges)
+            {
+                for(unsigned int n = 0 ; n < edge.nodeTags.size() ; ++n)
+                {
+                    double x = edge.nodeCoordinate[n].first;
+                    double y = edge.nodeCoordinate[n].second;
+                    u(element.offsetInU + edge.offsetInElm[n]) = initCond.bcFunc(x, y, 0, 0, 0, initCond.coefficients);
+                }
+            }
+        }
+    }
 
 	// vectors of physical flux
 	Eigen::VectorXd fx(numNodes);

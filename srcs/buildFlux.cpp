@@ -7,7 +7,7 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 {
 	// first basic flux: simple transport
 	double ax = 1.0;
-	double ay = 0.0;
+	double ay = 1.0;
 
 	fx = ax*u;
 	fy = ay*u;
@@ -20,7 +20,7 @@ void flux(double& fx, double& fy, double u)
 {
 	// first basic flux: simple transport
 	double ax = 1.0;
-	double ay = 0.0;
+	double ay = 1.0;
 
 	fx = ax*u;
 	fy = ay*u;
@@ -46,9 +46,9 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			Element2D element = entity.elements[elm];
 
 			// get the properties of the current element type
-            ElementProperty elmProp1D 
+            ElementProperty elmProp1D
             	= mesh.elementProperties1D.at(element.elementType1D);
-            ElementProperty elmProp2D 
+            ElementProperty elmProp2D
             	= mesh.elementProperties2D.at(element.elementType2D);
 
 			// partial rhs vector
@@ -79,7 +79,7 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				indices.push_back(Eigen::Triplet<double>(s, s, lala));
 				indices.push_back(Eigen::Triplet<double>(s, (s+1) % nSigma, lalb));
 				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, s, lalb));
-				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, 
+				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma,
 									(s+1) % nSigma, lala));
 				dMs.setFromTriplets(indices.begin(), indices.end());
 
@@ -131,13 +131,13 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                        					.edges[edge.edgeInFront.second]
                        					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
 
-						gx[edge.offsetInElm[j]] += 
+						gx[edge.offsetInElm[j]] +=
 							-(factor*fx[indexJ] + fx[indexFrontJ])/2
-							- C*element.edges[s].normal.first*(u[indexJ] 
+							- C*element.edges[s].normal.first*(u[indexJ]
 																- u[indexFrontJ])/2;
-						gy[edge.offsetInElm[j]] += 
+						gy[edge.offsetInElm[j]] +=
 							-(factor*fy[indexJ] + fy[indexFrontJ])/2
-							- C*element.edges[s].normal.second*(u[indexJ] 
+							- C*element.edges[s].normal.second*(u[indexJ]
 																- u[indexFrontJ])/2;
 					}
 				}
