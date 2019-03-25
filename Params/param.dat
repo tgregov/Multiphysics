@@ -2,11 +2,11 @@ Gauss3
 Lagrange
 RK1
 strong
-4
-0.01
+2
+0.001
 BC_Left
-	gaussian
-	1,1,0.1
+	constantNeumann
+	0
 BC_Right
 	constantNeumann
 	0
@@ -16,3 +16,6 @@ BC_Up
 BC_Down
 	constantNeumann
 	0
+Init_Cond
+	gaussian2D
+	0.4,0.5,0.01,0.5,0.01
