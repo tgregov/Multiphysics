@@ -16,7 +16,7 @@ struct SolverParams
     std::string timeIntType;    /**< Runge-Kutta time integration type (RK1 or RK4) */
     std::string solverType;     /**< Solver form (strong or weak) */
 
-    unsigned int simTime;       /**< Simulation time duration */
+    double simTime;       /**< Simulation time duration */
     double timeStep;            /**< Time steps for the simulation */
 
     std::map<std::string, bc> boundaryConditions;

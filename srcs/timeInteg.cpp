@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <cassert>
 #include <gmsh.h>
 #include "matrices/buildM.hpp"
 #include "matrices/buildS.hpp"
@@ -155,6 +156,8 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
         }
     }
 
+    // u.setZero();
+
 	// vectors of physical flux
 	Eigen::VectorXd fx(numNodes);
 	Eigen::VectorXd fy(numNodes);
@@ -254,6 +257,9 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 			u += (k1 + 2*k2 + 2*k3 + k4)*solverParams.timeStep/6;
 
 		}
+
+		// check that it does not diverge
+		assert(u.maxCoeff() <= 1E5);
 
 		// add time step
 		t += solverParams.timeStep;
