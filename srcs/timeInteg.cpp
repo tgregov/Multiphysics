@@ -107,7 +107,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	std::cout << "Building the invM matrix...";
   	buildM(mesh, invM);
   	//std::cout << "invM:\n" << invM;
-  	std::cout 	<< "\rBuilding the invM matrix... 		Done" << std::flush 
+  	std::cout 	<< "\rBuilding the invM matrix... 		Done" << std::flush
   				<< std::endl;
   	std::cout << "Building the Sx and Sy matrices...";
   	buildS(mesh, Sx, Sy);
@@ -116,7 +116,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	std::cout 	<< "\rBuilding the Sx and Sy matrices... 	Done" << std::flush
   				<< std::endl;
 
-  	
+
   	//Function pointer to the used function (weak vs strong form)
   	std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u,
                                 Eigen::VectorXd& fx, Eigen::VectorXd& fy,
@@ -187,27 +187,27 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		}
 	}
 
+    std::vector<std::vector<double>> uDisplay(elementNumNodes.size()); //Vector to display results
+
 	double t = 0.0;
 
 	//write initial condition
-	std::vector<std::vector<double>> uDisplay;
 	unsigned int index = 0;
 
-	for(size_t count = 0 ; count < elementTags.size() ; ++count)
+	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 	{
-
-		std::vector<double> temp;
+		std::vector<double> temp(elementNumNodes.size());
 		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
-			temp.push_back(u[index]);
+			temp[node]=u[index];
 			++index;
 		}
 
-		uDisplay.push_back(temp);
+		uDisplay[count] = std::move(temp);
 	}
 
 	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-		uDisplay, t, 1);
+	                         uDisplay, t, 1);
 
 
 	// temporary vectors (only for RK4, but I don't want to define them at each time
@@ -265,18 +265,17 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		t += solverParams.timeStep;
 
 		// display the results
-		std::vector<std::vector<double>> uDisplay;
 		unsigned int offset = 0;
-		for(size_t count = 0; count < elementNumNodes.size(); ++count)
+		for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 		{
-			std::vector<double> temp;
-			for (unsigned int countLocal = 0; countLocal < elementNumNodes[count]; 
+			std::vector<double> temp(elementNumNodes[count]);
+			for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
 				++countLocal)
 			{
-				temp.push_back(u[countLocal+offset]);
+				temp[countLocal] = u[countLocal+offset];
 			}
 			offset += elementNumNodes[count];
-			uDisplay.push_back(temp);
+			uDisplay[count] = std::move(temp);
 		}
 
 		gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
@@ -287,11 +286,11 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	 			<< std::endl;
 
 
-	
+
 	// write the results & finalize
     gmsh::view::write(viewTag, std::string("results.msh"));
     gmsh::finalize();
-    
+
 
 	return true;
 }
