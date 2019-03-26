@@ -133,15 +133,20 @@ static void computeEdgeNormalCoord(Edge& edge,
 {
     std::pair<double, double> normal;
 
-    //Normally first and second node tags are vertex
-    std::vector<double> coord1, dummyParametricCoord1;
-    gmsh::model::mesh::getNode(edge.nodeTags[0], coord1,
-                                            dummyParametricCoord1);
+    std::vector<double> coord1, coord2;
+    for(unsigned int i = 0 ; i < edge.nodeTags.size() ; ++i)
+    {
+            std::vector<double> coord, dummyParametricCoord;
+            gmsh::model::mesh::getNode(edge.nodeTags[i], coord,
+                                        dummyParametricCoord);
+            edge.nodeCoordinate.push_back(std::pair<double, double>(coord[0], coord[1]));
+            //Normally first and second node tags are vertex
+            if(i == 0)
+                coord1 = std::move(coord);
+            else if(i == 1)
+                coord2 = std::move(coord);
 
-    // get the coordinates of the second node
-    std::vector<double> coord2, dummyParametricCoord2;
-    gmsh::model::mesh::getNode(edge.nodeTags[1], coord2,
-                                dummyParametricCoord2);
+    }
 
     // compute the normal
     // if A:(x1, y1) and B:(x2, y2), then AB = (x2 - x1, y2 - y1) and a
@@ -167,8 +172,6 @@ static void computeEdgeNormalCoord(Edge& edge,
     normal.second = ny/norm;
 
     edge.normal = normal;
-    edge.nodeCoordinate.push_back(std::pair<double, double>(coord1[0], coord1[1]));
-    edge.nodeCoordinate.push_back(std::pair<double, double>(coord2[0], coord2[1]));
 }
 
 /**
