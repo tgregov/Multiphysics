@@ -257,6 +257,18 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 			u += (k1 + 2*k2 + 2*k3 + k4)*solverParams.timeStep/6;
 
 		}
+		else if(solverParams.timeIntType == "RK2")
+		{
+
+			temp = u + usedF(t + solverParams.timeStep/2, u, fx, fy, invM, Sx, 
+							Sy, numNodes, mesh, solverParams.boundaryConditions)
+							*solverParams.timeStep/2;
+							
+			u += solverParams.timeStep * usedF(t + solverParams.timeStep/2, temp,
+												fx, fy, invM, Sx, Sy, numNodes, mesh,
+												solverParams.boundaryConditions);
+
+		}
 
 		// check that it does not diverge
 		assert(u.maxCoeff() <= 1E5);
