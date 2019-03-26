@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     // omp_set_num_threads(2);
     // Eigen::setNbThreads(2);
 
-    //displayMesh(mesh);
+    // displayMesh(mesh);
     std::cout   << "================================================================"
                 << std::endl
                 << "                     EXECUTING THE SOLVER                       "
