@@ -85,8 +85,30 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
                 elementProperty.prodFunc.push_back(wll);
             }
 
+            std::vector<std::vector<double>> lalb(elementProperty.nSF);
+            for(size_t l = 0 ; l < lalb.size() ; ++l)
+            {
+                lalb[l].resize(elementProperty.nSF);
+            }
 
-            meshElementProp[eleTypes[i]] = elementProperty;
+            for(unsigned int l = 0 ; l < elementProperty.nSF*(elementProperty.nSF+1)/2 ; ++l)
+            {
+                double  sum = 0.0;
+                for (unsigned int k = 0 ; k < elementProperty.nGP ; ++k)
+                {
+                    sum += elementProperty.prodFunc[k][l];
+                }
+
+                lalb[elementProperty.IJ[l].first][elementProperty.IJ[l].second] = sum;
+                if(elementProperty.IJ[l].first != elementProperty.IJ[l].second)
+                {
+                    lalb[elementProperty.IJ[l].second][elementProperty.IJ[l].first] = sum;
+                }
+            }
+
+            elementProperty.lalb = std::move(lalb);
+
+            meshElementProp[eleTypes[i]] = std::move(elementProperty);
         }
     }
 }
@@ -171,7 +193,7 @@ static void computeEdgeNormalCoord(Edge& edge,
     normal.first = nx/norm;
     normal.second = ny/norm;
 
-    edge.normal = normal;
+    edge.normal = std::move(normal);
 }
 
 /**
@@ -255,7 +277,8 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         std::vector<int> nodesTags,
                         const std::vector<double>& elementBarycenter,
                         const std::map<std::string, std::vector<int>>& nodesTagBoundaries,
-                        const ElementProperty& element2DProperty)
+                        const ElementProperty& element2DProperty,
+                        const ElementProperty& element1DProperty)
 {
     Element2D element;
     element.elementTag = elementTag;
@@ -291,6 +314,21 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
         }
 
         computeEdgeNormalCoord(element.edges[i], elementBarycenter);
+
+        Eigen::SparseMatrix<double> dMs(element2DProperty.nSF, element2DProperty.nSF);
+        std::vector<Eigen::Triplet<double>> indices;
+
+        for(size_t nA = 0 ; nA <  element.edges[i].nodeTags.size() ; ++nA)
+        {
+            for(size_t nB = 0 ; nB <  element.edges[i].nodeTags.size() ; ++nB)
+            {
+                indices.push_back(Eigen::Triplet<double>
+                    (element.edges[i].offsetInElm[nA], element.edges[i].offsetInElm[nB], element1DProperty.lalb[nA][nB]));
+            }
+        }
+
+        dMs.setFromTriplets(indices.begin(), indices.end());
+        element.dM.push_back(dMs);
     }
 
     entity.elements.push_back(element);
@@ -408,7 +446,8 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                         std::move(nodeTagsElement),
                         elementBarycenter,
                         mesh.nodesTagBoundary,
-                        mesh.elementProperties2D[eleType2D]);
+                        mesh.elementProperties2D[eleType2D],
+                        mesh.elementProperties1D[eleType1D]);
 
             currentOffset += elementOffset;
         }
