@@ -5,6 +5,7 @@ main.cpp
 buildFlux.hpp buildFlux.cpp 
 timeInteg.cpp timeInteg.hpp 
 Solver.hpp Solver.cpp
-bcFunction.hpp bcFunction.cpp)
+bcFunction.hpp bcFunction.cpp
+utils.hpp utils.cpp)
 ADD_EXECUTABLE(main ${SRCS})
 TARGET_LINK_LIBRARIES(main ${GMSH_LIBRARIES})

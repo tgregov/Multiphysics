@@ -7,7 +7,7 @@
 #include <iostream>
 #include <gmsh.h>
 #include "Mesh2D.hpp"
-
+#include "../utils.hpp"
 
 /**
  * \brief Loads the name order, dimension, number of nodes,
@@ -85,8 +85,30 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
                 elementProperty.prodFunc.push_back(wll);
             }
 
+            std::vector<std::vector<double>> lalb(elementProperty.nSF);
+            for(size_t l = 0 ; l < lalb.size() ; ++l)
+            {
+                lalb[l].resize(elementProperty.nSF);
+            }
 
-            meshElementProp[eleTypes[i]] = elementProperty;
+            for(unsigned int l = 0 ; l < elementProperty.nSF*(elementProperty.nSF+1)/2 ; ++l)
+            {
+                double  sum = 0.0;
+                for (unsigned int k = 0 ; k < elementProperty.nGP ; ++k)
+                {
+                    sum += elementProperty.prodFunc[k][l];
+                }
+
+                lalb[elementProperty.IJ[l].first][elementProperty.IJ[l].second] = sum;
+                if(elementProperty.IJ[l].first != elementProperty.IJ[l].second)
+                {
+                    lalb[elementProperty.IJ[l].second][elementProperty.IJ[l].first] = sum;
+                }
+            }
+
+            elementProperty.lalb = std::move(lalb);
+
+            meshElementProp[eleTypes[i]] = std::move(elementProperty);
         }
     }
 }
@@ -100,20 +122,21 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
  * \param nNodesElement Number of nodes of the parent element.
  */
 static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
-                    std::vector<double> determinant1D, unsigned int nNodesElement)
+                    std::vector<double> determinant1D,
+                    const std::vector<int>& nodesTagsElement)
 {
 
     Edge edge;
     //Should be before movement !
     for(unsigned int i = 0 ; i < nodesTagsEdge.size() ; ++i)
     {
-        unsigned int offset = i+element.edges.size();
-        if(offset == nNodesElement)
-            offset = 0;
+        for(unsigned int j = 0 ; j < nodesTagsElement.size() ; ++j)
+        {
+            if(nodesTagsEdge[i] == nodesTagsElement[j]) // We should always find it!
+                edge.offsetInElm.push_back(j);
 
-        edge.offsetInElm.push_back(offset);
+        }
     }
-
     edge.nodeTags = std::move(nodesTagsEdge);
     edge.determinant1D = std::move(determinant1D);
 
@@ -132,14 +155,20 @@ static void computeEdgeNormalCoord(Edge& edge,
 {
     std::pair<double, double> normal;
 
-    std::vector<double> coord1, dummyParametricCoord1;
-    gmsh::model::mesh::getNode(edge.nodeTags[0], coord1,
-                                            dummyParametricCoord1);
+    std::vector<double> coord1, coord2;
+    for(unsigned int i = 0 ; i < edge.nodeTags.size() ; ++i)
+    {
+            std::vector<double> coord, dummyParametricCoord;
+            gmsh::model::mesh::getNode(edge.nodeTags[i], coord,
+                                        dummyParametricCoord);
+            edge.nodeCoordinate.push_back(std::pair<double, double>(coord[0], coord[1]));
+            //Normally first and second node tags are vertex
+            if(i == 0)
+                coord1 = std::move(coord);
+            else if(i == 1)
+                coord2 = std::move(coord);
 
-    // get the coordinates of the second node
-    std::vector<double> coord2, dummyParametricCoord2;
-    gmsh::model::mesh::getNode(edge.nodeTags[1], coord2,
-                                dummyParametricCoord2);
+    }
 
     // compute the normal
     // if A:(x1, y1) and B:(x2, y2), then AB = (x2 - x1, y2 - y1) and a
@@ -164,9 +193,7 @@ static void computeEdgeNormalCoord(Edge& edge,
     normal.first = nx/norm;
     normal.second = ny/norm;
 
-    edge.normal = normal;
-    edge.nodeCoordinate.push_back(std::pair<double, double>(coord1[0], coord1[1]));
-    edge.nodeCoordinate.push_back(std::pair<double, double>(coord2[0], coord2[1]));
+    edge.normal = std::move(normal);
 }
 
 /**
@@ -177,37 +204,22 @@ static void computeEdgeNormalCoord(Edge& edge,
  */
 static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int edgePos)
 {
-    bool found = false;
     unsigned int elVecSize = entity.elements.size();
     unsigned int nEdgePerEl = entity.elements[0].edges.size();
     for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
     {
-        if(!found)
+        for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
         {
-            for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
+            std::vector<int> nodesTagsInfront = entity.elements[elm].edges[k].nodeTags;
+            std::vector<unsigned int> permutation1, permutation2;
+
+            if(isPermutation(currentEdge.nodeTags, nodesTagsInfront, permutation1, permutation2))
             {
-                    if(entity.elements[elm].edges[k].nodeTags[0] == currentEdge.nodeTags[0]
-                       && entity.elements[elm].edges[k].nodeTags[1] == currentEdge.nodeTags[1])
-                    {
-                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
-                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
-                        currentEdge.nodeIndexEdgeInFront.push_back(0);
-                        currentEdge.nodeIndexEdgeInFront.push_back(1);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
-                        found = true;
-                    }
-                    else if(entity.elements[elm].edges[k].nodeTags[0] == currentEdge.nodeTags[1]
-                       && entity.elements[elm].edges[k].nodeTags[1] == currentEdge.nodeTags[0])
-                    {
-                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
-                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
-                        currentEdge.nodeIndexEdgeInFront.push_back(1);
-                        currentEdge.nodeIndexEdgeInFront.push_back(0);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(1);
-                        entity.elements[elm].edges[k].nodeIndexEdgeInFront.push_back(0);
-                        found = true;
-                    }
+                currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
+                entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
+                currentEdge.nodeIndexEdgeInFront = std::move(permutation1);
+                entity.elements[elm].edges[k].nodeIndexEdgeInFront = std::move(permutation2);
+                return;
             }
         }
     }
@@ -261,10 +273,12 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
                         std::vector<double> determinants2D,
                         std::vector<double> determinants1D,
                         unsigned int nGP1D, unsigned int offsetInU,
-                        const std::vector<int>& nodesTagsPerEdge,
+                        std::vector<int> nodesTagsPerEdge,
+                        std::vector<int> nodesTags,
                         const std::vector<double>& elementBarycenter,
                         const std::map<std::string, std::vector<int>>& nodesTagBoundaries,
-                        const ElementProperty& element2DProperty)
+                        const ElementProperty& element2DProperty,
+                        const ElementProperty& element1DProperty)
 {
     Element2D element;
     element.elementTag = elementTag;
@@ -275,15 +289,19 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 
     element.determinant2D = std::move(determinants2D);
     element.jacobian2D = std::move(jacobians2D);
+    element.nodeTags = std::move(nodesTags);
 
-    for(unsigned int i = 0 ; i < nodesTagsPerEdge.size()/2 ; ++i)
+    unsigned int nEdge = element2DProperty.numNodes/element2DProperty.order;
+    unsigned int nNodePerEdge = element2DProperty.order + 1;
+
+    for(unsigned int i = 0 ; i < nEdge ; ++i)
     {
-        std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + 2*i,
-                                        nodesTagsPerEdge.begin() + 2*(i + 1));
+        std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + nNodePerEdge*i,
+                                        nodesTagsPerEdge.begin() + nNodePerEdge*(i + 1));
 
         std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP1D*i, determinants1D.begin() + nGP1D*(i + 1));
 
-        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), element2DProperty.numNodes);
+        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), element.nodeTags);
         if(entity.elements.size() != 0)
         {
             if(!IsBounbdary(nodesTagBoundaries, element.edges[i]))
@@ -296,6 +314,21 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
         }
 
         computeEdgeNormalCoord(element.edges[i], elementBarycenter);
+
+        Eigen::SparseMatrix<double> dMs(element2DProperty.nSF, element2DProperty.nSF);
+        std::vector<Eigen::Triplet<double>> indices;
+
+        for(size_t nA = 0 ; nA <  element.edges[i].nodeTags.size() ; ++nA)
+        {
+            for(size_t nB = 0 ; nB <  element.edges[i].nodeTags.size() ; ++nB)
+            {
+                indices.push_back(Eigen::Triplet<double>
+                    (element.edges[i].offsetInElm[nA], element.edges[i].offsetInElm[nB], element1DProperty.lalb[nA][nB]));
+            }
+        }
+
+        dMs.setFromTriplets(indices.begin(), indices.end());
+        element.dM.push_back(dMs);
     }
 
     entity.elements.push_back(element);
@@ -333,13 +366,13 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
         std::vector<int> nodeTags, elementTags;
         gmsh::model::mesh::getElementsByType(eleType2D, elementTags, nodeTags,
                                                 entityHandle.second);
-        entity.elementTags2D[eleType2D] = elementTags;
-        entity.nodesTags2D[eleType2D] = nodeTags;
 
         std::vector<int> nodesTagPerEdge;
         gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodesTagPerEdge,
                                                 entityHandle.second);
-        entity.nodesTagsPerEdge2D[eleType2D] = nodesTagPerEdge;
+
+        unsigned int numNodes = mesh.elementProperties2D[eleType2D].numNodes;
+        unsigned int order = mesh.elementProperties2D[eleType2D].order;
 
         std::vector<double> baryCenters;
         gmsh::model::mesh::getBarycenters(eleType2D, entityHandle.second, false, true, baryCenters);
@@ -347,8 +380,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
         // add 1D entity to store all the lines associated to elements of the same
         // order
         // TO DO: Problem Q4 and T3 element have the same order ?
-        int eleType1D = gmsh::model::mesh::getElementType("line",
-                                        mesh.elementProperties2D[eleType2D].order);
+        int eleType1D = gmsh::model::mesh::getElementType("line", order);
         gmsh::model::mesh::setElementsByType(1, c, eleType1D, {}, nodesTagPerEdge);
 
         loadElementProperties(mesh.elementProperties1D,
@@ -369,12 +401,6 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
         unsigned int nGP2D = mesh.elementProperties2D[eleType2D].nGP;
         unsigned int nGP1D = mesh.elementProperties1D[eleType1D].nGP;
 
-        // TO DO: check
-        // unsigned int nEdgePerNode = nodesTagPerEdge.size()/nodeTags.size();
-        // std::cout << " ====> " << nEdgePerNode << std::endl;
-        unsigned int numNodes = mesh.elementProperties2D[eleType2D].numNodes;
-        // std:: cout << numNodes << std::endl;
-
         unsigned ratio, currentDecade = 0;
         for(unsigned int i = 0 ; i < elementTags.size() ; ++i)
         {
@@ -388,7 +414,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                             << std::flush;
                 currentDecade = ratio + 1;
             }
- 
+
             std::vector<double> jacobiansElement2D(
                                             jacobians2D.begin() + 9*nGP2D*i,
                                             jacobians2D.begin() + 9*nGP2D*(1 + i));
@@ -396,32 +422,38 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                                             determinants2D.begin() + nGP2D*i,
                                             determinants2D.begin() + nGP2D*(1 + i));
             std::vector<double> determinantElement1D(
-                                            determinants1D.begin() + numNodes*nGP1D*i,
-                                            determinants1D.begin() + numNodes*nGP1D*(1 + i));
+                                            determinants1D.begin() + (numNodes/order)*nGP1D*i,
+                                            determinants1D.begin() + (numNodes/order)*nGP1D*(1 + i));
+
+            std::vector<int> nodeTagsElement(nodeTags.begin() + numNodes*i,
+                                             nodeTags.begin() + numNodes*(1 + i));
 
             //[TO DO]: generalize for non-linear element
             std::vector<int> nodesTagPerEdgeElement(
-                                nodesTagPerEdge.begin() + 2*numNodes*i,
-                                nodesTagPerEdge.begin() + 2*numNodes*(i + 1));
+                                nodesTagPerEdge.begin() + (order + 1)*(numNodes/order)*i,
+                                nodesTagPerEdge.begin() + (order + 1)*(numNodes/order)*(i + 1));
 
             std::vector<double> elementBarycenter(baryCenters.begin() + 3*i, baryCenters.begin() + 3*(i + 1));
+
+            unsigned int elementOffset = numNodes; //To check
 
             addElement(entity, elementTags[i], eleType2D, eleType1D,
                         std::move(jacobiansElement2D),
                         std::move(determinantsElement2D),
                         std::move(determinantElement1D),
                         nGP1D, currentOffset,
-                        nodesTagPerEdgeElement,
+                        std::move(nodesTagPerEdgeElement),
+                        std::move(nodeTagsElement),
                         elementBarycenter,
                         mesh.nodesTagBoundary,
-                        mesh.elementProperties2D[eleType2D]);
+                        mesh.elementProperties2D[eleType2D],
+                        mesh.elementProperties1D[eleType1D]);
 
-            currentOffset += nodesTagPerEdgeElement.size()/2;
+            currentOffset += elementOffset;
         }
 
-        std::cout   << "\r" << "Entity [" << entity.entityTag2D << "]: "
+         std::cout  << "\r" << "Entity [" << entity.entityTag2D << "]: "
                     << "100% of the elements computed" << std::flush << std::endl;
-
     }
 
     // add the entity to the mesh.entities field
@@ -482,8 +514,9 @@ unsigned int getNumNodes(const Mesh2D& mesh2D)
         // loop over the elements
         for(unsigned int elm = 0 ; elm < entity.elements.size() ; ++elm)
         {
-            // the number of nodes for an element equals its number of edges
-            numNodes += entity.elements[elm].edges.size();
+            Element2D element = entity.elements[elm];
+            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
+                numNodes++;
         }
     }
 
@@ -502,11 +535,12 @@ std::vector<int> getTags(const Mesh2D& mesh2D)
         Entity2D entity = mesh2D.entities[ent];
 
         // loop over the nodes
-        for(std::pair<int, std::vector<int>> nodes : entity.nodesTagsPerEdge2D)
+        for(unsigned int elm = 0 ; elm < entity.elements.size() ; ++elm)
         {
-            for(unsigned int i = 0 ; i < nodes.second.size()/2 ; ++i)
+            Element2D element = entity.elements[elm];
+            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
             {
-                listTags.push_back(nodes.second[2*i]);
+                listTags.push_back(element.nodeTags[n]);
             }
         }
     }

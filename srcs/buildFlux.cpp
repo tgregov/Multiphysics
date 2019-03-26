@@ -27,7 +27,7 @@ void flux(double& fx, double& fy, double u)
 }
 
 bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
-	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, const double& C,
+	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, double C,
 	double factor, unsigned int numNodes, double t, const std::map<std::string, bc>& boundaries)
 {
 
@@ -46,47 +46,17 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			Element2D element = entity.elements[elm];
 
 			// get the properties of the current element type
-            ElementProperty elmProp1D 
+            ElementProperty elmProp1D
             	= mesh.elementProperties1D.at(element.elementType1D);
-            ElementProperty elmProp2D 
+            ElementProperty elmProp2D
             	= mesh.elementProperties2D.at(element.elementType2D);
 
 			// partial rhs vector
-			Eigen::VectorXd partialI(elmProp2D.nSF); partialI.setZero();
+			Eigen::VectorXd partialI(elmProp2D.nSF); partialI.setZero(); //DO NOT TOUCH
 
+            unsigned int nSigma = element.edges.size();
 
-			// I. BUILD THE DELTAM MATRIX
-			// compute sum_k{w_k*l_i*l_j}
-			// [TO DO]: only works for linear SF
-			// [TO DO]: put it in mesh2D
-			double lala = 0.0;
-			double lalb = 0.0;
-			for (unsigned int k = 0 ; k < elmProp1D.nGP ; ++k)
-			{
-				lala += elmProp1D.prodFunc[k][0];
-				lalb += elmProp1D.prodFunc[k][1];
-			}
-
-			// compute the indices of the components
-			unsigned int nSigma = element.edges.size();
-			std::vector<Eigen::SparseMatrix<double>> dM;
-
-			for(unsigned int s = 0 ; s < nSigma ; s++)
-			{
-				Eigen::SparseMatrix<double> dMs(elmProp2D.nSF, elmProp2D.nSF);
-				std::vector<Eigen::Triplet<double>> indices;
-
-				indices.push_back(Eigen::Triplet<double>(s, s, lala));
-				indices.push_back(Eigen::Triplet<double>(s, (s+1) % nSigma, lalb));
-				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, s, lalb));
-				indices.push_back(Eigen::Triplet<double>((s+1) % nSigma, 
-									(s+1) % nSigma, lala));
-				dMs.setFromTriplets(indices.begin(), indices.end());
-
-				dM.push_back(dMs);
-			}
-
-			// II. COMPUTE THE RHS
+			// I. COMPUTE THE RHS
 			// [TO DO] optmize x2
 			// loop, for each element, over the edges
 			for(unsigned int s = 0 ; s < nSigma ; ++s)
@@ -131,19 +101,19 @@ bool buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                        					.edges[edge.edgeInFront.second]
                        					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
 
-						gx[edge.offsetInElm[j]] += 
+						gx[edge.offsetInElm[j]] +=
 							-(factor*fx[indexJ] + fx[indexFrontJ])/2
-							- C*element.edges[s].normal.first*(u[indexJ] 
+							- C*element.edges[s].normal.first*(u[indexJ]
 																- u[indexFrontJ])/2;
-						gy[edge.offsetInElm[j]] += 
+						gy[edge.offsetInElm[j]] +=
 							-(factor*fy[indexJ] + fy[indexFrontJ])/2
-							- C*element.edges[s].normal.second*(u[indexJ] 
+							- C*element.edges[s].normal.second*(u[indexJ]
 																- u[indexFrontJ])/2;
 					}
 				}
 
-				dMgx = dM[s]*gx;
-				dMgy = dM[s]*gy;
+				dMgx = element.dM[s]*gx;
+				dMgy = element.dM[s]*gy;
 
 				// then we apply a scalar product and sum the current contribution
 				// "+=" seems to work

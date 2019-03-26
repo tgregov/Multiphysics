@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     // check that the file format is valid
     if (argc < 3)
     {
-        std::cerr   << "Usage: " << argv[0] << " file.msh " << " param.dat " 
+        std::cerr   << "Usage: " << argv[0] << " file.msh " << " param.dat "
                     <<  std::endl;
         return 1;
     }
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
                 << "================================================================"
                 << std::endl;
     Mesh2D mesh;
-    if(!readMesh2D(mesh, std::string(argv[1]), solverParams.spaceIntType, 
+    if(!readMesh2D(mesh, std::string(argv[1]), solverParams.spaceIntType,
         solverParams.basisFuncType))
     {
         std::cerr   << "Something went wrong when reading mesh file: "
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
                 << "                     EXECUTING THE SOLVER                       "
                 << std::endl
                 << "================================================================"
-                << std::endl;   
+                << std::endl;
     if(!timeInteg(mesh, solverParams, std::string(argv[1])))
     {
         std::cerr   << "Something went wrong when time integrating" << std::endl;

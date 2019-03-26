@@ -61,6 +61,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "constantNeumann")
             boundary.bcFunc = constantNeumann;
 
+        else if(bcType == "gaussian2D")
+            boundary.bcFunc = gaussian2D;
+
         else
         {
             std::cerr << "Unhandled boundary condtion type " << bcType
@@ -180,16 +183,16 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     std::getline(paramFile, temp);
 
-    if(!(temp.find_first_not_of("0123456789") == std::string::npos)) //To improve
+    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
     {
-        std::cerr << "Unexpected number of time steps " << temp
+        std::cerr << "Unexpected simulation time duration " << temp
                   << " in parameter file " << fileName << std::endl;
 
         paramFile.close();
         return false;
     }
 
-    solverParams.nbrTimeSteps = std::stoi(temp);
+    solverParams.simTime = std::stod(temp);
 
     temp.clear();
     std::getline(paramFile, temp);
@@ -222,7 +225,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << std::endl
                 << "Formulation type: " << solverParams.solverType
                 << std::endl
-                << "Number of time steps: " << solverParams.nbrTimeSteps
+                << "Simulation time duration: " << solverParams.simTime << "s"
                 << std::endl
                 << "Time step: " << solverParams.timeStep << "s"
                 << std::endl;

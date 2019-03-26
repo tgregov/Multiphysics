@@ -4,6 +4,7 @@
  */
 
 #include <iostream>
+#include <cassert>
 #include <gmsh.h>
 #include "matrices/buildM.hpp"
 #include "matrices/buildS.hpp"
@@ -93,6 +94,7 @@ static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx
 bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	const std::string& fileName)
 {
+    unsigned int nbreTimeSteps = static_cast<unsigned int>(solverParams.simTime/solverParams.timeStep);
 
 	// number of nodes and tags of the problem
 	unsigned int numNodes = getNumNodes(mesh);
@@ -104,10 +106,16 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
   	std::cout << "Building the invM matrix...";
   	buildM(mesh, invM);
-  	std::cout << "\rBuilding the invM matrix... 		Done" << std::endl;
+  	//std::cout << "invM:\n" << invM;
+  	std::cout 	<< "\rBuilding the invM matrix... 		Done" << std::flush
+  				<< std::endl;
   	std::cout << "Building the Sx and Sy matrices...";
   	buildS(mesh, Sx, Sy);
-  	std::cout << "\rBuilding the Sx and Sy matrices... 	Done" << std::endl;
+  	//std::cout << "Sx:\n" << Sx;
+  	//std::cout << "Sy:\n" << Sy;
+  	std::cout 	<< "\rBuilding the Sx and Sy matrices... 	Done" << std::flush
+  				<< std::endl;
+
 
   	//Function pointer to the used function (weak vs strong form)
   	std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u,
@@ -130,7 +138,25 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	}
 
 	// initial condition [TO DO]: use param.dat and bc struct
-	Eigen::VectorXd u(numNodes); u.setZero();
+	bc initCond = solverParams.boundaryConditions.at("Init_Cond");
+	Eigen::VectorXd u(numNodes);
+	for(auto entity : mesh.entities)
+    {
+        for(auto element : entity.elements)
+        {
+            for(auto edge : element.edges)
+            {
+                for(unsigned int n = 0 ; n < edge.nodeTags.size() ; ++n)
+                {
+                    double x = edge.nodeCoordinate[n].first;
+                    double y = edge.nodeCoordinate[n].second;
+                    u(element.offsetInU + edge.offsetInElm[n]) = initCond.bcFunc(x, y, 0, 0, 0, initCond.coefficients);
+                }
+            }
+        }
+    }
+
+    // u.setZero();
 
 	// vectors of physical flux
 	Eigen::VectorXd fx(numNodes);
@@ -157,47 +183,46 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		{
 			Element2D element = entity.elements[i];
 			elementTags.push_back(element.elementTag);
-			// [TO DO]: only works for T3 :(
-			elementNumNodes.push_back(element.edges.size());
+			elementNumNodes.push_back(element.nodeTags.size());
 		}
 	}
+
+    std::vector<std::vector<double>> uDisplay(elementNumNodes.size()); //Vector to display results
 
 	double t = 0.0;
 
 	//write initial condition
-	std::vector<std::vector<double>> uDisplay;
 	unsigned int index = 0;
 
-	for(size_t count = 0 ; count < elementTags.size() ; ++count)
+	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 	{
-
-		std::vector<double> temp;
+		std::vector<double> temp(elementNumNodes.size());
 		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
-			temp.push_back(u[index]);
+			temp[node]=u[index];
 			++index;
 		}
 
-		uDisplay.push_back(temp);
+		uDisplay[count] = std::move(temp);
 	}
 
 	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-		uDisplay, t, 1);
+	                         uDisplay, t, 1);
 
 
-	// temporary vectors (only for RK4, but I don't want to define them at each time 
+	// temporary vectors (only for RK4, but I don't want to define them at each time
 	// iteration)
-	Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes), 
+	Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes),
 	temp(numNodes);
 
 	// numerical integration
 	unsigned int ratio, currentDecade = 0;
-	for(unsigned int nbrStep = 1 ; nbrStep < solverParams.nbrTimeSteps + 1 ; 
+	for(unsigned int nbrStep = 1 ; nbrStep < nbreTimeSteps + 1 ;
 		nbrStep++)
 	{
 
   		// display progress
-		ratio = int(100*double(nbrStep - 1)/double(solverParams.nbrTimeSteps));
+		ratio = int(100*double(nbrStep - 1)/double(nbreTimeSteps));
         if(ratio >= currentDecade)
         {
             std::cout  	<< "\r" << "Integrating: " << ratio << "%"
@@ -207,45 +232,50 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 
 		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
 		{
-			
-			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh, 
+
+			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh,
 					solverParams.boundaryConditions)*solverParams.timeStep;
 		}
 		else if(solverParams.timeIntType == "RK4")
 		{
 			// could be optimized
-			k1 = usedF(t, u, fx, fy, invM, Sx, Sy, 
+			k1 = usedF(t, u, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			temp = u + k1*solverParams.timeStep/2;
-			k2 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy, 
+			k2 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			temp = u + k2*solverParams.timeStep/2;
-			k3 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy, 
+			k3 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			temp = u + k3*solverParams.timeStep;
-			k4 = usedF(t + solverParams.timeStep, temp, fx, fy, invM, Sx, Sy, 
+			k4 = usedF(t + solverParams.timeStep, temp, fx, fy, invM, Sx, Sy,
 						numNodes, mesh, solverParams.boundaryConditions);
 
 			u += (k1 + 2*k2 + 2*k3 + k4)*solverParams.timeStep/6;
 
 		}
 
+		// check that it does not diverge
+		assert(u.maxCoeff() <= 1E5);
+
 		// add time step
 		t += solverParams.timeStep;
 
 		// display the results
-		std::vector<std::vector<double>> uDisplay;
-
-		for(unsigned int count = 0; count < u.size()/3; ++count)
+		unsigned int offset = 0;
+		for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 		{
-			std::vector<double> temp;
-			temp.push_back(u[3*count]);
-			temp.push_back(u[3*count+1]);
-			temp.push_back(u[3*count+2]);
-			uDisplay.push_back(temp);
+			std::vector<double> temp(elementNumNodes[count]);
+			for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
+				++countLocal)
+			{
+				temp[countLocal] = u[countLocal+offset];
+			}
+			offset += elementNumNodes[count];
+			uDisplay[count] = std::move(temp);
 		}
 
 		gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
@@ -260,6 +290,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	// write the results & finalize
     gmsh::view::write(viewTag, std::string("results.msh"));
     gmsh::finalize();
+
 
 	return true;
 }
