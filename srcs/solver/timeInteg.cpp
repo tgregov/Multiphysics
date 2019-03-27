@@ -95,6 +95,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	const std::string& fileName)
 {
     unsigned int nbreTimeSteps = static_cast<unsigned int>(solverParams.simTime/solverParams.timeStep);
+    unsigned int nbreTimeStepsDtWrite = static_cast<unsigned int>(solverParams.simTimeDtWrite/solverParams.timeStep);
 
 	// number of nodes and tags of the problem
 	unsigned int numNodes = getNumNodes(mesh);
@@ -276,22 +277,25 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		// add time step
 		t += solverParams.timeStep;
 
-		// display the results
-		unsigned int offset = 0;
-		for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-		{
-			std::vector<double> temp(elementNumNodes[count]);
-			for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
-				++countLocal)
-			{
-				temp[countLocal] = u[countLocal+offset];
-			}
-			offset += elementNumNodes[count];
-			uDisplay[count] = std::move(temp);
-		}
+        // Store the results every Dt only.
+		if((nbrStep % nbreTimeStepsDtWrite) == 0)
+        {
+            unsigned int offset = 0;
+            for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
+            {
+                std::vector<double> temp(elementNumNodes[count]);
+                for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
+                    ++countLocal)
+                {
+                    temp[countLocal] = u[countLocal+offset];
+                }
+                offset += elementNumNodes[count];
+                uDisplay[count] = std::move(temp);
+            }
 
-		gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
-			uDisplay, t, 1);
+            gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
+                uDisplay, t, 1);
+        }
 	}
 
 	std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush

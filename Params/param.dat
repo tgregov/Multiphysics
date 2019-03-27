@@ -4,6 +4,7 @@ RK1
 strong
 3
 0.005
+0.01
 BC_Left
 	gaussian
 	1, 1, 0.1

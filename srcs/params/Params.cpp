@@ -208,6 +208,19 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
 
     solverParams.timeStep = std::stod(temp);
 
+    temp.clear();
+    std::getline(paramFile, temp);
+
+    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
+    {
+        std::cerr << "Unexpected time between data writing " << temp
+                  << " in parameter file " << fileName << std::endl;
+
+        paramFile.close();
+        return false;
+    }
+    solverParams.simTimeDtWrite = std::stod(temp);
+
     if(!handleBoundaryCondition(paramFile, solverParams, fileName))
     {
         paramFile.close();
@@ -228,6 +241,8 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << "Simulation time duration: " << solverParams.simTime << "s"
                 << std::endl
                 << "Time step: " << solverParams.timeStep << "s"
+                << std::endl
+                << "Time between data writing: " << solverParams.simTimeDtWrite << "s"
                 << std::endl;
 
     return true;
