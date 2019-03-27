@@ -4,8 +4,8 @@
 #include <map>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include "mesh/Mesh2D.hpp"
-#include "bcFunction.hpp"
+#include "../mesh/Mesh2D.hpp"
+#include "../params/ibvFunction.hpp"
 
 
 /**
@@ -35,7 +35,7 @@ void flux(double& fx, double& fy, double u);
  * \param u Nodal vector of unknowns.
  * \param fx Physical flux variable along x, evaluated at each node.
  * \param fy Physical flux variable along y, evaluated at each node.
- * \param C Parameter C of the Lax-Friedrichs numerical flux. 
+ * \param C Parameter C of the Lax-Friedrichs numerical flux.
  * \param factor Parameter that allows to get the weak or stong form.
  * \param numNodes Number of nodes within the mesh.
  * \param t Time.
@@ -43,7 +43,7 @@ void flux(double& fx, double& fy, double u);
  */
 void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, double C,
-	double factor, unsigned int numNodes, double t, 
+	double factor, unsigned int numNodes, double t,
 	const std::map<std::string, bc>& boundaries);
 
 #endif /* buildFlux_hpp */

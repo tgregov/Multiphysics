@@ -19,13 +19,13 @@ struct bc
 
 
 /**
- * \brief Compute a simple A*sin(w*t + phi)
+ * \brief Compute a simple A*sin(2*pi*nu*t + phi)
  * \param x x coordinate.
  * \param y y coordinate.
  * \param z z coordinate.
  * \param u The current solution.
  * \param t Current time.
- * \param coeffs Coefficient for the sinus. coeffs[0] = A, coeffs[1] = w
+ * \param coeffs Coefficient for the sinus. coeffs[0] = A, coeffs[1] = nu
  * coeffs[2] = phi.
  * \return Value of the function at (x, y , z, t).
  */

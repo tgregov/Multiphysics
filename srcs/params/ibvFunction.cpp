@@ -1,13 +1,13 @@
 #include <cmath>
 #include <cassert>
-#include "bcFunction.hpp"
+#include "ibvFunction.hpp"
 
 double sinus(double x, double y, double z, double u,
              double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 3);
 
-    return coeffs[0]*sin(coeffs[1]*t + coeffs[2]);
+    return coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2]);
 }
 
 double gaussian(double x, double y, double z, double u,

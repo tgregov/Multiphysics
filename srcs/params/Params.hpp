@@ -1,8 +1,8 @@
-#ifndef Solver_hpp_included
-#define Solver_hpp_included
+#ifndef Params_hpp_included
+#define Params_hpp_included
 
 #include <string>
-#include "bcFunction.hpp"
+#include "ibvFunction.hpp"
 
 /**
  * \struct SolverParams
@@ -30,4 +30,4 @@ struct SolverParams
  */
 bool loadSolverParams(const std::string& fileName, SolverParams& solverParams);
 
-#endif // Solver_hpp_included
+#endif // Params_hpp_included

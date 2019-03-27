@@ -1,5 +1,5 @@
 /**
- * \file Solver.cpp
+ * \file Params.cpp
  * \brief Implementation of the required function to load a SolverParams struct from file.
  */
 
@@ -8,7 +8,7 @@
 #include <cerrno> //Change with something more c++ ;-)
 #include <cstring>
 #include <vector>
-#include "Solver.hpp"
+#include "Params.hpp"
 
 /**
  * \brief Load boundary conditions from a file

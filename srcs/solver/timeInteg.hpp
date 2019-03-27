@@ -4,8 +4,8 @@
 #include <string>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include "mesh/Mesh2D.hpp"
-#include "Solver.hpp"
+#include "../mesh/Mesh2D.hpp"
+#include "../params/Params.hpp"
 
 /**
  * \brief Time integrate the equations (DG-FEM)

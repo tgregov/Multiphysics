@@ -3,8 +3,8 @@
 #include <Eigen/Core>
 #include "mesh/Mesh2D.hpp"
 #include "mesh/displayMesh.hpp"
-#include "timeInteg.hpp"
-#include "Solver.hpp"
+#include "solver/timeInteg.hpp"
+#include "params/Params.hpp"
 
 int main(int argc, char **argv)
 {

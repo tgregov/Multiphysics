@@ -6,11 +6,11 @@
 #include <iostream>
 #include <cassert>
 #include <gmsh.h>
-#include "matrices/buildM.hpp"
-#include "matrices/buildS.hpp"
+#include "../matrices/buildM.hpp"
+#include "../matrices/buildS.hpp"
 #include "buildFlux.hpp"
 #include "timeInteg.hpp"
-#include "bcFunction.hpp"
+#include "../params/ibvFunction.hpp"
 
 /**
  * \brief Compute the Du vector.
@@ -260,10 +260,10 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 		else if(solverParams.timeIntType == "RK2")
 		{
 
-			temp = u + usedF(t + solverParams.timeStep/2, u, fx, fy, invM, Sx, 
+			temp = u + usedF(t + solverParams.timeStep/2, u, fx, fy, invM, Sx,
 							Sy, numNodes, mesh, solverParams.boundaryConditions)
 							*solverParams.timeStep/2;
-							
+
 			u += solverParams.timeStep * usedF(t + solverParams.timeStep/2, temp,
 												fx, fy, invM, Sx, Sy, numNodes, mesh,
 												solverParams.boundaryConditions);
