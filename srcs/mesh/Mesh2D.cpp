@@ -167,7 +167,6 @@ static void computeEdgeNormalCoord(Edge& edge,
                 coord1 = std::move(coord);
             else if(i == 1)
                 coord2 = std::move(coord);
-
     }
 
     // compute the normal
@@ -343,7 +342,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
  */
-static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, unsigned int& currentOffset,
+static bool addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, unsigned int& currentOffset,
                       const std::string& intScheme, const std::string& basisFuncType)
 {
     // add the current 2D entity
@@ -398,8 +397,20 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                                         determinants1D, dummyPoints1D,
                                         c);
 
+        unsigned int nElements = nodeTags.size()/mesh.elementProperties2D[eleType2D].numNodes;
         unsigned int nGP2D = mesh.elementProperties2D[eleType2D].nGP;
         unsigned int nGP1D = mesh.elementProperties1D[eleType1D].nGP;
+        unsigned int nEdgePerElement = determinants1D.size()/(nGP1D*nElements);
+        unsigned int nNodesPerEdge = mesh.elementProperties1D[eleType1D].numNodes;
+
+        //Check for bubble nodes in eleType2D
+        if(numNodes != order * nEdgePerElement)
+        {
+            std::cerr << "Currently unsupported element type " << mesh.elementProperties2D[eleType2D].name
+                      << " inside mesh!" << std::endl;
+
+            return false;
+        }
 
         unsigned ratio, currentDecade = 0;
         for(unsigned int i = 0 ; i < elementTags.size() ; ++i)
@@ -422,16 +433,16 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                                             determinants2D.begin() + nGP2D*i,
                                             determinants2D.begin() + nGP2D*(1 + i));
             std::vector<double> determinantElement1D(
-                                            determinants1D.begin() + (numNodes/order)*nGP1D*i,
-                                            determinants1D.begin() + (numNodes/order)*nGP1D*(1 + i));
+                                            determinants1D.begin() + nEdgePerElement*nGP1D*i,
+                                            determinants1D.begin() + nEdgePerElement*nGP1D*(1 + i));
 
             std::vector<int> nodeTagsElement(nodeTags.begin() + numNodes*i,
                                              nodeTags.begin() + numNodes*(1 + i));
 
             //[TO DO]: generalize for non-linear element
             std::vector<int> nodesTagPerEdgeElement(
-                                nodesTagPerEdge.begin() + (order + 1)*(numNodes/order)*i,
-                                nodesTagPerEdge.begin() + (order + 1)*(numNodes/order)*(i + 1));
+                                nodesTagPerEdge.begin() + nNodesPerEdge*nEdgePerElement*i,
+                                nodesTagPerEdge.begin() + nNodesPerEdge*nEdgePerElement*(i + 1));
 
             std::vector<double> elementBarycenter(baryCenters.begin() + 3*i, baryCenters.begin() + 3*(i + 1));
 
@@ -458,6 +469,7 @@ static void addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
 
     // add the entity to the mesh.entities field
     mesh.entities.push_back(entity);
+    return true;
 }
 
 
@@ -601,7 +613,8 @@ bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
 
     for(auto entityHandle : entityHandles)
     {
-        addEntity(mesh, entityHandle, currentOffset, intScheme, basisFuncType);
+        if(!addEntity(mesh, entityHandle, currentOffset, intScheme, basisFuncType))
+            return false;
     }
 
     gmsh::finalize();
