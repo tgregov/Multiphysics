@@ -4,7 +4,7 @@
 
 
 // see .hpp file for description
-void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C, 
+void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 	const Eigen::VectorXd& u)
 {
 	// first basic flux: simple transport
@@ -33,14 +33,13 @@ void flux(double& fx, double& fy, double u)
 // see .hpp file for description
 void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, double C,
-	double factor, unsigned int numNodes, double t, 
+	double factor, unsigned int numNodes, double t,
 	const std::map<std::string, bc>& boundaries)
 {
 
 	// loop over the entities
 	for(size_t ent = 0 ; ent < mesh.entities.size() ; ent++)
 	{
-
 		// current entity
 		Entity2D entity = mesh.entities[ent];
 
@@ -63,7 +62,6 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			unsigned int nSigma = element.edges.size();
 			for(unsigned int s = 0 ; s < nSigma ; ++s)
 			{
-
 				// current edge
 				Edge edge = element.edges[s];
 
@@ -96,15 +94,15 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"
 						gx[edge.offsetInElm[j]] += -(factor*fx[indexJ] + fxAtBC)/2
-							- C*element.edges[s].normal.first*(u[indexJ] - uAtBC)/2;
+							- C*edge.normal.first*(u[indexJ] - uAtBC)/2;
 						gy[edge.offsetInElm[j]] += -(factor*fy[indexJ] + fyAtBC)/2
-							- C*element.edges[s].normal.second*(u[indexJ] - uAtBC)/2;
+							- C*edge.normal.second*(u[indexJ] - uAtBC)/2;
 					}
 					else // general case
 					{
 					    // [TO DO]: neighbours in other entities
 					    // global index of the node "in front"
-                       	unsigned int indexFrontJ = 
+                       	unsigned int indexFrontJ =
                        				entity
                        					.elements[edge.edgeInFront.first]
                        					.offsetInU
@@ -114,15 +112,13 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                        					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
 
                         // compute the numerical flux
-                        // the weak/strong form is stored in "factor"				
+                        // the weak/strong form is stored in "factor"
 						gx[edge.offsetInElm[j]] +=
 							-(factor*fx[indexJ] + fx[indexFrontJ])/2
-							- C*element.edges[s].normal.first*(u[indexJ]
-																- u[indexFrontJ])/2;
+							- C*edge.normal.first*(u[indexJ] - u[indexFrontJ])/2;
 						gy[edge.offsetInElm[j]] +=
 							-(factor*fy[indexJ] + fy[indexFrontJ])/2
-							- C*element.edges[s].normal.second*(u[indexJ]
-																- u[indexFrontJ])/2;
+							- C*edge.normal.second*(u[indexJ] - u[indexFrontJ])/2;
 					}
 				}
 
@@ -132,8 +128,7 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 
 				// dot product between dM and the normal
 				partialI += edge.determinant1D[0]*(
-					element.edges[s].normal.first*dMgx
-					+ element.edges[s].normal.second*dMgy);
+					edge.normal.first*dMgx + edge.normal.second*dMgy);
 			}
 
 			// add the local rhs vector to the global one
