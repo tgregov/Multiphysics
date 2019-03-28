@@ -4,8 +4,7 @@
 
 
 // see .hpp file for description
-void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
-	const Eigen::VectorXd& u)
+void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u)
 {
 	// first basic flux: simple transport
 	double ax = 1.0;
@@ -14,7 +13,7 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, double& C,
 	fx = ax*u;
 	fy = ay*u;
 
-	C = sqrt(ax*ax + ay*ay);
+	// C = fabs(normal.first*ax + normal.second*ay);
 }
 
 
@@ -32,7 +31,7 @@ void flux(double& fx, double& fy, double u)
 
 // see .hpp file for description
 void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
-	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, double C,
+	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy,
 	double factor, unsigned int numNodes, double t,
 	const std::map<std::string, ibc>& boundaries)
 {
@@ -69,6 +68,9 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Eigen::VectorXd gx(elmProp2D.nSF); gx.setZero();
 				Eigen::VectorXd gy(elmProp2D.nSF); gy.setZero();
 				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
+
+
+				double C = fabs(edge.normal.first*1.0 + edge.normal.second*0.0);
 
 				for(unsigned int j = 0 ; j < edge.offsetInElm.size() ; ++j)
 				{

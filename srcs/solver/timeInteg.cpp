@@ -35,13 +35,12 @@ static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
   const std::map<std::string, ibc>& boundaries)
 {
  	// compute the nodal physical fluxes
- 	double C;
- 	flux(fx, fy, C, u);
+ 	flux(fx, fy, u);
 
 	// compute the right-hand side of the master equation (phi or psi)
 	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
 
- 	buildFlux(mesh, I, u, fx, fy, C, 1, numNodes, t, boundaries);
+ 	buildFlux(mesh, I, u, fx, fy, 1, numNodes, t, boundaries);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(numNodes);
@@ -72,13 +71,12 @@ static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx
 	unsigned int numNodes, const Mesh2D& mesh, const std::map<std::string, ibc>& boundaries)
 {
  	// compute the nodal physical fluxes
- 	double C;
- 	flux(fx, fy, C, u);
+ 	flux(fx, fy, u);
 
 	// compute the right-hand side of the master equation (phi or psi)
 	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
 
- 	buildFlux(mesh, I, u, fx, fy, C, -1, numNodes, t, boundaries);
+ 	buildFlux(mesh, I, u, fx, fy, -1, numNodes, t, boundaries);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(numNodes);
