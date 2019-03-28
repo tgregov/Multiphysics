@@ -20,7 +20,8 @@ struct SolverParams
     double timeStep;            /**< Time steps for the simulation */
     double simTimeDtWrite;      /**< Time between two data writings */
 
-    std::map<std::string, bc> boundaryConditions;
+    std::map<std::string, ibc> boundaryConditions;
+    ibc initCondition;
 };
 
 /**

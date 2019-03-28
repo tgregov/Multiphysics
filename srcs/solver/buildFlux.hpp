@@ -44,6 +44,6 @@ void flux(double& fx, double& fy, double u);
 void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, double C,
 	double factor, unsigned int numNodes, double t,
-	const std::map<std::string, bc>& boundaries);
+	const std::map<std::string, ibc>& boundaries);
 
 #endif /* buildFlux_hpp */

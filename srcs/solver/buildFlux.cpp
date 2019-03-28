@@ -34,7 +34,7 @@ void flux(double& fx, double& fy, double u)
 void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy, double C,
 	double factor, unsigned int numNodes, double t,
-	const std::map<std::string, bc>& boundaries)
+	const std::map<std::string, ibc>& boundaries)
 {
 
 	// loop over the entities
@@ -81,10 +81,10 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 					{
 
 						double fxAtBC, fyAtBC, uAtBC;
-						bc boundary = boundaries.at(edge.bcName);
+						ibc boundary = boundaries.at(edge.bcName);
 
 						// node "in front" (at boundary condition)
-						uAtBC = boundary.bcFunc(edge.nodeCoordinate[j].first,
+						uAtBC = boundary.ibcFunc(edge.nodeCoordinate[j].first,
 							edge.nodeCoordinate[j].second,
 							0.0, u[indexJ], t, boundary.coefficients);
 

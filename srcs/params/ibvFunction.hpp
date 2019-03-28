@@ -9,12 +9,12 @@
  * \struct bc
  * \brief Mathematical function for a boundary condition.
  */
-struct bc
+struct ibc
 {
     std::vector<double> coefficients;   /**< Coefficient for the mathematical function */
     std::function<double(double x, double y, double z,
                          double u, double t,
-                         std::vector<double> coeffs)> bcFunc; /**< Pointer to the mathematical function */
+                         std::vector<double> coeffs)> ibcFunc; /**< Pointer to the mathematical function */
 };
 
 

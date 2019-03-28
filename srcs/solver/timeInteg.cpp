@@ -32,9 +32,8 @@ static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 	const Eigen::SparseMatrix<double>& SxTranspose,
 	const Eigen::SparseMatrix<double>& SyTranspose,
 	unsigned int numNodes, const Mesh2D& mesh,
-  const std::map<std::string, bc>& boundaries)
+  const std::map<std::string, ibc>& boundaries)
 {
-
  	// compute the nodal physical fluxes
  	double C;
  	flux(fx, fy, C, u);
@@ -70,9 +69,8 @@ static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
 	const Eigen::SparseMatrix<double>& Sx, const Eigen::SparseMatrix<double>& Sy,
-	unsigned int numNodes, const Mesh2D& mesh, const std::map<std::string, bc>& boundaries)
+	unsigned int numNodes, const Mesh2D& mesh, const std::map<std::string, ibc>& boundaries)
 {
-
  	// compute the nodal physical fluxes
  	double C;
  	flux(fx, fy, C, u);
@@ -125,7 +123,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
                                 const Eigen::SparseMatrix<double>& SxTranspose,
                                 const Eigen::SparseMatrix<double>& SyTranspose,
                                 unsigned int numNodes, const Mesh2D& mesh,
-                                const std::map<std::string, bc>& boundaries)> usedF;
+                                const std::map<std::string, ibc>& boundaries)> usedF;
 
   	if(solverParams.solverType == "weak")
   	{
@@ -138,8 +136,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
      	usedF = Fstrong;
   	}
 
-	// initial condition [TO DO]: use param.dat and bc struct
-	bc initCond = solverParams.boundaryConditions.at("Init_Cond");
+	//Set Initial Condition
 	Eigen::VectorXd u(numNodes);
 	for(auto entity : mesh.entities)
     {
@@ -151,7 +148,9 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
                 {
                     double x = edge.nodeCoordinate[n].first;
                     double y = edge.nodeCoordinate[n].second;
-                    u(element.offsetInU + edge.offsetInElm[n]) = initCond.bcFunc(x, y, 0, 0, 0, initCond.coefficients);
+                    u(element.offsetInU + edge.offsetInElm[n]) =
+                    solverParams.initCondition.ibcFunc(x, y, 0, 0, 0,
+                                                       solverParams.initCondition.coefficients);
                 }
             }
         }

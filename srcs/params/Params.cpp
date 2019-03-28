@@ -20,11 +20,12 @@
 static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solverParams,
                                     const std::string& fileName)
 {
-    bc boundary;
     unsigned int nBC = 0;
+    bool foundInitCond = false;
 
     while(true)
     {
+        ibc tempCondition;
         std::string bcName;
         std::string bcType;
         std::string tempBcCoeff;
@@ -37,8 +38,6 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         }
         std::getline(paramFile, bcName);
 
-        bc currentBC;
-
         std::getline(paramFile, bcType);
         if(bcType[0] != '\t') //Let's make them tabulated for easier reading
         {
@@ -50,19 +49,19 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         bcType.erase(0,1);
 
         if(bcType == "sinus")
-            boundary.bcFunc = sinus;
+            tempCondition.ibcFunc = sinus;
 
         else if(bcType == "gaussian")
-            boundary.bcFunc = gaussian;
+            tempCondition.ibcFunc = gaussian;
 
         else if(bcType == "constant")
-            boundary.bcFunc = constant;
+            tempCondition.ibcFunc = constant;
 
         else if(bcType == "constantNeumann")
-            boundary.bcFunc = constantNeumann;
+            tempCondition.ibcFunc = constantNeumann;
 
         else if(bcType == "gaussian2D")
-            boundary.bcFunc = gaussian2D;
+            tempCondition.ibcFunc = gaussian2D;
 
         else
         {
@@ -94,14 +93,30 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         //At the end, still one push_back to do
         bcCoeff.push_back(std::stod(tempBcCoeff.substr(precComaPos+1, tempBcCoeff.size() - precComaPos - 1)));
 
-        boundary.coefficients = bcCoeff;
+        tempCondition.coefficients = bcCoeff;
 
-        solverParams.boundaryConditions[bcName] = boundary;
-
-        nBC++;
+        if(bcName == "Init_Cond")
+        {
+            solverParams.initCondition = tempCondition;
+            foundInitCond = true;
+        }
+        else
+        {
+            nBC++;
+            solverParams.boundaryConditions[bcName] = tempCondition;
+        }
     }
 
-    std::cout << "Number of BC in file " << fileName << ": " << nBC << std::endl;
+    if(!foundInitCond)
+    {
+        std::cerr << "No initial condition (Init_Cond field) found in parameter file "
+                  << fileName << std::endl;
+
+        return false;
+    }
+
+    std::cout << "Inital Condition present and " << nBC
+              << " boundary conditions present in file " << fileName << std::endl;
 
     return true;
 }
