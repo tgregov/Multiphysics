@@ -97,9 +97,13 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
     unsigned int nbreTimeSteps = static_cast<unsigned int>(solverParams.simTime/solverParams.timeStep);
     unsigned int nbreTimeStepsDtWrite = static_cast<unsigned int>(solverParams.simTimeDtWrite/solverParams.timeStep);
 
-	// number of nodes and tags of the problem
-	unsigned int numNodes = getNumNodes(mesh);
-	std::vector<int> nodeTags =  getTags(mesh);
+	// number of nodes, tags and coordinates of the problem
+	unsigned int numNodes = mesh.nodeData.numNodes;
+	std::vector<int> nodeTags = mesh.nodeData.nodeTags;
+	std::vector<std::vector<double>> coord = mesh.nodeData.coord;
+
+	// unsigned int numNodes = getNumNodes(mesh);
+	// std::vector<int> nodeTags =  getTags(mesh);
 
 	// matrices of the DG method
   	Eigen::SparseMatrix<double> invM(numNodes, numNodes);

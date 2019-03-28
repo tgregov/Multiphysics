@@ -9,6 +9,48 @@
 #include "Mesh2D.hpp"
 #include "../utils.hpp"
 
+static void loadNodeData(Mesh2D& mesh2D)
+{
+
+    unsigned int numNodes = 0;
+    std::vector<int> nodeTags;
+    std::vector<std::vector<double>> coord;
+
+    // loop over the entities
+    for(size_t ent = 0 ; ent < mesh2D.entities.size() ; ++ent)
+    {
+        Entity2D entity = mesh2D.entities[ent];
+
+        // loop over the elements
+        for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
+        {
+            Element2D element = entity.elements[elm];
+
+            for(size_t s = 0 ; s < element.edges.size() ; ++s)
+            {
+                Edge edge = element.edges[s];
+
+                for(size_t n = 0 ; n < edge.nodeCoordinate.size() ; ++n)
+                {
+                    std::vector<double> temp;
+                    temp.push_back(edge.nodeCoordinate[n].first);
+                    temp.push_back(edge.nodeCoordinate[n].second);                    
+                    coord.push_back(temp);
+
+                    nodeTags.push_back(edge.nodeTags[n]);
+                    numNodes++;
+                }
+            }
+        }
+    }
+
+    mesh2D.nodeData.numNodes = numNodes;
+    mesh2D.nodeData.nodeTags = nodeTags;
+    mesh2D.nodeData.coord = coord;
+}
+
+
+
 /**
  * \brief Loads the name order, dimension, number of nodes,
  *  basis functions, integration points for a certain element type into a map.
@@ -514,53 +556,6 @@ static bool IsMesh2D()
 
 
 // documentation in .hpp file
-unsigned int getNumNodes(const Mesh2D& mesh2D)
-{
-    unsigned int numNodes = 0;
-
-    // loop over the entities
-    for(unsigned int ent = 0 ; ent < mesh2D.entities.size() ; ++ent)
-    {
-        Entity2D entity = mesh2D.entities[ent];
-
-        // loop over the elements
-        for(unsigned int elm = 0 ; elm < entity.elements.size() ; ++elm)
-        {
-            Element2D element = entity.elements[elm];
-            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
-                numNodes++;
-        }
-    }
-
-    return numNodes;
-}
-
-
-// documentation in .hpp file
-std::vector<int> getTags(const Mesh2D& mesh2D)
-{
-    std::vector<int> listTags;
-
-    // loop over the entities
-    for(unsigned int ent = 0 ; ent < mesh2D.entities.size() ; ++ent)
-    {
-        Entity2D entity = mesh2D.entities[ent];
-
-        // loop over the nodes
-        for(unsigned int elm = 0 ; elm < entity.elements.size() ; ++elm)
-        {
-            Element2D element = entity.elements[elm];
-            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
-            {
-                listTags.push_back(element.nodeTags[n]);
-            }
-        }
-    }
-
-    return listTags;
-}
-
-// documentation in .hpp file
 bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
                 const std::string& intScheme, const std::string& basisFuncType)
 {
@@ -616,6 +611,8 @@ bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
         if(!addEntity(mesh, entityHandle, currentOffset, intScheme, basisFuncType))
             return false;
     }
+
+    loadNodeData(mesh);
 
     gmsh::finalize();
 

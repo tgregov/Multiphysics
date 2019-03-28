@@ -7,6 +7,14 @@
 #include <vector>
 #include <Eigen/Sparse>
 
+struct NodeData
+{
+    unsigned int numNodes;
+    std::vector<int> nodeTags;
+    std::vector<std::vector<double>> coord;
+};
+
+
 /**
  * \struct Edge
  * \brief Represents an edge.
@@ -111,23 +119,9 @@ struct Mesh2D
     std::map<std::string, std::vector<int>> nodesTagBoundary;/**< Tags of the nodes per BC */
 
     std::vector<Entity2D> entities; /**< List of entities inside the mesh */
+
+    NodeData nodeData;
 };
-
-
-/**
- * \brief Get the number of nodes (i.e. of unknowns) given a mesh.
- * \param mesh2D The structure that contains the mesh.
- * \return The number of unknowns inside a mesh.
- */
-unsigned int getNumNodes(const Mesh2D& mesh2D);
-
-
-/**
- * \brief Get the tags of nodes (i.e. of unknowns) given a mesh.
- * \param mesh2D The structure that contains the mesh.
- * \return Vector containing all the tags of the nodes inside a mesh.
- */
-std::vector<int> getTags(const Mesh2D& mesh2D);
 
 
 /**

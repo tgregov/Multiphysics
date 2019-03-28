@@ -2,9 +2,10 @@ Gauss6
 Lagrange
 RK1
 strong
-3
-0.005
+2
 0.01
+0.01
+1.0,0.0
 BC_Left
 	gaussian
 	1, 1, 0.1
