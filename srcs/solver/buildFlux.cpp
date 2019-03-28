@@ -4,28 +4,27 @@
 
 
 // see .hpp file for description
-void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u)
+void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u,
+          const std::vector<double>& fluxCoeffs)
 {
 	// first basic flux: simple transport
-	double ax = 1.0;
-	double ay = 0.0;
-
-	fx = ax*u;
-	fy = ay*u;
-
-	// C = fabs(normal.first*ax + normal.second*ay);
+	fx = fluxCoeffs[0]*u;
+	fy = fluxCoeffs[1]*u;
 }
 
 
 // see .hpp file for description
-void flux(double& fx, double& fy, double u)
+void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeffs)
 {
 	// first basic flux: simple transport
-	double ax = 1.0;
-	double ay = 0.0;
+    fx = fluxCoeffs[0]*u;
+	fy = fluxCoeffs[1]*u;
+}
 
-	fx = ax*u;
-	fy = ay*u;
+double computeC(const std::pair<double, double>& normal,
+                const std::vector<double>& fluxCoeffs)
+{
+    return fabs(fluxCoeffs[0]*normal.first + fluxCoeffs[1]*normal.second);
 }
 
 
@@ -33,7 +32,8 @@ void flux(double& fx, double& fy, double u)
 void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy,
 	double factor, unsigned int numNodes, double t,
-	const std::map<std::string, ibc>& boundaries)
+	const std::map<std::string, ibc>& boundaries,
+	const std::vector<double>& fluxCoeffs)
 {
 
 	// loop over the entities
@@ -70,7 +70,7 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
 
 
-				double C = fabs(edge.normal.first*1.0 + edge.normal.second*0.0);
+				double C = computeC(edge.normal, fluxCoeffs);
 
 				for(unsigned int j = 0 ; j < edge.offsetInElm.size() ; ++j)
 				{
@@ -91,7 +91,7 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 							0.0, u[indexJ], t, boundary.coefficients);
 
 						// physical flux "in front" (at boundary condition)
-                        flux(fxAtBC, fyAtBC, uAtBC);
+                        flux(fxAtBC, fyAtBC, uAtBC, fluxCoeffs);
 
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"

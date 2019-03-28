@@ -22,6 +22,8 @@ struct SolverParams
 
     std::map<std::string, ibc> boundaryConditions;
     ibc initCondition;
+
+    std::vector<double> fluxCoeffs;
 };
 
 /**

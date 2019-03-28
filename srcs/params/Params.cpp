@@ -150,7 +150,6 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         return false;
     }
 
-
     solverParams.spaceIntType = temp;
 
     temp.clear();
@@ -235,6 +234,21 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         return false;
     }
     solverParams.simTimeDtWrite = std::stod(temp);
+
+    std::getline(paramFile, temp);
+    unsigned int precComaPos = -1;
+    for(unsigned int i = 0 ; i < temp.size() ; ++i)
+    {
+        if(temp[i] == ',')
+        {
+            solverParams.fluxCoeffs.push_back(std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
+            precComaPos = i;
+        }
+    }
+    //At the end, still one push_back to do
+    solverParams.fluxCoeffs.push_back(std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
+
+    std::cout<<"COUCOU: "<<solverParams.fluxCoeffs[0]<<", "<<solverParams.fluxCoeffs[1]<<std::endl;
 
     if(!handleBoundaryCondition(paramFile, solverParams, fileName))
     {
