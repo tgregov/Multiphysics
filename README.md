@@ -16,9 +16,7 @@ Current status: [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?
 ### On the mesh:
 * 2D mesh
 * The elements edges are straight (constant normal vector over it)
-* ~~Same type of elements in the mesh (e.g. T3)~~
-* Affine change of variable between the reference and physical configuration, for the edges of the elements
-
+* No bubble node
 
 ## Compilation procedure
 ### On NIC4
