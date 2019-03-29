@@ -3,7 +3,7 @@
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
-#include "../mesh/Mesh2D.hpp"
+#include "../mesh/Mesh.hpp"
 
 
 /**
@@ -15,6 +15,6 @@
  * \param mesh2D The structure that contains the mesh.
  * \param invM The Eigen::SparseMatrix in which the matrix components will be stored.
  */
-void buildM(const Mesh2D& mesh2D, Eigen::SparseMatrix<double>& invM);
+void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM);
 
 #endif /* buildM_hpp */

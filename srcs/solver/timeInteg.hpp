@@ -4,7 +4,7 @@
 #include <string>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include "../mesh/Mesh2D.hpp"
+#include "../mesh/Mesh.hpp"
 #include "../params/Params.hpp"
 
 /**
@@ -14,7 +14,7 @@
  * \param fileName The name of the file containing the mesh.
  * \return true if time integration happened without problems, false otherwise.
  */
-bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
+bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	             const std::string& fileName);
 
 #endif /* timeInteg_hpp */

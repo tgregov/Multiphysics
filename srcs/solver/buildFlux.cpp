@@ -21,18 +21,17 @@ void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeff
 	fy = fluxCoeffs[1]*u;
 }
 
-double computeC(const std::pair<double, double>& normal,
-                const std::vector<double>& fluxCoeffs)
+static double computeC(const std::vector<double>& normal,
+                       const std::vector<double>& fluxCoeffs)
 {
-    return fabs(fluxCoeffs[0]*normal.first + fluxCoeffs[1]*normal.second);
+    return fabs(fluxCoeffs[0]*normal[0] + fluxCoeffs[1]*normal[1]);
 }
 
 
 // see .hpp file for description
-void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
+void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy,
-	double factor, unsigned int numNodes, double t,
-	const std::map<std::string, ibc>& boundaries,
+	double factor, double t, const std::map<std::string, ibc>& boundaries,
 	const std::vector<double>& fluxCoeffs)
 {
 
@@ -40,24 +39,24 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	for(size_t ent = 0 ; ent < mesh.entities.size() ; ent++)
 	{
 		// current entity
-		Entity2D entity = mesh.entities[ent];
+		Entity entity = mesh.entities[ent];
 
 		// loop over the elements
 		for(size_t elm = 0 ; elm < entity.elements.size() ; elm++)
 		{
 			// current element
-			Element2D element = entity.elements[elm];
+			Element element = entity.elements[elm];
 
 			// get the properties of the current element type
-            ElementProperty elmProp1D
-            	= mesh.elementProperties1D.at(element.elementType1D);
-            ElementProperty elmProp2D
-            	= mesh.elementProperties2D.at(element.elementType2D);
+            ElementProperty elmPropLD
+            	= mesh.elementProperties.at(element.elementTypeLD);
+            ElementProperty elmPropHD
+            	= mesh.elementProperties.at(element.elementTypeHD);
 
 			// local I vector for the current element
-			Eigen::VectorXd partialI(elmProp2D.nSF); partialI.setZero(); // necessary
+			Eigen::VectorXd partialI(elmPropHD.nSF); partialI.setZero(); // necessary
 
-			// loo over the edges for the current element
+			// loop over the edges for the current element
 			unsigned int nSigma = element.edges.size();
 			for(unsigned int s = 0 ; s < nSigma ; ++s)
 			{
@@ -65,9 +64,9 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Edge edge = element.edges[s];
 
 				// we first compute the matrix-vector product of dM with gx and gy
-				Eigen::VectorXd gx(elmProp2D.nSF); gx.setZero();
-				Eigen::VectorXd gy(elmProp2D.nSF); gy.setZero();
-				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
+				Eigen::VectorXd gx(elmPropHD.nSF); gx.setZero();
+				Eigen::VectorXd gy(elmPropHD.nSF); gy.setZero();
+				Eigen::VectorXd dMgx(elmPropHD.nSF), dMgy(elmPropHD.nSF);
 
 
 				double C = computeC(edge.normal, fluxCoeffs);
@@ -86,8 +85,8 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 						ibc boundary = boundaries.at(edge.bcName);
 
 						// node "in front" (at boundary condition)
-						uAtBC = boundary.ibcFunc(edge.nodeCoordinate[j].first,
-							edge.nodeCoordinate[j].second,
+						uAtBC = boundary.ibcFunc(edge.nodeCoordinate[j][0],
+							edge.nodeCoordinate[j][1],
 							0.0, u[indexJ], t, boundary.coefficients);
 
 						// physical flux "in front" (at boundary condition)
@@ -96,9 +95,9 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"
 						gx[edge.offsetInElm[j]] += -(factor*fx[indexJ] + fxAtBC)/2
-							- C*edge.normal.first*(u[indexJ] - uAtBC)/2;
+							- C*edge.normal[0]*(u[indexJ] - uAtBC)/2;
 						gy[edge.offsetInElm[j]] += -(factor*fy[indexJ] + fyAtBC)/2
-							- C*edge.normal.second*(u[indexJ] - uAtBC)/2;
+							- C*edge.normal[1]*(u[indexJ] - uAtBC)/2;
 					}
 					else // general case
 					{
@@ -117,10 +116,10 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                         // the weak/strong form is stored in "factor"
 						gx[edge.offsetInElm[j]] +=
 							-(factor*fx[indexJ] + fx[indexFrontJ])/2
-							- C*edge.normal.first*(u[indexJ] - u[indexFrontJ])/2;
+							- C*edge.normal[0]*(u[indexJ] - u[indexFrontJ])/2;
 						gy[edge.offsetInElm[j]] +=
 							-(factor*fy[indexJ] + fy[indexFrontJ])/2
-							- C*edge.normal.second*(u[indexJ] - u[indexFrontJ])/2;
+							- C*edge.normal[1]*(u[indexJ] - u[indexFrontJ])/2;
 					}
 				}
 
@@ -129,13 +128,13 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				dMgy = element.dM[s]*gy;
 
 				// dot product between dM and the normal
-				partialI += edge.determinant1D[0]*(
-					edge.normal.first*dMgx + edge.normal.second*dMgy);
+				partialI += edge.determinantLD[0]*(
+					edge.normal[0]*dMgx + edge.normal[1]*dMgy);
 			}
 
 			// add the local rhs vector to the global one
 			// [TO DO]: find some Eigen function that allows to do that efficiently
-			for(unsigned int j = 0 ; j < elmProp2D.nSF ; ++j)
+			for(unsigned int j = 0 ; j < elmPropHD.nSF ; ++j)
 			{
 				I[element.offsetInU + j] = partialI[j];
 			}
