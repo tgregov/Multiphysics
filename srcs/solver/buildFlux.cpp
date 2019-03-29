@@ -48,8 +48,6 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 			Element element = entity.elements[elm];
 
 			// get the properties of the current element type
-            ElementProperty elmPropLD
-            	= mesh.elementProperties.at(element.elementTypeLD);
             ElementProperty elmPropHD
             	= mesh.elementProperties.at(element.elementTypeHD);
 
