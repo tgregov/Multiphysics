@@ -5,26 +5,32 @@
 
 // see .hpp file for description
 void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u,
-          const std::vector<double>& fluxCoeffs)
+          const std::vector<double>& fluxCoeffs, 
+          const std::vector<std::vector<double>>& coord, double t)
 {
-	// first basic flux: simple transport
-	fx = fluxCoeffs[0]*u;
-	fy = fluxCoeffs[1]*u;
+
+	for(size_t i = 0 ; i < u.size() ; ++i)
+	{	
+
+		fx[i] = u[i]*cos(5*t);
+		fy[i] = u[i]*sin(5*t);
+	}
 }
 
 
 // see .hpp file for description
-void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeffs)
+void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeffs, 
+	std::vector<double> coord, double t)
 {
-	// first basic flux: simple transport
-    fx = fluxCoeffs[0]*u;
-	fy = fluxCoeffs[1]*u;
+
+	fx = u*cos(5*t);
+	fy = u*sin(5*t);
 }
 
 double computeC(const std::pair<double, double>& normal,
-                const std::vector<double>& fluxCoeffs)
+                const std::vector<double>& fluxCoeffs, double t)
 {
-    return fabs(fluxCoeffs[0]*normal.first + fluxCoeffs[1]*normal.second);
+    return fabs(cos(5*t)*normal.first + sin(5*t)*normal.second);
 }
 
 
@@ -33,7 +39,8 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy,
 	double factor, unsigned int numNodes, double t,
 	const std::map<std::string, ibc>& boundaries,
-	const std::vector<double>& fluxCoeffs)
+	const std::vector<double>& fluxCoeffs,
+	const std::vector<std::vector<double>>& coord)
 {
 
 	// loop over the entities
@@ -70,7 +77,7 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Eigen::VectorXd dMgx(elmProp2D.nSF), dMgy(elmProp2D.nSF);
 
 
-				double C = computeC(edge.normal, fluxCoeffs);
+				double C = computeC(edge.normal, fluxCoeffs, t);
 
 				for(unsigned int j = 0 ; j < edge.offsetInElm.size() ; ++j)
 				{
@@ -91,7 +98,7 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 							0.0, u[indexJ], t, boundary.coefficients);
 
 						// physical flux "in front" (at boundary condition)
-                        flux(fxAtBC, fyAtBC, uAtBC, fluxCoeffs);
+                        flux(fxAtBC, fyAtBC, uAtBC, fluxCoeffs, coord[indexJ], t);
 
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"

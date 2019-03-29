@@ -15,7 +15,9 @@
  * \param C Parameter C of the Lax-Friedrichs numerical flux.
  * \param u Nodal vector of unknowns.
  */
-void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u, const std::vector<double>& fluxCoeffs);
+void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u, 
+	const std::vector<double>& fluxCoeffs, 
+	const std::vector<std::vector<double>>& coord, double t);
 
 
 /**
@@ -24,7 +26,8 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u, co
  * \param fy Physical flux variable along y.
  * \param u Nodal vector of unknowns.
  */
-void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeffs);
+void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeffs,
+	std::vector<double> coord, double t);
 
 
 /**
@@ -44,6 +47,7 @@ void buildFlux(const Mesh2D& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy,
 	double factor, unsigned int numNodes, double t,
 	const std::map<std::string, ibc>& boundaries,
-	const std::vector<double>& fluxCoeffs);
+	const std::vector<double>& fluxCoeffs,
+	const std::vector<std::vector<double>>& coord);
 
 #endif /* buildFlux_hpp */
