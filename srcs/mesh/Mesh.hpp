@@ -13,14 +13,14 @@
  */
 struct Edge
 {
-    int edgeTag;                        /**< 1D element tag of the edge*/
+    int edgeTag;                        /**< Element tag of the edge*/
 
-    std::vector<double> determinant1D;  /**< Determinant of the variable change for Gauss integration,
+    std::vector<double> determinantLD;  /**< Determinant of the variable change for Gauss integration,
                                             evaluated at each Gauss point*/
 
     std::vector<int> nodeTags;          /**< Node tags for each point of the edge*/
-    std::vector<std::pair<double, double>> nodeCoordinate; /**< 2D coordinate of the node*/
-    std::pair<double, double> normal;   /**< Edge normal point outwards the element*/
+    std::vector<std::vector<double>> nodeCoordinate; /**< Coordinate of the node*/
+    std::vector<double> normal;   /**< Edge normal point outwards the element*/
 
     //std::optional :cry:
     std::pair<unsigned int, unsigned int> edgeInFront = std::pair<unsigned int, unsigned>(-1, -1); /**<
@@ -34,20 +34,20 @@ struct Edge
 };
 
 /**
- * \struct Element2D
- * \brief Represents a 2D element.
+ * \struct Element
+ * \brief Represents an element.
  */
-struct Element2D
+struct Element
 {
     int elementTag;                     /**< element tag of the element*/
-    int elementType2D;                  /**< 2D type of the element*/
-    int elementType1D;                  /**< 1D type of the element*/ //Store it only once
+    int elementTypeHD;                  /**< Type of the element*/
+    int elementTypeLD;                  /**< Type of the edges*/ //Store it only once
 
     unsigned int offsetInU;             /**< Offset of the element in the unknowns vector*/
 
-    std::vector<double> determinant2D;  /**< Determinant of the variable change for Gauss integration,
+    std::vector<double> determinantHD;  /**< Determinant of the variable change for Gauss integration,
                                              evaluated at each Gauss point*/
-    std::vector<double> jacobian2D;     /**< Jacobian of the variable change for Gauss integration,
+    std::vector<double> jacobianHD;     /**< Jacobian of the variable change for Gauss integration,
                                              evaluated at each Gauss point*/
 
     std::vector<Edge> edges;            /**< List of edge which compose the element */
@@ -57,19 +57,15 @@ struct Element2D
 };
 
 /**
- * \struct Entity2D
- * \brief Represents a 2D entity.
+ * \struct Entity
+ * \brief Represents an entity.
  */
-struct Entity2D
+struct Entity
 {
-    int entityTag2D;                    /**< Tag of the 2D entity*/
-    int entityTag1D;                    /**< Tag of the 1D entity linked to this 2D entity*/
+    int entityTagHD;                    /**< Tag of the HD entity*/
+    int entityTagLD;                    /**< Tag of the LD entity linked to this HD entity*/
 
-    std::vector<Element2D> elements;    /**< List of the elements inside the entity*/
-
-//    std::map<int, std::vector<int>> elementTags2D;      /**< Tag of the element inside the entity per element type */
-//    std::map<int, std::vector<int>> nodesTags2D;        /**< Tag of the nodes inside the entity per element type */
-//    std::map<int, std::vector<int>> nodesTagsPerEdge2D; /**< Tag of the nodes per edge inside the entity per element type */
+    std::vector<Element> elements;      /**< List of the elements inside the entity*/
 };
 
 /**
@@ -100,45 +96,39 @@ struct ElementProperty
 
 
 /**
- * \struct Mesh2D
- * \brief Represents a 2D mesh.
+ * \struct Mesh
+ * \brief Represents a mesh.
  */
-struct Mesh2D
+struct Mesh
 {
-    std::map<int, ElementProperty> elementProperties2D; /**< Store element properties for each 2D element type */
-    std::map<int, ElementProperty> elementProperties1D; /**< Store element properties for each 1D element type */
+    std::map<int, ElementProperty> elementProperties; /**< Store element properties for each element type */
 
     std::map<std::string, std::vector<int>> nodesTagBoundary;/**< Tags of the nodes per BC */
 
-    std::vector<Entity2D> entities; /**< List of entities inside the mesh */
+    std::vector<Entity> entities;   /**< List of entities inside the mesh */
+
+    unsigned int numNodes;          /**< Number of nodes inside the mesh */
+
+    unsigned short dim;             /**< Mesh dimension (1, 2, (3)) */
 };
-
-
-/**
- * \brief Get the number of nodes (i.e. of unknowns) given a mesh.
- * \param mesh2D The structure that contains the mesh.
- * \return The number of unknowns inside a mesh.
- */
-unsigned int getNumNodes(const Mesh2D& mesh2D);
-
 
 /**
  * \brief Get the tags of nodes (i.e. of unknowns) given a mesh.
- * \param mesh2D The structure that contains the mesh.
+ * \param mesh The structure that contains the mesh.
  * \return Vector containing all the tags of the nodes inside a mesh.
  */
-std::vector<int> getTags(const Mesh2D& mesh2D);
+std::vector<int> getTags(const Mesh& mesh);
 
 
 /**
  * \brief Read a mesh from a file.msh
- * \param mesh2D The structure which will contain loaded informations.
+ * \param mesh The structure which will contain loaded informations.
  * \param fileName The name of the file to load.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
  */
-bool readMesh2D(Mesh2D& mesh2D, const std::string& fileName,
-                const std::string& intScheme, const std::string& basisFuncType);
+bool readMesh(Mesh& mesh, const std::string& fileName,
+              const std::string& intScheme, const std::string& basisFuncType);
 
 #endif // Mesh2D_hpp_included
 

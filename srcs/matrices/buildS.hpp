@@ -2,7 +2,7 @@
 #define buildS_hpp
 
 #include <Eigen/Sparse>
-#include "../mesh/Mesh2D.hpp"
+#include "../mesh/Mesh.hpp"
 
 
 /**
@@ -22,7 +22,7 @@
  * \param Sy The Eigen::SparseMatrix in which the matrix [Sx] components will be
  * stored.
  */
-void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
+void buildS(const Mesh& mesh, Eigen::SparseMatrix<double>& Sx,
 	Eigen::SparseMatrix<double>& Sy);
 
 #endif /* buildS_hpp */
