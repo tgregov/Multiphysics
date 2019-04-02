@@ -51,10 +51,10 @@ struct Element
                                              evaluated at each Gauss point*/
 
     std::vector<Edge> edges;            /**< List of edge which compose the element */
-    std::vector<int> nodeTags;
-    std::vector<std::vector<double>> nodesCoord;
+    std::vector<int> nodeTags;          /**< List of node tags of the element */
+    std::vector<std::vector<double>> nodesCoord;    /**< Node coordinates of the elemnts */
 
-    std::vector<Eigen::SparseMatrix<double>> dM;
+    std::vector<Eigen::SparseMatrix<double>> dM;    /**< Partial M matrix */
 };
 
 /**

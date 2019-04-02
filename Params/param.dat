@@ -2,22 +2,22 @@ Gauss6
 Lagrange
 RK1
 strong
-3
-0.005
+2
+0.001
 0.01
 1.0,0.0
 BC_Left
-	gaussian
-	1, 1, 0.1
-BC_Right
-	constantNeumann
-	0
-BC_Up
-	constantNeumann
-	0
-BC_Down
-	constantNeumann
-	0
-Init_Cond
 	constant
 	0
+BC_Right
+	constant
+	0
+BC_Up
+	constant
+	0
+BC_Down
+	constant
+	0
+Init_Cond
+	gaussian2D
+	0.5,0.3,0.01,0.5,0.01
