@@ -12,8 +12,8 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u,
 	for(size_t i = 0 ; i < u.size() ; ++i)
 	{	
 
-		fx[i] = u[i]*cos(5*t);
-		fy[i] = u[i]*sin(5*t);
+		fx[i] = u[i]*0.5*coord[i][1];//cos(5*t);
+		fy[i] = u[i]*0.0;//sin(5*t);
 	}
 }
 
@@ -23,15 +23,15 @@ void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeff
 	std::vector<double> coord, double t)
 {
 
-	fx = u*cos(5*t);
-	fy = u*sin(5*t);
+	fx = u*0.5*coord[1];//cos(5*t);
+	fy = u*0.0;//sin(5*t);
 }
 
 
 double computeC(const std::vector<double>& normal,
-                const std::vector<double>& fluxCoeffs, double t)
+                const std::vector<double>& fluxCoeffs, double t, std::vector<double> coord)
 {
-    return fabs(cos(5*t)*normal[0] + sin(5*t)*normal[1]);
+    return fabs(normal[0]*0.5*coord[1]);//cos(5*t)*normal[0] + sin(5*t)*normal[1]);
 }
 
 
@@ -76,13 +76,14 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Eigen::VectorXd dMgx(elmPropHD.nSF), dMgy(elmPropHD.nSF);
 
 
-				double C = computeC(edge.normal, fluxCoeffs, t);
 
 				for(unsigned int j = 0 ; j < edge.offsetInElm.size() ; ++j)
 				{
 
 					// global index of the current node
 					unsigned int indexJ = element.offsetInU + edge.offsetInElm[j];
+					double C = computeC(edge.normal, fluxCoeffs, t, coord[indexJ]);
+
 
 					// case of a boundary condition
 					if (edge.edgeInFront.first == -1)
