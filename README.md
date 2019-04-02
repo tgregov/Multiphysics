@@ -16,7 +16,6 @@ Current status: [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?
 ### On the mesh:
 * 2D mesh
 * The elements edges are straight (constant normal vector over it)
-* No bubble node
 
 ## Compilation procedure
 ### On NIC4

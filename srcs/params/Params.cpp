@@ -248,8 +248,6 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     //At the end, still one push_back to do
     solverParams.fluxCoeffs.push_back(std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
 
-    std::cout<<"COUCOU: "<<solverParams.fluxCoeffs[0]<<", "<<solverParams.fluxCoeffs[1]<<std::endl;
-
     if(!handleBoundaryCondition(paramFile, solverParams, fileName))
     {
         paramFile.close();
