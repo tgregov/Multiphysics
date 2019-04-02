@@ -5,6 +5,7 @@ strong
 3
 0.005
 0.01
+1.0,0.0
 BC_Left
 	gaussian
 	1, 1, 0.1
