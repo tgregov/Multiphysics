@@ -52,6 +52,7 @@ struct Element
 
     std::vector<Edge> edges;            /**< List of edge which compose the element */
     std::vector<int> nodeTags;
+    std::vector<std::vector<double>> nodesCoord;
 
     std::vector<Eigen::SparseMatrix<double>> dM;
 };

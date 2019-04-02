@@ -143,16 +143,13 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
     {
         for(auto element : entity.elements)
         {
-            for(auto edge : element.edges)
+            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
             {
-                for(unsigned int n = 0 ; n < edge.nodeTags.size() ; ++n)
-                {
-                    double x = edge.nodeCoordinate[n][0];
-                    double y = edge.nodeCoordinate[n][1];
-                    u(element.offsetInU + edge.offsetInElm[n]) =
-                    solverParams.initCondition.ibcFunc(x, y, 0, 0, 0,
-                                                       solverParams.initCondition.coefficients);
-                }
+                double x = element.nodesCoord[n][0];
+                double y = element.nodesCoord[n][1];
+                u(element.offsetInU + n) =
+                solverParams.initCondition.ibcFunc(x, y, 0, 0, 0,
+                                                   solverParams.initCondition.coefficients);
             }
         }
     }
@@ -197,7 +194,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 
 	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 	{
-		std::vector<double> temp(elementNumNodes.size());
+		std::vector<double> temp(elementNumNodes[count]);
 		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
 			temp[node]=u[index];

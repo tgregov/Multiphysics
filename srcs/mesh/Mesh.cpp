@@ -320,6 +320,14 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
     element.jacobianHD = std::move(jacobiansHD);
     element.nodeTags = std::move(nodesTags);
 
+    for(unsigned int i = 0 ; i < element.nodeTags.size() ; ++i)
+    {
+        std::vector<double> coord, dummyParametricCoord;
+        gmsh::model::mesh::getNode(element.nodeTags[i], coord, dummyParametricCoord);
+
+        element.nodesCoord.push_back(coord);
+    }
+
     //Compute the number of edge and of nodes per edge of that element
     unsigned int nEdge = determinantsLD.size()/nGPLD;
     unsigned int nNodePerEdge = elementProperty.at(eleTypeLD).numNodes;
@@ -460,15 +468,6 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
         unsigned int nGPLD = mesh.elementProperties[eleTypeLD].nGP;
         unsigned int nEdgePerElement = determinantsLD.size()/(nGPLD*nElements);
         unsigned int nNodesPerEdge = mesh.elementProperties[eleTypeLD].numNodes;
-
-        //Check for bubble nodes in eleTypeHD
-        if(numNodes != order * nEdgePerElement)
-        {
-            std::cerr << "Currently unsupported element type " << mesh.elementProperties[eleTypeHD].name
-                      << " inside mesh!" << std::endl;
-
-            return false;
-        }
 
         //Loop over each mesh.dim D elements
         unsigned ratio, currentDecade = 0;
