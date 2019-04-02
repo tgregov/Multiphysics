@@ -3,13 +3,13 @@
 
 
 // see .hpp for description
-void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
+void buildS(const Mesh& mesh, Eigen::SparseMatrix<double>& Sx,
 			Eigen::SparseMatrix<double>& Sy)
 {
 
 	// * indexx/indexy: vectors of triplets that contains the coordinates in the
     // 		[Sx]/[Sy] matrices of each ot their components
-    // * offsetMatrix: upper-left coordinate at which the current element matrix 
+    // * offsetMatrix: upper-left coordinate at which the current element matrix
     //		should be added
 	std::vector<Eigen::Triplet<double>> indexx, indexy;
     unsigned int offsetMatrix = 0;
@@ -19,22 +19,22 @@ void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
     {
 
     	// current entity
-        Entity2D entity = mesh.entities[ent];
+        Entity entity = mesh.entities[ent];
 
         // loop over the elements
         for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
         {
 
         	// current element
-            Element2D element = entity.elements[elm];
+            Element element = entity.elements[elm];
 
 			// get the 2D properties of the current element type
             // * pondFunc[k][i]: w_k*l_i evaluated at each GP
-            ElementProperty elmProp 
-            	= mesh.elementProperties2D.at(element.elementType2D);
+            ElementProperty elmProp
+            	= mesh.elementProperties.at(element.elementTypeHD);
             std::vector<std::vector<double>> pondFunc = elmProp.pondFunc;
 
-            // matrices [Sx], [Sy] for the current element, the matrices are stored 
+            // matrices [Sx], [Sy] for the current element, the matrices are stored
             // as vectors, such that S_{i,j} = [S](i*elmProp.nSF + j)
             std::vector<double> sxElm(elmProp.nSF*elmProp.nSF, 0.0);
 			std::vector<double> syElm(elmProp.nSF*elmProp.nSF, 0.0);
@@ -44,13 +44,13 @@ void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 			{
 
 				// only the 2D case here
-				double dxdxi 	= element.jacobian2D[9*k];
-				double dxdeta 	= element.jacobian2D[9*k + 3];
-				double dydxi 	= element.jacobian2D[9*k + 1];
-				double dydeta 	= element.jacobian2D[9*k + 4];
+				double dxdxi 	= element.jacobianHD[9*k];
+				double dxdeta 	= element.jacobianHD[9*k + 3];
+				double dydxi 	= element.jacobianHD[9*k + 1];
+				double dydeta 	= element.jacobianHD[9*k + 4];
 
 				// dzdzeta component of the jacobian: +/-1
-				double sign = element.jacobian2D[9*k + 8];
+				double sign = element.jacobianHD[9*k + 8];
 
 				// the dets simplify in the inverse of a 2x2 matrix !
 				double dxidx 	= dydeta/sign;
@@ -76,7 +76,7 @@ void buildS(const Mesh2D& mesh, Eigen::SparseMatrix<double>& Sx,
 						syElm[i*elmProp.nSF + j]
 							+= pondFunc[k][i]*(dljdxi*dxidy + dljdeta*detady);
 
-						// if we have calculated the sum for all the GP, 
+						// if we have calculated the sum for all the GP,
 						// we can save the computed components
 						if(k == elmProp.nGP - 1)
 						{

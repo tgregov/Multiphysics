@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <Eigen/Core>
-#include "mesh/Mesh2D.hpp"
+#include "mesh/Mesh.hpp"
 #include "mesh/displayMesh.hpp"
 #include "solver/timeInteg.hpp"
 #include "params/Params.hpp"
@@ -36,8 +36,8 @@ int main(int argc, char **argv)
                 << std::endl
                 << "================================================================"
                 << std::endl;
-    Mesh2D mesh;
-    if(!readMesh2D(mesh, std::string(argv[1]), solverParams.spaceIntType,
+    Mesh mesh;
+    if(!readMesh(mesh, std::string(argv[1]), solverParams.spaceIntType,
         solverParams.basisFuncType))
     {
         std::cerr   << "Something went wrong when reading mesh file: "

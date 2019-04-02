@@ -1,12 +1,12 @@
 /**
- * \file Mesh2D.cpp
- * \brief Implementation of the required function to load a Mesh2D struct from file.
+ * \file Mesh.cpp
+ * \brief Implementation of the required function to load a Mesh structure from file.
  */
 
 #include <algorithm>
 #include <iostream>
 #include <gmsh.h>
-#include "Mesh2D.hpp"
+#include "Mesh.hpp"
 #include "../utils.hpp"
 
 static void loadNodeData(Mesh2D& mesh2D)
@@ -159,12 +159,12 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
 /**
  * \brief Add an edge to a certain element (filling the required fields).
  * \param element The parent element.
- * \param nodesTagsEdge Node tags per edge of the element.
- * \param determinant1D Determinant associated with the edge of the element.
- * \param nNodesElement Number of nodes of the parent element.
+ * \param nodesTagsEdge Nodes tag per edge of the element.
+ * \param determinantLD Determinant associated with the edge of the element.
+ * \param nodesTagsElement Nodes tag of the element.
  */
-static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
-                    std::vector<double> determinant1D,
+static void addEdge(Element& element, std::vector<int> nodesTagsEdge,
+                    std::vector<double> determinantLD,
                     const std::vector<int>& nodesTagsElement)
 {
 
@@ -180,7 +180,7 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
         }
     }
     edge.nodeTags = std::move(nodesTagsEdge);
-    edge.determinant1D = std::move(determinant1D);
+    edge.determinantLD = std::move(determinantLD);
 
     element.edges.push_back(edge);
     // we still need to add its tag
@@ -190,12 +190,13 @@ static void addEdge(Element2D& element, std::vector<int> nodesTagsEdge,
 /**
  * \brief Compute the outward normal of an edge.
  * \param edge The edge of which the normal is computed.
+ * \param meshDim Dimension of the mesh (1 or 2)
  * \param baryCenter  Barycenter of the parent element.
  */
-static void computeEdgeNormalCoord(Edge& edge,
+static void computeEdgeNormalCoord(Edge& edge, unsigned int meshDim,
                               const std::vector<double>& baryCenter)
 {
-    std::pair<double, double> normal;
+    std::vector<double> normal;
 
     std::vector<double> coord1, coord2;
     for(unsigned int i = 0 ; i < edge.nodeTags.size() ; ++i)
@@ -203,7 +204,9 @@ static void computeEdgeNormalCoord(Edge& edge,
             std::vector<double> coord, dummyParametricCoord;
             gmsh::model::mesh::getNode(edge.nodeTags[i], coord,
                                         dummyParametricCoord);
-            edge.nodeCoordinate.push_back(std::pair<double, double>(coord[0], coord[1]));
+
+            edge.nodeCoordinate.push_back(coord);
+
             //Normally first and second node tags are vertex
             if(i == 0)
                 coord1 = std::move(coord);
@@ -211,30 +214,44 @@ static void computeEdgeNormalCoord(Edge& edge,
                 coord2 = std::move(coord);
     }
 
-    // compute the normal
-    // if A:(x1, y1) and B:(x2, y2), then AB = (x2 - x1, y2 - y1) and a
-    // normal is given by n = (y2 - y1, x1 - x2)
-    double nx = coord2[1] - coord1[1];
-    double ny = coord1[0] - coord2[0];
-    double norm = sqrt(ny*ny + nx*nx);
-
-    // unfortunately, nodes per edge in nodes vector are not always in
-    // the same order (clockwise vs anticlockwise) => we need to check
-    // the orientation
-    double vx = baryCenter[0] - (coord2[0] + coord1[0])/2;
-    double vy = baryCenter[1] - (coord2[1] + coord1[1])/2;
-
-    if(nx*vx + ny*vy > 0)
+    switch(meshDim)
     {
-        nx = -nx;
-        ny = -ny;
+        case 1:
+            //Normals are either 1 or -1
+            if(coord1[0]-baryCenter[0] < 0)
+                normal.push_back(-1);
+            else
+                normal.push_back(1);
+                edge.normal = std::move(normal);
+                break;
+
+        case 2:
+            //Compute the normal
+            //If A:(x1, y1) and B:(x2, y2), then AB = (x2 - x1, y2 - y1) and a
+            //normal is given by n = (y2 - y1, x1 - x2)
+            double nx = coord2[1] - coord1[1];
+            double ny = coord1[0] - coord2[0];
+            double norm = sqrt(ny*ny + nx*nx);
+
+            // unfortunately, nodes per edge in nodes vector are not always in
+            // the same order (clockwise vs anticlockwise) => we need to check
+            // the orientation
+            double vx = baryCenter[0] - (coord2[0] + coord1[0])/2;
+            double vy = baryCenter[1] - (coord2[1] + coord1[1])/2;
+
+            if(nx*vx + ny*vy > 0)
+            {
+                nx = -nx;
+                ny = -ny;
+            }
+
+            // normalize the normal components
+            normal.push_back(nx/norm);
+            normal.push_back(ny/norm);
+
+            edge.normal = std::move(normal);
+            break;
     }
-
-    // normalize the normal components
-    normal.first = nx/norm;
-    normal.second = ny/norm;
-
-    edge.normal = std::move(normal);
 }
 
 /**
@@ -243,8 +260,11 @@ static void computeEdgeNormalCoord(Edge& edge,
  * \param currentEdge The edge of which you want to find the neighbor.
  * \param edgePos Index of the edge in its element.
  */
-static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int edgePos)
+static void findInFrontEdge(Entity& entity, Edge& currentEdge, unsigned int edgePos)
 {
+    //Try to find the edge in another element. If an edge is not a boundary, then
+    //it has necessarily an "edge in front", which will be found (the check is done an all
+    //previously computed elements).
     unsigned int elVecSize = entity.elements.size();
     unsigned int nEdgePerEl = entity.elements[0].edges.size();
     for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
@@ -254,6 +274,8 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
             std::vector<int> nodesTagsInfront = entity.elements[elm].edges[k].nodeTags;
             std::vector<unsigned int> permutation1, permutation2;
 
+            //If the nodes tags of an edge is the permutation of the nodes tags of
+            //another, we have found the "edge in front"
             if(isPermutation(currentEdge.nodeTags, nodesTagsInfront, permutation1, permutation2))
             {
                 currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
@@ -273,15 +295,20 @@ static void findInFrontEdge(Entity2D& entity, Edge& currentEdge, unsigned int ed
  */
 static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagBoundaries, Edge& edge)
 {
+    //Check if an edge is on the boundary of the domain.
     for(std::pair<std::string, std::vector<int>> nodeTagBoundary : nodesTagBoundaries)
     {
-        for(unsigned int i = 0 ; i < nodesTagBoundaries.size()/2 ; ++i)
+        for(unsigned int j = 0 ; j < edge.nodeTags.size() ; ++j)
         {
-            if(std::count(nodeTagBoundary.second.begin(), nodeTagBoundary.second.end(), edge.nodeTags[0])
-               && std::count(nodeTagBoundary.second.begin(), nodeTagBoundary.second.end(), edge.nodeTags[1]))
-            {
-                edge.bcName=nodeTagBoundary.first;
+            //If one of the nodes tags of the edge is not found inside the boundary
+            //Then the edge does not belong to that boundary
+            if(!std::count(nodeTagBoundary.second.begin(), nodeTagBoundary.second.end(), edge.nodeTags[j]))
+                break;
 
+            //Ok the edge belongs to that boundary.
+            if(j == edge.nodeTags.size() - 1)
+            {
+                edge.bcName = nodeTagBoundary.first;
                 return true;
             }
         }
@@ -294,57 +321,75 @@ static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagB
  * \brief Add an element to a certain entity (filling the required fields).
  * \param entity The parent entity.
  * \param elementTag Element tag.
- * \param eleType2D Type of the element.
- * \param eleType1D Type of the element's edges.
- * \param jacobians2D Jacobian matrix of the variable change of the element
+ * \param eleTypeHD Type of the element.
+ * \param eleTypeLD Type of the element's edges.
+ * \param jacobiansHD Jacobian matrix of the variable change of the element
  * evaluated at each Gauss points.
- * \param determinants2D Determinant of the variable change of the element
+ * \param determinantsHD Determinant of the variable change of the element
  * evaluated at each Gauss points.
- * \param determinants1D Determinant of the variable change of the element's edges
+ * \param determinantsLD Determinant of the variable change of the element's edges
  * evaluated at each Gauss points.
- * \param nGP1D Number of Gauss point for integration.
+ * \param nGPLD Number of Gauss point for integration.
  * \param offsetInU Offset of the element in the u unknown vector.
  * \param nodesTagsPerEdge Node tags of the element, per edge.
+ * \param nodesTags Node tags of the element.
  * \param elementBarycenter Element barycenter coordinate.
  * \param nodesTagBoundaries Map which stores the tags of the nodes belonging to a certain boundary.
- * \param element2DProperty Structure containing informations about a certain element type.
+ * \param elementProperty Structure containing informations about a certain element type.
+ * \param meshDim Dimension of the mesh (1 or 2)
  */
-static void addElement(Entity2D& entity, int elementTag, int eleType2D,
-                        int eleType1D, std::vector<double> jacobians2D,
-                        std::vector<double> determinants2D,
-                        std::vector<double> determinants1D,
-                        unsigned int nGP1D, unsigned int offsetInU,
+static void addElement(Entity& entity, int elementTag, int eleTypeHD,
+                        int eleTypeLD, std::vector<double> jacobiansHD,
+                        std::vector<double> determinantsHD,
+                        std::vector<double> determinantsLD,
+                        unsigned int nGPLD, unsigned int offsetInU,
                         std::vector<int> nodesTagsPerEdge,
                         std::vector<int> nodesTags,
                         const std::vector<double>& elementBarycenter,
                         const std::map<std::string, std::vector<int>>& nodesTagBoundaries,
-                        const ElementProperty& element2DProperty,
-                        const ElementProperty& element1DProperty)
+                        const std::map<int, ElementProperty>& elementProperty,
+                        unsigned int meshDim)
 {
-    Element2D element;
+    //Fill an element structure
+    Element element;
     element.elementTag = elementTag;
-    element.elementType2D = eleType2D;
-    element.elementType1D = eleType1D;
+    element.elementTypeHD = eleTypeHD;
+    element.elementTypeLD = eleTypeLD;
 
     element.offsetInU = offsetInU;
 
-    element.determinant2D = std::move(determinants2D);
-    element.jacobian2D = std::move(jacobians2D);
+    element.determinantHD = std::move(determinantsHD);
+    element.jacobianHD = std::move(jacobiansHD);
     element.nodeTags = std::move(nodesTags);
 
-    unsigned int nEdge = element2DProperty.numNodes/element2DProperty.order;
-    unsigned int nNodePerEdge = element2DProperty.order + 1;
+    for(unsigned int i = 0 ; i < element.nodeTags.size() ; ++i)
+    {
+        std::vector<double> coord, dummyParametricCoord;
+        gmsh::model::mesh::getNode(element.nodeTags[i], coord, dummyParametricCoord);
 
+        element.nodesCoord.push_back(coord);
+    }
+
+    //Compute the number of edge and of nodes per edge of that element
+    unsigned int nEdge = determinantsLD.size()/nGPLD;
+    unsigned int nNodePerEdge = elementProperty.at(eleTypeLD).numNodes;
+
+    //For each edge, we add an edge to the element.edges field
     for(unsigned int i = 0 ; i < nEdge ; ++i)
     {
+        //Get the nodes tags associated with that particular edge
         std::vector<int> nodesTagsEdge(nodesTagsPerEdge.begin() + nNodePerEdge*i,
                                         nodesTagsPerEdge.begin() + nNodePerEdge*(i + 1));
 
-        std::vector<double> determinantsEdge1D(determinants1D.begin() + nGP1D*i, determinants1D.begin() + nGP1D*(i + 1));
+        //Get the determinants associated with that particular edge
+        std::vector<double> determinantsEdgeLD(determinantsLD.begin() + nGPLD*i, determinantsLD.begin() + nGPLD*(i + 1));
 
-        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdge1D), element.nodeTags);
+        //Add the edge to the element.edges field
+        addEdge(element, std::move(nodesTagsEdge), std::move(determinantsEdgeLD), element.nodeTags);
         if(entity.elements.size() != 0)
         {
+            //Check if the edge is on the boundary of the domain
+            //If not, try to find the edge neighbour in a previously computed element
             if(!IsBounbdary(nodesTagBoundaries, element.edges[i]))
                 findInFrontEdge(entity, element.edges[i], i);
 
@@ -354,9 +399,11 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
             IsBounbdary(nodesTagBoundaries, element.edges[i]);
         }
 
-        computeEdgeNormalCoord(element.edges[i], elementBarycenter);
+        //Compute the normal of the edge and get the nodes coordinates of the edge
+        computeEdgeNormalCoord(element.edges[i], meshDim, elementBarycenter);
 
-        Eigen::SparseMatrix<double> dMs(element2DProperty.nSF, element2DProperty.nSF);
+        //Compute some essential matrix for the DG-FEM method
+        Eigen::SparseMatrix<double> dMs(elementProperty.at(eleTypeHD).nSF, elementProperty.at(eleTypeHD).nSF);
         std::vector<Eigen::Triplet<double>> indices;
 
         for(size_t nA = 0 ; nA <  element.edges[i].nodeTags.size() ; ++nA)
@@ -364,7 +411,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
             for(size_t nB = 0 ; nB <  element.edges[i].nodeTags.size() ; ++nB)
             {
                 indices.push_back(Eigen::Triplet<double>
-                    (element.edges[i].offsetInElm[nA], element.edges[i].offsetInElm[nB], element1DProperty.lalb[nA][nB]));
+                    (element.edges[i].offsetInElm[nA], element.edges[i].offsetInElm[nB], elementProperty.at(eleTypeLD).lalb[nA][nB]));
             }
         }
 
@@ -372,6 +419,7 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
         element.dM.push_back(dMs);
     }
 
+    //Add the element to the entity
     entity.elements.push_back(element);
 }
 
@@ -379,81 +427,91 @@ static void addElement(Entity2D& entity, int elementTag, int eleType2D,
 /**
  * \brief Add an entity to a certain 2D mesh (filling the required fields).
  * \param mesh The parent mesh.
- * \param entityHandle Entity dimTags to add.
+ * \param entityTag Entity tag to add.
  * \param currentOffset Offset in u unknown vector.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
  */
-static bool addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, unsigned int& currentOffset,
+static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
                       const std::string& intScheme, const std::string& basisFuncType)
 {
-    // add the current 2D entity
-    Entity2D entity;
-    entity.entityTag2D = entityHandle.second;
-    int c = gmsh::model::addDiscreteEntity(1);
-    entity.entityTag1D = c;
+    //Fill an entity structure
+    Entity entity;
+    entity.entityTagHD = entityTag;
 
-    // get the element types in the current 2D entity
-    std::vector<int> eleTypes2D;
-    gmsh::model::mesh::getElementTypes(eleTypes2D, entityHandle.first,
-                                        entityHandle.second);
-    loadElementProperties(mesh.elementProperties2D, eleTypes2D,
+    //Add an entity for the mesh.dim-1 D elements created (edges of the elements)
+    int c = gmsh::model::addDiscreteEntity(1);
+    entity.entityTagLD = c;
+
+    //Get the element types in the current mesh.dim D entity
+    std::vector<int> eleTypesHD;
+    gmsh::model::mesh::getElementTypes(eleTypesHD, mesh.dim,entityTag);
+
+    loadElementProperties(mesh.elementProperties, eleTypesHD,
                           intScheme, basisFuncType);
 
-    // loop over the element types in the current 2D entity
-    for(auto eleType2D : eleTypes2D)
+    //Loop over the element types in the current mesh.dim D entity
+    for(auto eleTypeHD : eleTypesHD)
     {
-        // get the elements of type eleType2D
+        //Get the elements of type eleTypeHD and their nodes tags.
         std::vector<int> nodeTags, elementTags;
-        gmsh::model::mesh::getElementsByType(eleType2D, elementTags, nodeTags,
-                                                entityHandle.second);
+        gmsh::model::mesh::getElementsByType(eleTypeHD, elementTags, nodeTags,
+                                                entityTag);
 
+        //Get the elements nodes tags "per edge".
         std::vector<int> nodesTagPerEdge;
-        gmsh::model::mesh::getElementEdgeNodes(eleType2D, nodesTagPerEdge,
-                                                entityHandle.second);
+        gmsh::model::mesh::getElementEdgeNodes(eleTypeHD, nodesTagPerEdge,
+                                                entityTag);
 
-        unsigned int numNodes = mesh.elementProperties2D[eleType2D].numNodes;
-        unsigned int order = mesh.elementProperties2D[eleType2D].order;
+        unsigned int numNodes = mesh.elementProperties[eleTypeHD].numNodes;
+        unsigned int order = mesh.elementProperties[eleTypeHD].order;
 
+        //Get the elements barycenters (for normal computation)
         std::vector<double> baryCenters;
-        gmsh::model::mesh::getBarycenters(eleType2D, entityHandle.second, false, true, baryCenters);
+        gmsh::model::mesh::getBarycenters(eleTypeHD, entityTag, false, true, baryCenters);
 
-        // add 1D entity to store all the lines associated to elements of the same
-        // order
-        // TO DO: Problem Q4 and T3 element have the same order ?
-        int eleType1D = gmsh::model::mesh::getElementType("line", order);
-        gmsh::model::mesh::setElementsByType(1, c, eleType1D, {}, nodesTagPerEdge);
-
-        loadElementProperties(mesh.elementProperties1D,
-                                std::vector<int>(1, eleType1D), intScheme,
-                                basisFuncType);
-
-        std::vector<double> jacobians2D, determinants2D, dummyPoints2D;
-        gmsh::model::mesh::getJacobians(eleType2D, intScheme, jacobians2D,
-                                        determinants2D, dummyPoints2D,
-                                        entityHandle.second);
-
-        //Attention: assume one eleType2D per entity !! (Same eleType1D for T3 and Q4 -> bug)
-        std::vector<double> dummyJacobians1D, determinants1D, dummyPoints1D;
-        gmsh::model::mesh::getJacobians(eleType1D, intScheme, dummyJacobians1D,
-                                        determinants1D, dummyPoints1D,
-                                        c);
-
-        unsigned int nElements = nodeTags.size()/mesh.elementProperties2D[eleType2D].numNodes;
-        unsigned int nGP2D = mesh.elementProperties2D[eleType2D].nGP;
-        unsigned int nGP1D = mesh.elementProperties1D[eleType1D].nGP;
-        unsigned int nEdgePerElement = determinants1D.size()/(nGP1D*nElements);
-        unsigned int nNodesPerEdge = mesh.elementProperties1D[eleType1D].numNodes;
-
-        //Check for bubble nodes in eleType2D
-        if(numNodes != order * nEdgePerElement)
+        // Add mesh.dim-1 D entity to store all the lines associated to elements of the same order
+        int eleTypeLD;
+        switch(mesh.dim)
         {
-            std::cerr << "Currently unsupported element type " << mesh.elementProperties2D[eleType2D].name
-                      << " inside mesh!" << std::endl;
+            case 1:
+                eleTypeLD = gmsh::model::mesh::getElementType("point", order);
+                break;
 
-            return false;
+            case 2:
+                eleTypeLD = gmsh::model::mesh::getElementType("line", order);
+                break;
         }
 
+        //Creation of the mesh.dim-1 D elements
+        gmsh::model::mesh::setElementsByType(mesh.dim-1, c, eleTypeLD, {}, nodesTagPerEdge);
+
+        loadElementProperties(mesh.elementProperties,
+                                std::vector<int>(1, eleTypeLD), intScheme,
+                                basisFuncType);
+
+        //We then load jacobian matrices and their determinants of the mesh.dim D
+        //and mesh.dim -1 D elements (useful for M, Sx, Sy, Sz)
+        std::vector<double> jacobiansHD, determinantsHD, dummyPointsHD;
+        gmsh::model::mesh::getJacobians(eleTypeHD, intScheme, jacobiansHD,
+                                        determinantsHD, dummyPointsHD,
+                                        entityTag);
+
+        std::vector<double> dummyJacobiansLD, determinantsLD, dummyPointsLD;
+        gmsh::model::mesh::getJacobians(eleTypeLD, intScheme, dummyJacobiansLD,
+                                        determinantsLD, dummyPointsLD,
+                                        c);
+
+        //Computation of the number of mesh.dim D elements, number of gauss points for
+        //mesh.dim and mesh.dim-1 D elements, the number of edges per mesh.dim D elements
+        //and the number of nodes per edge.
+        unsigned int nElements = nodeTags.size()/mesh.elementProperties[eleTypeHD].numNodes;
+        unsigned int nGPHD = mesh.elementProperties[eleTypeHD].nGP;
+        unsigned int nGPLD = mesh.elementProperties[eleTypeLD].nGP;
+        unsigned int nEdgePerElement = determinantsLD.size()/(nGPLD*nElements);
+        unsigned int nNodesPerEdge = mesh.elementProperties[eleTypeLD].numNodes;
+
+        //Loop over each mesh.dim D elements
         unsigned ratio, currentDecade = 0;
         for(unsigned int i = 0 ; i < elementTags.size() ; ++i)
         {
@@ -462,22 +520,24 @@ static bool addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
             ratio = int(100*double(i)/double(elementTags.size()));
             if(ratio >= currentDecade)
             {
-                std::cout   << "\r" << "Entity [" << entity.entityTag2D << "]: "
+                std::cout   << "\r" << "Entity [" << entity.entityTagHD << "]: "
                             << ratio << "% of the elements computed"
                             << std::flush;
                 currentDecade = ratio + 1;
             }
 
-            std::vector<double> jacobiansElement2D(
-                                            jacobians2D.begin() + 9*nGP2D*i,
-                                            jacobians2D.begin() + 9*nGP2D*(1 + i));
-            std::vector<double> determinantsElement2D(
-                                            determinants2D.begin() + nGP2D*i,
-                                            determinants2D.begin() + nGP2D*(1 + i));
-            std::vector<double> determinantElement1D(
-                                            determinants1D.begin() + nEdgePerElement*nGP1D*i,
-                                            determinants1D.begin() + nEdgePerElement*nGP1D*(1 + i));
+            //Get jacobians and determinant associated with that particular element
+            std::vector<double> jacobiansElementHD(
+                                            jacobiansHD.begin() + 9*nGPHD*i,
+                                            jacobiansHD.begin() + 9*nGPHD*(1 + i));
+            std::vector<double> determinantsElementHD(
+                                            determinantsHD.begin() + nGPHD*i,
+                                            determinantsHD.begin() + nGPHD*(1 + i));
+            std::vector<double> determinantElementLD(
+                                            determinantsLD.begin() + nEdgePerElement*nGPLD*i,
+                                            determinantsLD.begin() + nEdgePerElement*nGPLD*(1 + i));
 
+            //Get nodes tags and nodes tags "per edge" associated with that particular element
             std::vector<int> nodeTagsElement(nodeTags.begin() + numNodes*i,
                                              nodeTags.begin() + numNodes*(1 + i));
 
@@ -486,44 +546,47 @@ static bool addEntity(Mesh2D& mesh, const std::pair<int, int>& entityHandle, uns
                                 nodesTagPerEdge.begin() + nNodesPerEdge*nEdgePerElement*i,
                                 nodesTagPerEdge.begin() + nNodesPerEdge*nEdgePerElement*(i + 1));
 
+            //Get the barycenter of that particular element
             std::vector<double> elementBarycenter(baryCenters.begin() + 3*i, baryCenters.begin() + 3*(i + 1));
 
-            unsigned int elementOffset = numNodes; //To check
+            //Offset of the element in the unknown vector
+            unsigned int elementOffset = numNodes;
 
-            addElement(entity, elementTags[i], eleType2D, eleType1D,
-                        std::move(jacobiansElement2D),
-                        std::move(determinantsElement2D),
-                        std::move(determinantElement1D),
-                        nGP1D, currentOffset,
+            //Add the element to the entity
+            addElement(entity, elementTags[i], eleTypeHD, eleTypeLD,
+                        std::move(jacobiansElementHD),
+                        std::move(determinantsElementHD),
+                        std::move(determinantElementLD),
+                        nGPLD, currentOffset,
                         std::move(nodesTagPerEdgeElement),
                         std::move(nodeTagsElement),
                         elementBarycenter,
                         mesh.nodesTagBoundary,
-                        mesh.elementProperties2D[eleType2D],
-                        mesh.elementProperties1D[eleType1D]);
+                        mesh.elementProperties, mesh.dim);
 
             currentOffset += elementOffset;
+            mesh.numNodes += numNodes;
         }
 
-         std::cout  << "\r" << "Entity [" << entity.entityTag2D << "]: "
+         std::cout  << "\r" << "Entity [" << entity.entityTagHD << "]: "
                     << "100% of the elements computed" << std::flush << std::endl;
     }
 
-    // add the entity to the mesh.entities field
+    //Add the entity to the mesh.entities field
     mesh.entities.push_back(entity);
     return true;
 }
 
 
 /**
- * \brief Checks if the mesh is 2D.
- * \return true if the mesh is 2D, false otherwise.
+ * \brief Compute the mesh dimension.
+ * \return The mesh dimension (1, 2 or 3).
  */
-static bool IsMesh2D()
+static unsigned short getMeshDim()
 {
     int elementDim = -1;
 
-    // loop over the dimension i to get the maximum element dimension in the mesh
+    //Loop over the dimension i to get the maximum element dimension in the mesh
     for(unsigned short i = 0 ; i <= 3 ; ++i)
     {
         std::vector<int> eleTypes;
@@ -540,75 +603,92 @@ static bool IsMesh2D()
                 elementDim = i;
                 std::cerr   << "Hybrid meshes not handled in this example!"
                             << std::endl;
-                return false;
         }
     }
 
-    if(elementDim != 2)
-    {
-        std::cerr   << "The mesh does not seem to be 2D "
-                    << "(contains elements of higher dimension)" << std::endl;
-        return false;
-    }
-
-    return true;
+    return elementDim;
 }
 
+// documentation in .hpp file
+std::vector<int> getTags(const Mesh& mesh)
+{
+    std::vector<int> listTags;
+
+    // loop over the entities
+    for(unsigned int ent = 0 ; ent < mesh.entities.size() ; ++ent)
+    {
+        Entity entity = mesh.entities[ent];
+
+        // loop over the nodes
+        for(unsigned int elm = 0 ; elm < entity.elements.size() ; ++elm)
+        {
+            Element element = entity.elements[elm];
+            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
+            {
+                listTags.push_back(element.nodeTags[n]);
+            }
+        }
+    }
+
+    return listTags;
+}
 
 // documentation in .hpp file
-bool readMesh2D(Mesh2D& mesh, const std::string& fileName,
+bool readMesh(Mesh& mesh, const std::string& fileName,
                 const std::string& intScheme, const std::string& basisFuncType)
 {
     gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
     gmsh::open(fileName);
 
-    // check that the mesh is 2D
-    if(!IsMesh2D())
+    //Check that the mesh is not 3D
+    mesh.dim = getMeshDim();
+    if(mesh.dim == 3)
     {
-        gmsh::finalize();
+        std::cerr << "3D meshes unsupported!" << std::endl;
         return false;
     }
 
-    //Can we retrieve info with phys group tag, or is it by chance than physgroupTag = entityTag ?
-    // collect the information contained in the gmsh file
+    //We retrieve the tags of the physical groups of dimension mesh.dim and mesh.dim-1
     std::vector<std::pair<int, int>> physGroupHandles;
-    gmsh::model::getPhysicalGroups(physGroupHandles, 2);
+    gmsh::model::getPhysicalGroups(physGroupHandles, mesh.dim);
 
     std::vector<std::pair<int, int>> BCHandles;
-    gmsh::model::getPhysicalGroups(BCHandles, 1);
+    gmsh::model::getPhysicalGroups(BCHandles, mesh.dim - 1);
 
-    for(unsigned int i = 0 ; i < BCHandles.size() ; ++i)
+    //Physical groups of dimension mesh.dim-1 are boundary conditions.
+    //We then retrieve and store the tag of each node in those boundaries.
+    for(auto BCHandle : BCHandles)
     {
         std::string name;
-        gmsh::model::getPhysicalName(1, BCHandles[i].second, name);
+        gmsh::model::getPhysicalName(mesh.dim - 1, BCHandle.second, name);
         std::vector<int> nodesTags;
-        std::vector<double> coord;
-        gmsh::model::mesh::getNodesForPhysicalGroup(1, BCHandles[i].second,
-                                                    nodesTags, coord);
+        std::vector<double> dummyCoord;
+        gmsh::model::mesh::getNodesForPhysicalGroup(mesh.dim - 1, BCHandle.second,
+                                                    nodesTags, dummyCoord);
         mesh.nodesTagBoundary[name] = nodesTags;
-        //mesh.coordNodesBoundary[name] = coord;
     }
 
-    //Assume 1 2D physical group, might change later
-    //New structure ?
+    //We assume that a physical group contains only one entity and we retrieve them.
     std::vector<int> entitiesTag;
-    gmsh::model::getEntitiesForPhysicalGroup(physGroupHandles[0].first,
-                                             physGroupHandles[0].second,
-                                             entitiesTag);
-
-    //Modify addEntity ?
-    std::vector<std::pair<int, int>> entityHandles;
-    for(auto entityTag : entitiesTag)
+    for(auto physGroupHandle : physGroupHandles)
     {
-        entityHandles.push_back(std::pair<int, int>(physGroupHandles[0].first, entityTag));
+        std::vector<int> entityTag;
+        gmsh::model::getEntitiesForPhysicalGroup(physGroupHandle.first,
+                                             physGroupHandle.second,
+                                             entityTag);
+
+        entitiesTag.push_back(entityTag[0]);
     }
+
 
     unsigned int currentOffset = 0;
+    mesh.numNodes = 0;
 
-    for(auto entityHandle : entityHandles)
+    //We add each identified entity to the mesh.
+    for(auto entityTag : entitiesTag)
     {
-        if(!addEntity(mesh, entityHandle, currentOffset, intScheme, basisFuncType))
+        if(!addEntity(mesh, entityTag, currentOffset, intScheme, basisFuncType))
             return false;
     }
 

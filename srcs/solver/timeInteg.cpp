@@ -31,7 +31,7 @@ static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
 	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
 	const Eigen::SparseMatrix<double>& SxTranspose,
 	const Eigen::SparseMatrix<double>& SyTranspose,
-	unsigned int numNodes, const Mesh2D& mesh,
+	const Mesh& mesh,
     const std::map<std::string, ibc>& boundaries,
     const std::vector<double>& fluxCoeffs,
     const std::vector<std::vector<double>>& coord)
@@ -40,12 +40,12 @@ static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
  	flux(fx, fy, u, fluxCoeffs, coord, t);
 
 	// compute the right-hand side of the master equation (phi or psi)
-	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
+	Eigen::VectorXd I(mesh.numNodes); I.setZero(); //[TO DO]: define this in timeInteg
 
  	buildFlux(mesh, I, u, fx, fy, 1, numNodes, t, boundaries, fluxCoeffs, coord);
 
 	// compute the vector F to be integrated in time
-	Eigen::VectorXd vectorF(numNodes);
+	Eigen::VectorXd vectorF(mesh.numNodes);
 
     vectorF = invM*(I + SxTranspose*fx + SyTranspose*fy);
 
@@ -71,7 +71,7 @@ static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx
 	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
 	const Eigen::SparseMatrix<double>& Sx,
 	const Eigen::SparseMatrix<double>& Sy,
-	unsigned int numNodes, const Mesh2D& mesh,
+	const Mesh& mesh,
 	const std::map<std::string, ibc>& boundaries,
 	const std::vector<double>& fluxCoeffs,
 	const std::vector<std::vector<double>>& coord)
@@ -80,12 +80,12 @@ static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx
  	flux(fx, fy, u, fluxCoeffs, coord, t);
 
 	// compute the right-hand side of the master equation (phi or psi)
-	Eigen::VectorXd I(numNodes); I.setZero(); //[TO DO]: define this in timeInteg
+	Eigen::VectorXd I(mesh.numNodes); I.setZero(); //[TO DO]: define this in timeInteg
 
  	buildFlux(mesh, I, u, fx, fy, -1, numNodes, t, boundaries, fluxCoeffs, coord);
 
 	// compute the vector F to be integrated in time
-	Eigen::VectorXd vectorF(numNodes);
+	Eigen::VectorXd vectorF(mesh.numNodes);
 
     vectorF = invM*(I - Sx*fx - Sy*fy);
 
@@ -93,7 +93,7 @@ static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx
 }
 
 //Documentation in .hpp
-bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
+bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	const std::string& fileName)
 {
     unsigned int nbreTimeSteps = static_cast<unsigned int>(solverParams.simTime/solverParams.timeStep);
@@ -108,9 +108,9 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	// std::vector<int> nodeTags =  getTags(mesh);
 
 	// matrices of the DG method
-  	Eigen::SparseMatrix<double> invM(numNodes, numNodes);
-  	Eigen::SparseMatrix<double> Sx(numNodes, numNodes);
-  	Eigen::SparseMatrix<double> Sy(numNodes, numNodes);
+  	Eigen::SparseMatrix<double> invM(mesh.numNodes, mesh.numNodes);
+  	Eigen::SparseMatrix<double> Sx(mesh.numNodes, mesh.numNodes);
+  	Eigen::SparseMatrix<double> Sy(mesh.numNodes, mesh.numNodes);
   	std::cout << "Building the invM matrix...";
   	buildM(mesh, invM);
   	//std::cout << "invM:\n" << invM;
@@ -130,7 +130,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
                                 const Eigen::SparseMatrix<double>& invM,
                                 const Eigen::SparseMatrix<double>& SxTranspose,
                                 const Eigen::SparseMatrix<double>& SyTranspose,
-                                unsigned int numNodes, const Mesh2D& mesh,
+                                const Mesh& mesh,
                                 const std::map<std::string, ibc>& boundaries,
                                 const std::vector<double> fluxCoeffs,
                                 const std::vector<std::vector<double>>& coord)> usedF;
@@ -147,21 +147,18 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
   	}
 
 	//Set Initial Condition
-	Eigen::VectorXd u(numNodes);
+	Eigen::VectorXd u(mesh.numNodes);
 	for(auto entity : mesh.entities)
     {
         for(auto element : entity.elements)
         {
-            for(auto edge : element.edges)
+            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
             {
-                for(unsigned int n = 0 ; n < edge.nodeTags.size() ; ++n)
-                {
-                    double x = edge.nodeCoordinate[n].first;
-                    double y = edge.nodeCoordinate[n].second;
-                    u(element.offsetInU + edge.offsetInElm[n]) =
-                    solverParams.initCondition.ibcFunc(x, y, 0, 0, 0,
-                                                       solverParams.initCondition.coefficients);
-                }
+                double x = element.nodesCoord[n][0];
+                double y = element.nodesCoord[n][1];
+                u(element.offsetInU + n) =
+                solverParams.initCondition.ibcFunc(x, y, 0, 0, 0,
+                                                   solverParams.initCondition.coefficients);
             }
         }
     }
@@ -169,8 +166,8 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
     // u.setZero();
 
 	// vectors of physical flux
-	Eigen::VectorXd fx(numNodes);
-	Eigen::VectorXd fy(numNodes);
+	Eigen::VectorXd fx(mesh.numNodes);
+	Eigen::VectorXd fy(mesh.numNodes);
 
 	// launch gmsh
 	gmsh::initialize();
@@ -187,11 +184,11 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 	std::vector<unsigned int> elementNumNodes;
 	for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
 	{
-		Entity2D entity = mesh.entities[ent];
+		Entity entity = mesh.entities[ent];
 
 		for(size_t i = 0 ; i < entity.elements.size() ; ++i)
 		{
-			Element2D element = entity.elements[i];
+			Element element = entity.elements[i];
 			elementTags.push_back(element.elementTag);
 			elementNumNodes.push_back(element.nodeTags.size());
 		}
@@ -206,7 +203,7 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 
 	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 	{
-		std::vector<double> temp(elementNumNodes.size());
+		std::vector<double> temp(elementNumNodes[count]);
 		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
 			temp[node]=u[index];
@@ -222,8 +219,8 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 
 	// temporary vectors (only for RK4, but I don't want to define them at each time
 	// iteration)
-	Eigen::VectorXd k1(numNodes), k2(numNodes), k3(numNodes), k4(numNodes),
-	temp(numNodes);
+	Eigen::VectorXd k1(mesh.numNodes), k2(mesh.numNodes), k3(mesh.numNodes), k4(mesh.numNodes),
+	temp(mesh.numNodes);
 
 	// numerical integration
 	unsigned int ratio, currentDecade = 0;
@@ -242,7 +239,6 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 
 		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
 		{
-
 			u += usedF(t, u, fx, fy, invM, Sx, Sy, numNodes, mesh,
 					solverParams.boundaryConditions, solverParams.fluxCoeffs, coord)*solverParams.timeStep;
 		}
@@ -277,7 +273,6 @@ bool timeInteg(const Mesh2D& mesh, const SolverParams& solverParams,
 			u += solverParams.timeStep * usedF(t + solverParams.timeStep/2, temp,
 												fx, fy, invM, Sx, Sy, numNodes, mesh,
 												solverParams.boundaryConditions, solverParams.fluxCoeffs, coord);
-
 		}
 
 		// check that it does not diverge
