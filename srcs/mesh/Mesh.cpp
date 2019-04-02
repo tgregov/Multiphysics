@@ -9,7 +9,7 @@
 #include "Mesh.hpp"
 #include "../utils.hpp"
 
-static void loadNodeData(Mesh2D& mesh2D)
+static void loadNodeData(Mesh& mesh)
 {
 
     unsigned int numNodes = 0;
@@ -17,36 +17,32 @@ static void loadNodeData(Mesh2D& mesh2D)
     std::vector<std::vector<double>> coord;
 
     // loop over the entities
-    for(size_t ent = 0 ; ent < mesh2D.entities.size() ; ++ent)
+    for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
     {
-        Entity2D entity = mesh2D.entities[ent];
+        Entity entity = mesh.entities[ent];
 
         // loop over the elements
         for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
         {
-            Element2D element = entity.elements[elm];
+            Element element = entity.elements[elm];
 
-            for(size_t s = 0 ; s < element.edges.size() ; ++s)
+            for(size_t n = 0 ; n < element.nodeTags.size() ; ++n)
             {
-                Edge edge = element.edges[s];
+                std::vector<double> temp;
+                temp.push_back(element.nodesCoord[n][0]);
+                temp.push_back(element.nodesCoord[n][1]);                    
+                coord.push_back(temp);                
+                    
+                nodeTags.push_back(element.nodeTags[n]);
+                numNodes++;
 
-                for(size_t n = 0 ; n < edge.nodeCoordinate.size() ; ++n)
-                {
-                    std::vector<double> temp;
-                    temp.push_back(edge.nodeCoordinate[n].first);
-                    temp.push_back(edge.nodeCoordinate[n].second);                    
-                    coord.push_back(temp);
-
-                    nodeTags.push_back(edge.nodeTags[n]);
-                    numNodes++;
-                }
             }
         }
     }
 
-    mesh2D.nodeData.numNodes = numNodes;
-    mesh2D.nodeData.nodeTags = nodeTags;
-    mesh2D.nodeData.coord = coord;
+    mesh.nodeData.numNodes = numNodes;
+    mesh.nodeData.nodeTags = nodeTags;
+    mesh.nodeData.coord = coord;
 }
 
 

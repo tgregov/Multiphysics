@@ -28,10 +28,10 @@ void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeff
 }
 
 
-double computeC(const std::pair<double, double>& normal,
+double computeC(const std::vector<double>& normal,
                 const std::vector<double>& fluxCoeffs, double t)
 {
-    return fabs(cos(5*t)*normal.first + sin(5*t)*normal.second);
+    return fabs(cos(5*t)*normal[0] + sin(5*t)*normal[1]);
 }
 
 

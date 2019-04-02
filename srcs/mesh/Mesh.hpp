@@ -119,6 +119,8 @@ struct Mesh
     unsigned int numNodes;          /**< Number of nodes inside the mesh */
 
     unsigned short dim;             /**< Mesh dimension (1, 2, (3)) */
+
+    NodeData nodeData;
 };
 
 
