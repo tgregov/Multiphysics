@@ -12,8 +12,8 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u,
 	for(size_t i = 0 ; i < u.size() ; ++i)
 	{	
 
-		fx[i] = u[i]*0.5*coord[i][1];//cos(5*t);
-		fy[i] = u[i]*0.0;//sin(5*t);
+		fx[i] = -u[i]*1*(coord[i][1]-0.5);//cos(5*t);
+		fy[i] = u[i]*1*(coord[i][0]-0.5);//sin(5*t);
 	}
 }
 
@@ -23,15 +23,15 @@ void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeff
 	std::vector<double> coord, double t)
 {
 
-	fx = u*0.5*coord[1];//cos(5*t);
-	fy = u*0.0;//sin(5*t);
+	fx = -u*1*(coord[1]-0.5);//cos(5*t);
+	fy = u*1*(coord[0]-0.5);//sin(5*t);
 }
 
 
 double computeC(const std::vector<double>& normal,
                 const std::vector<double>& fluxCoeffs, double t, std::vector<double> coord)
 {
-    return fabs(normal[0]*0.5*coord[1]);//cos(5*t)*normal[0] + sin(5*t)*normal[1]);
+    return fabs(-normal[0]*0.5*(coord[1]-0.5) + normal[1]*0.5*(coord[0]-0.5));//cos(5*t)*normal[0] + sin(5*t)*normal[1]);
 }
 
 
