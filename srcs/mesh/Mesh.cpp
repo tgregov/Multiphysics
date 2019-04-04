@@ -389,6 +389,7 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
  * \param currentOffset Offset in u unknown vector.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
+ * \return true if then entity was added flawlessly, false otherwise.
  */
 static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
                       const std::string& intScheme, const std::string& basisFuncType)
@@ -423,6 +424,14 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
 
         unsigned int numNodes = mesh.elementProperties[eleTypeHD].numNodes;
         unsigned int order = mesh.elementProperties[eleTypeHD].order;
+
+        if(intScheme == "Lagrange" && order > 7)
+        {
+            std::cerr << "Lagrange polynomials are not stable with an order superior to 7"
+                      << std::endl;
+
+            return false;
+        }
 
         //Get the elements barycenters (for normal computation)
         std::vector<double> baryCenters;

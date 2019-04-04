@@ -83,9 +83,8 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 						ibc boundary = boundaries.at(edge.bcName);
 
 						// node "in front" (at boundary condition)
-						uAtBC = boundary.ibcFunc(edge.nodeCoordinate[j][0],
-							edge.nodeCoordinate[j][1],
-							0.0, u[indexJ], t, boundary.coefficients);
+						uAtBC = boundary.ibcFunc(edge.nodeCoordinate[j],
+                               u[indexJ], t, boundary.coefficients);
 
 						// physical flux "in front" (at boundary condition)
                         flux(fxAtBC, fyAtBC, uAtBC, fluxCoeffs);

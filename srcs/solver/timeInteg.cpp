@@ -145,10 +145,8 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         {
             for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
             {
-                double x = element.nodesCoord[n][0];
-                double y = element.nodesCoord[n][1];
                 u(element.offsetInU + n) =
-                solverParams.initCondition.ibcFunc(x, y, 0, 0, 0,
+                solverParams.initCondition.ibcFunc(element.nodesCoord[n], 0, 0,
                                                    solverParams.initCondition.coefficients);
             }
         }

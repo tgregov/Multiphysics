@@ -2,7 +2,7 @@
 #include <cassert>
 #include "ibvFunction.hpp"
 
-double sinus(double x, double y, double z, double u,
+double sinus(const std::vector<double>& pos, double u,
              double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 3);
@@ -10,7 +10,7 @@ double sinus(double x, double y, double z, double u,
     return coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2]);
 }
 
-double gaussian(double x, double y, double z, double u,
+double gaussian(const std::vector<double>& pos, double u,
                 double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 3);
@@ -18,7 +18,7 @@ double gaussian(double x, double y, double z, double u,
     return coeffs[0]*exp(-(t-coeffs[1])*(t-coeffs[1])/(2*coeffs[2]));
 }
 
-double constant(double x, double y, double z, double u,
+double constant(const std::vector<double>& pos, double u,
                 double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 1);
@@ -26,19 +26,20 @@ double constant(double x, double y, double z, double u,
     return coeffs[0];
 }
 
-double constantNeumann(double x, double y, double z, double u,
+double constantNeumann(const std::vector<double>& pos, double u,
                 double t, const std::vector<double>& coeffs)
 {
     return u;
 }
 
-double gaussian2D(double x, double y, double z, double u,
+double gaussian2D(const std::vector<double>& pos, double u,
                   double t, const std::vector<double>& coeffs)
 {
     assert(coeffs.size() == 5);
+    assert(pos.size() == 3);
 
-    double X = (x-coeffs[1])*(x-coeffs[1])/(2*coeffs[2]);
-    double Y = (y-coeffs[3])*(y-coeffs[3])/(2*coeffs[4]);
+    double X = (pos[0]-coeffs[1])*(pos[0]-coeffs[1])/(2*coeffs[2]);
+    double Y = (pos[1]-coeffs[3])*(pos[1]-coeffs[3])/(2*coeffs[4]);
 
     return coeffs[0]*exp(-(X+Y));
 }

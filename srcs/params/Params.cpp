@@ -115,8 +115,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         return false;
     }
 
-    std::cout << "Inital Condition present and " << nBC
-              << " boundary conditions present in file " << fileName << std::endl;
+    std::cout << "Initial condition present and " << nBC
+              << " boundary conditions present in "<< std::endl
+              << "file " << fileName << std::endl;
 
     return true;
 }
