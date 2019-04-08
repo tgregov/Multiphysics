@@ -1,6 +1,6 @@
 # MATH 0471: Multiphysics integrated computational project 
 ## Goal
-Development of the Discontinuous Galerkin method (DG) applied to a particular physical situation (to be determined).  
+Development of the Discontinuous Galerkin method (DG) applied to 2D shallow water equations.  
 [Link](http://www.montefiore.ulg.ac.be/~geuzaine/MATH0471/enonce2019.pdf) of the problem statement.
 
 ## Useful reminders
