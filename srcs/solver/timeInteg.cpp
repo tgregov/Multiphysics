@@ -28,28 +28,28 @@
  * \return DU vector.
  * for each BC at each boundaries.
  */
-static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
-	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
+static void Fweak(double t, Field& field, const Eigen::SparseMatrix<double>& invM,
 	const Eigen::SparseMatrix<double>& SxTranspose,
 	const Eigen::SparseMatrix<double>& SyTranspose,
 	const Mesh& mesh,
-    const std::map<std::string, ibc>& boundaries,
-    const std::vector<double>& fluxCoeffs)
+    const std::map<std::string, ibc>& boundaries)
 {
  	// compute the nodal physical fluxes
- 	flux(fx, fy, u, fluxCoeffs);
+ 	flux(field);
 
 	// compute the right-hand side of the master equation (phi or psi)
-	Eigen::VectorXd I(mesh.numNodes); I.setZero(); //[TO DO]: define this in timeInteg
+	Eigen::VectorXd IH(mesh.numNodes); IH.setZero(); //[TO DO]: define this in timeInteg
+	Eigen::VectorXd IuH(mesh.numNodes); IuH.setZero();
+	Eigen::VectorXd IvH(mesh.numNodes); IvH.setZero();
 
- 	buildFlux(mesh, I, u, fx, fy, 1, t, boundaries, fluxCoeffs);
+ 	buildFlux(mesh, IH, IuH, IvH, field, 1, t, boundaries);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(mesh.numNodes);
 
-    vectorF = invM*(I + SxTranspose*fx + SyTranspose*fy);
-
-	return vectorF;
+    field.DeltaH = invM*(IH + SxTranspose*field.FxH + SyTranspose*field.FyH);
+    field.DeltauH = invM*(IuH + SxTranspose*field.FxuH + SyTranspose*field.FyuH);
+    field.DeltavH = invM*(IvH + SxTranspose*field.FxvH + SyTranspose*field.FyvH);
 }
 
 /**
@@ -67,28 +67,28 @@ static Eigen::VectorXd Fweak(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
  * \return DU vector.
  * for each BC at each boundaries.
  */
-static Eigen::VectorXd Fstrong(double t, Eigen::VectorXd& u, Eigen::VectorXd& fx,
-	Eigen::VectorXd& fy, const Eigen::SparseMatrix<double>& invM,
+static void Fstrong(double t, Field& field, const Eigen::SparseMatrix<double>& invM,
 	const Eigen::SparseMatrix<double>& Sx,
 	const Eigen::SparseMatrix<double>& Sy,
 	const Mesh& mesh,
-	const std::map<std::string, ibc>& boundaries,
-	const std::vector<double>& fluxCoeffs)
+    const std::map<std::string, ibc>& boundaries)
 {
  	// compute the nodal physical fluxes
- 	flux(fx, fy, u, fluxCoeffs);
+ 	flux(field);
 
 	// compute the right-hand side of the master equation (phi or psi)
-	Eigen::VectorXd I(mesh.numNodes); I.setZero(); //[TO DO]: define this in timeInteg
+	Eigen::VectorXd IH(mesh.numNodes); IH.setZero(); //[TO DO]: define this in timeInteg
+	Eigen::VectorXd IuH(mesh.numNodes); IuH.setZero();
+	Eigen::VectorXd IvH(mesh.numNodes); IvH.setZero();
 
- 	buildFlux(mesh, I, u, fx, fy, -1, t, boundaries, fluxCoeffs);
+ 	buildFlux(mesh, IH, IuH, IvH, field, -1, t, boundaries);
 
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(mesh.numNodes);
 
-    vectorF = invM*(I - Sx*fx - Sy*fy);
-
-	return vectorF;
+    field.DeltaH = invM*(IH + Sx*field.FxH + Sy*field.FyH);
+    field.DeltauH = invM*(IuH + Sx*field.FxuH + Sy*field.FyuH);
+    field.DeltavH = invM*(IvH + Sx*field.FxvH + Sy*field.FyvH);
 }
 
 //Documentation in .hpp
@@ -118,14 +118,11 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 
 
   	//Function pointer to the used function (weak vs strong form)
-  	std::function<Eigen::VectorXd(double t, Eigen::VectorXd& u,
-                                Eigen::VectorXd& fx, Eigen::VectorXd& fy,
-                                const Eigen::SparseMatrix<double>& invM,
-                                const Eigen::SparseMatrix<double>& SxTranspose,
-                                const Eigen::SparseMatrix<double>& SyTranspose,
-                                const Mesh& mesh,
-                                const std::map<std::string, ibc>& boundaries,
-                                const std::vector<double> fluxCoeffs)> usedF;
+  	std::function<void(double t, Field& field, const Eigen::SparseMatrix<double>& invM,
+	const Eigen::SparseMatrix<double>& Sx,
+	const Eigen::SparseMatrix<double>& Sy,
+	const Mesh& mesh,
+    const std::map<std::string, ibc>& boundaries)> usedF;
 
   	if(solverParams.solverType == "weak")
   	{
@@ -149,6 +146,10 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
   	field.FyH.resize(mesh.numNodes);
   	field.FyuH.resize(mesh.numNodes);
   	field.FyvH.resize(mesh.numNodes);
+  	field.DeltaH.resize(mesh.numNodes);
+  	field.DeltauH.resize(mesh.numNodes);
+  	field.DeltavH.resize(mesh.numNodes);
+
 
 	//Set Initial Condition
 	field.uH.setZero();
@@ -203,7 +204,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 		std::vector<double> temp(elementNumNodes[count]);
 		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
-			temp[node]=u[index];
+			temp[node]=field.H[index];
 			++index;
 		}
 
@@ -237,10 +238,12 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
 		{
 
-			u += usedF(t, u, fx, fy, invM, Sx, Sy, mesh,
-					solverParams.boundaryConditions, solverParams.fluxCoeffs)*solverParams.timeStep;
+			usedF(t, field, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			field.H += field.DeltaH*solverParams.timeStep;
+			field.uH += field.DeltauH*solverParams.timeStep;
+			field.vH += field.DeltavH*solverParams.timeStep;
 		}
-		else if(solverParams.timeIntType == "RK4")
+		/*else if(solverParams.timeIntType == "RK4")
 		{
 			// could be optimized
 			k1 = usedF(t, u, fx, fy, invM, Sx, Sy,
@@ -272,10 +275,10 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 												fx, fy, invM, Sx, Sy, mesh,
 												solverParams.boundaryConditions, solverParams.fluxCoeffs);
 
-		}
+		}*/
 
 		// check that it does not diverge
-		assert(u.maxCoeff() <= 1E5);
+		assert(field.H.maxCoeff() <= 1E5);
 
 		// add time step
 		t += solverParams.timeStep;
@@ -290,7 +293,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
                 for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
                     ++countLocal)
                 {
-                    temp[countLocal] = u[countLocal+offset];
+                    temp[countLocal] = field.H[countLocal+offset];
                 }
                 offset += elementNumNodes[count];
                 uDisplay[count] = std::move(temp);

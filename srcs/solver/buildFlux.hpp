@@ -15,7 +15,7 @@
  * \param C Parameter C of the Lax-Friedrichs numerical flux.
  * \param u Nodal vector of unknowns.
  */
-void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u, const std::vector<double>& fluxCoeffs);
+void flux(Field& field);
 
 
 /**
@@ -24,7 +24,8 @@ void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u, co
  * \param fy Physical flux variable along y.
  * \param u Nodal vector of unknowns.
  */
-void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeffs);
+void flux(std::vector<double>& Fx, std::vector<double>& Fy, 
+			const std::vector<double>& Q);
 
 
 /**
@@ -39,9 +40,8 @@ void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeff
  * \param t Time.
  * \param boundaries Information about the boundaries.
  */
-void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
-	const Eigen::VectorXd& fx, const Eigen::VectorXd& fy,
-	double factor, double t, const std::map<std::string, ibc>& boundaries,
-	const std::vector<double>& fluxCoeffs);
+void buildFlux(const Mesh& mesh, Eigen::VectorXd& IH,Eigen::VectorXd& IuH,
+			Eigen::VectorXd& IvH, Field& field, double factor, double t, 
+			const std::map<std::string, ibc>& boundaries);
 
 #endif /* buildFlux_hpp */

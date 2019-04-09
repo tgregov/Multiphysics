@@ -12,4 +12,9 @@ struct Field
 	Eigen::VectorXd FxH, 	FyH;
 	Eigen::VectorXd FxuH, 	FyuH; 
 	Eigen::VectorXd FxvH, 	FyvH;
+
+	Eigen::VectorXd DeltaH;
+	Eigen::VectorXd DeltauH;
+	Eigen::VectorXd DeltavH;
 };
+#endif
