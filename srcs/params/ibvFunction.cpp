@@ -41,5 +41,5 @@ double gaussian2D(const std::vector<double>& pos, double u,
     double X = (pos[0]-coeffs[1])*(pos[0]-coeffs[1])/(2*coeffs[2]);
     double Y = (pos[1]-coeffs[3])*(pos[1]-coeffs[3])/(2*coeffs[4]);
 
-    return coeffs[0]*exp(-(X+Y));
+    return 1+coeffs[0]*exp(-(X+Y));
 }
