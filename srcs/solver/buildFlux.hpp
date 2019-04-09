@@ -6,7 +6,7 @@
 #include <Eigen/Sparse>
 #include "../mesh/Mesh.hpp"
 #include "../params/ibvFunction.hpp"
-
+#include "field.hpp"
 
 /**
  * \brief Physical flux (allows to compute it at each node of the mesh).

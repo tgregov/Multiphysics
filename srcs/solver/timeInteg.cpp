@@ -11,6 +11,7 @@
 #include "buildFlux.hpp"
 #include "timeInteg.hpp"
 #include "../params/ibvFunction.hpp"
+#include "field.hpp"
 
 /**
  * \brief Compute the Du vector.
@@ -137,26 +138,33 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
      	usedF = Fstrong;
   	}
 
+
+  	Field field;
+  	field.H.resize(mesh.numNodes);
+  	field.uH.resize(mesh.numNodes);
+  	field.vH.resize(mesh.numNodes);
+  	field.FxH.resize(mesh.numNodes);
+  	field.FxuH.resize(mesh.numNodes);
+  	field.FxvH.resize(mesh.numNodes);
+  	field.FyH.resize(mesh.numNodes);
+  	field.FyuH.resize(mesh.numNodes);
+  	field.FyvH.resize(mesh.numNodes);
+
 	//Set Initial Condition
-	Eigen::VectorXd u(mesh.numNodes);
+	field.uH.setZero();
+	field.vH.setZero();
 	for(auto entity : mesh.entities)
     {
         for(auto element : entity.elements)
         {
             for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
             {
-                u(element.offsetInU + n) =
+                field.H(element.offsetInU + n) =
                 solverParams.initCondition.ibcFunc(element.nodesCoord[n], 0, 0,
                                                    solverParams.initCondition.coefficients);
             }
         }
     }
-
-    // u.setZero();
-
-	// vectors of physical flux
-	Eigen::VectorXd fx(mesh.numNodes);
-	Eigen::VectorXd fy(mesh.numNodes);
 
 	// launch gmsh
 	gmsh::initialize();

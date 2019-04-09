@@ -2,29 +2,72 @@
 #include <cmath>
 #include "buildFlux.hpp"
 
-
 // see .hpp file for description
-void flux(Eigen::VectorXd& fx, Eigen::VectorXd& fy, const Eigen::VectorXd& u,
-          const std::vector<double>& fluxCoeffs)
+void flux(Field& field)
 {
-	// first basic flux: simple transport
-	fx = fluxCoeffs[0]*u;
-	fy = fluxCoeffs[1]*u;
+
+	// TO DO: add Joachim's solution
+	// TO DO: div by zero warning
+	for(size_t i = 0 ; i < field.H.size() ; ++i)
+	{
+		field.FxH[i] = field.uH[i];
+		field.FyH[i] = field.vH[i];
+
+		field.FxuH[i] = (field.uH[i]*field.uH[i])/field.H[i] 
+						+ 9.81/2*field.H[i]*field.H[i];
+		field.FxvH[i] = field.uH[i]*field.vH[i]/field.H[i];
+
+		field.FyuH[i] = field.uH[i]*field.vH[i]/field.H[i];
+		field.FyvH[i] = (field.vH[i]*field.vH[i])/field.H[i] 
+						+ 9.81/2*field.H[i]*field.H[i];
+	}
 }
 
 
 // see .hpp file for description
-void flux(double& fx, double& fy, double u, const std::vector<double>& fluxCoeffs)
+void flux(std::vector<double>& Fx, std::vector<double>& Fy, 
+			const std::vector<double>& Q)
 {
-	// first basic flux: simple transport
-    fx = fluxCoeffs[0]*u;
-	fy = fluxCoeffs[1]*u;
+	Fx[0] = Q[1];
+	Fy[0] = Q[2];
+	
+	Fx[1] = Q[1]*Q[1]/Q[0] + 9.81/2*Q[0]*Q[0];
+	Fx[2] = Q[1]*Q[2]/Q[0]; 
+
+	Fy[1] = Q[1]*Q[2]/Q[0];
+	Fy[2] = Q[2]*Q[2]/Q[0] + 9.81/2*Q[0]*Q[0];
+	 
 }
 
 static double computeC(const std::vector<double>& normal,
-                       const std::vector<double>& fluxCoeffs)
+                       const Field& field, 
+                       unsigned int indexJ,
+                       unsigned int indexFrontJ)
 {
-    return fabs(fluxCoeffs[0]*normal[0] + fluxCoeffs[1]*normal[1]);
+
+	double lambdaIn = 	field.uH[indexJ]/field.H[indexJ]*normal[0]
+					+	field.vH[indexJ]/field.H[indexJ]*normal[1];
+	if(lambdaIn > = 0)
+	{
+		lambdaIn += sqrt(9.81*field.H[indexJ]);
+	}
+	else
+	{
+		lambdaIn = -lambdaIn + sqrt(9.81*field.H[indexJ]);
+	}
+
+	double lambdaOut = 	field.uH[indexFrontJ]/field.H[indexFrontJ]*normal[0]
+					+	field.vH[indexFrontJ]/field.H[indexFrontJ]*normal[1];
+	if(lambdaOut > = 0)
+	{
+		lambdaOut += sqrt(9.81*field.H[indexFrontJ]);
+	}
+	else
+	{
+		lambdaOut = -lambdaOut + sqrt(9.81*field.H[indexFrontJ]);
+	}
+
+    return (lambdaIn > lambdaOut ? lambdaIn : lambdaOut);
 }
 
 
@@ -66,9 +109,6 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 				Eigen::VectorXd gy(elmPropHD.nSF); gy.setZero();
 				Eigen::VectorXd dMgx(elmPropHD.nSF), dMgy(elmPropHD.nSF);
 
-
-				double C = computeC(edge.normal, fluxCoeffs);
-
 				for(unsigned int j = 0 ; j < edge.offsetInElm.size() ; ++j)
 				{
 
@@ -91,10 +131,12 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
 
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"
-						gx[edge.offsetInElm[j]] += -(factor*fx[indexJ] + fxAtBC)/2
-							- C*edge.normal[0]*(u[indexJ] - uAtBC)/2;
-						gy[edge.offsetInElm[j]] += -(factor*fy[indexJ] + fyAtBC)/2
-							- C*edge.normal[1]*(u[indexJ] - uAtBC)/2;
+						gx[edge.offsetInElm[j]] += 0;
+						//-(factor*fx[indexJ] + fxAtBC)/2
+						//	- C*edge.normal[0]*(u[indexJ] - uAtBC)/2;
+						gy[edge.offsetInElm[j]] += 0;
+						//-(factor*fy[indexJ] + fyAtBC)/2
+						//	- C*edge.normal[1]*(u[indexJ] - uAtBC)/2;
 					}
 					else // general case
 					{
@@ -108,6 +150,8 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& I, const Eigen::VectorXd& u,
                        					.elements[edge.edgeInFront.first]
                        					.edges[edge.edgeInFront.second]
                        					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
+
+						double C = computeC(edge.normal, field, indexJ, indexFrontJ);
 
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"

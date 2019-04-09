@@ -7,6 +7,7 @@
 #include "../mesh/Mesh.hpp"
 #include "../params/Params.hpp"
 
+
 /**
  * \brief Time integrate the equations (DG-FEM)
  * \param mesh The mesh representing the domain of interest
