@@ -47,9 +47,9 @@ static void Fweak(double t, Field& field, const Eigen::SparseMatrix<double>& inv
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(mesh.numNodes);
 
-    field.DeltaH = invM*(IH + SxTranspose*field.FxH + SyTranspose*field.FyH);
-    field.DeltauH = invM*(IuH + SxTranspose*field.FxuH + SyTranspose*field.FyuH);
-    field.DeltavH = invM*(IvH + SxTranspose*field.FxvH + SyTranspose*field.FyvH);
+    field.DeltaH = invM*(IH - SxTranspose*field.FxH - SyTranspose*field.FyH);
+    field.DeltauH = invM*(IuH - SxTranspose*field.FxuH - SyTranspose*field.FyuH);
+    field.DeltavH = invM*(IvH - SxTranspose*field.FxvH - SyTranspose*field.FyvH);
 }
 
 /**
@@ -86,9 +86,10 @@ static void Fstrong(double t, Field& field, const Eigen::SparseMatrix<double>& i
 	// compute the vector F to be integrated in time
 	Eigen::VectorXd vectorF(mesh.numNodes);
 
-    field.DeltaH = invM*(IH + Sx*field.FxH + Sy*field.FyH);
-    field.DeltauH = invM*(IuH + Sx*field.FxuH + Sy*field.FyuH);
-    field.DeltavH = invM*(IvH + Sx*field.FxvH + Sy*field.FyvH);
+    field.DeltaH = invM*(IH - Sx*field.FxH - Sy*field.FyH);
+    field.DeltauH = invM*(IuH - Sx*field.FxuH - Sy*field.FyuH);
+    field.DeltavH = invM*(IvH - Sx*field.FxvH - Sy*field.FyvH);
+    //std::cout << "\n DeltauH:\n" << field.DeltauH << std::endl;
 }
 
 //Documentation in .hpp
@@ -154,6 +155,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	//Set Initial Condition
 	field.uH.setZero();
 	field.vH.setZero();
+
 	for(auto entity : mesh.entities)
     {
         for(auto element : entity.elements)
@@ -217,8 +219,20 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 
 	// temporary vectors (only for RK4, but I don't want to define them at each time
 	// iteration)
-	Eigen::VectorXd k1(mesh.numNodes), k2(mesh.numNodes), k3(mesh.numNodes), k4(mesh.numNodes),
-	temp(mesh.numNodes);
+	Field temp = field;
+	Eigen::VectorXd k1H(mesh.numNodes);
+	Eigen::VectorXd k2H(mesh.numNodes);
+	Eigen::VectorXd k3H(mesh.numNodes);
+	Eigen::VectorXd k4H(mesh.numNodes);
+	Eigen::VectorXd k1uH(mesh.numNodes);
+	Eigen::VectorXd k2uH(mesh.numNodes);
+	Eigen::VectorXd k3uH(mesh.numNodes);
+	Eigen::VectorXd k4uH(mesh.numNodes);
+	Eigen::VectorXd k1vH(mesh.numNodes);
+	Eigen::VectorXd k2vH(mesh.numNodes);
+	Eigen::VectorXd k3vH(mesh.numNodes);
+	Eigen::VectorXd k4vH(mesh.numNodes);
+	double h = solverParams.timeStep;
 
 	// numerical integration
 	unsigned int ratio, currentDecade = 0;
@@ -235,50 +249,108 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
             currentDecade = ratio + 1;
         }
 
-		if(solverParams.timeIntType == "RK1") //(i.e. explicit Euler)
+		if(solverParams.timeIntType == "RK1")
 		{
-
+			//Numerical time integration using the method of Runge-Kutta order 1
+			// i.e. explicit Euler
 			usedF(t, field, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
-			field.H += field.DeltaH*solverParams.timeStep;
-			field.uH += field.DeltauH*solverParams.timeStep;
-			field.vH += field.DeltavH*solverParams.timeStep;
-		}
-		/*else if(solverParams.timeIntType == "RK4")
-		{
-			// could be optimized
-			k1 = usedF(t, u, fx, fy, invM, Sx, Sy,
-						mesh, solverParams.boundaryConditions, solverParams.fluxCoeffs);
-
-			temp = u + k1*solverParams.timeStep/2;
-			k2 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy,
-						mesh, solverParams.boundaryConditions, solverParams.fluxCoeffs);
-
-			temp = u + k2*solverParams.timeStep/2;
-			k3 = usedF(t + solverParams.timeStep/2, temp, fx, fy, invM, Sx, Sy,
-						mesh, solverParams.boundaryConditions, solverParams.fluxCoeffs);
-
-			temp = u + k3*solverParams.timeStep;
-			k4 = usedF(t + solverParams.timeStep, temp, fx, fy, invM, Sx, Sy,
-						mesh, solverParams.boundaryConditions, solverParams.fluxCoeffs);
-
-			u += (k1 + 2*k2 + 2*k3 + k4)*solverParams.timeStep/6;
-
+			field.H += field.DeltaH*h;
+			field.uH += field.DeltauH*h;
+			field.vH += field.DeltavH*h;
 		}
 		else if(solverParams.timeIntType == "RK2")
 		{
+			//Numerical time integration using the method of Runge-Kutta order 2
+			usedF(t, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k1H = temp.DeltaH*h;
+			k1uH = temp.DeltauH*h;
+			k1vH = temp.DeltavH*h;
 
-			temp = u + usedF(t + solverParams.timeStep/2, u, fx, fy, invM, Sx,
-							Sy, mesh, solverParams.boundaryConditions, solverParams.fluxCoeffs)
-							*solverParams.timeStep/2;
+			temp.H = field.H + k1H/2;
+			temp.uH = field.uH + k1uH/2;
+			temp.vH = field.vH + k1vH/2;
 
-			u += solverParams.timeStep * usedF(t + solverParams.timeStep/2, temp,
-												fx, fy, invM, Sx, Sy, mesh,
-												solverParams.boundaryConditions, solverParams.fluxCoeffs);
+			usedF(t + h/2, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k2H = temp.DeltaH*h;
+			k2uH = temp.DeltauH*h;
+			k2vH = temp.DeltavH*h;
 
-		}*/
+			field.H += k2H;
+			field.uH += k2uH;
+			field.vH += k2vH;
+		}
+		else if(solverParams.timeIntType == "RK3")
+		{
+			//Numerical time integration using the method of Runge-Kutta order 3
+			usedF(t, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k1H = temp.DeltaH*h;
+			k1uH = temp.DeltauH*h;
+			k1vH = temp.DeltavH*h;
+
+			temp.H = field.H + k1H/2;
+			temp.uH = field.uH + k1uH/2;
+			temp.vH = field.vH + k1vH/2;
+
+			usedF(t + h/2, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k2H = temp.DeltaH*h;
+			k2uH = temp.DeltauH*h;
+			k2vH = temp.DeltavH*h;
+			
+			temp.H = field.H - k1H + 2*k2H;
+			temp.uH = field.H - k1uH + 2*k2uH;
+			temp.vH = field.H - k1vH + 2*k2vH;
+
+			usedF(t + h, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k3H = temp.DeltaH*h;
+			k3uH = temp.DeltauH*h;
+			k3vH = temp.DeltavH*h;
+
+			field.H += (k1H + 4*k2H + k3H)/6;
+			field.uH += (k1uH + 4*k2uH + k3uH)/6;
+			field.vH += (k1vH + 4*k2vH + k3vH)/6;
+		}
+		else if(solverParams.timeIntType == "RK4")
+		{
+			//Numerical time integration using the method of Runge-Kutta order 4
+			usedF(t, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k1H = temp.DeltaH*h;
+			k1uH = temp.DeltauH*h;
+			k1vH = temp.DeltavH*h;
+
+			temp.H = field.H + k1H/2;
+			temp.uH = field.uH + k1uH/2;
+			temp.vH = field.vH + k1vH/2;
+
+			usedF(t + h/2, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k2H = temp.DeltaH*h;
+			k2uH = temp.DeltauH*h;
+			k2vH = temp.DeltavH*h;
+			
+			temp.H = field.H + k2H/2;
+			temp.uH = field.uH + k2uH/2;
+			temp.vH = field.vH + k2vH/2;
+
+			usedF(t + h/2, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k3H = temp.DeltaH*h;
+			k3uH = temp.DeltauH*h;
+			k3vH = temp.DeltavH*h;
+
+			temp.H = field.H + k3H;
+			temp.uH = field.uH + k3uH;
+			temp.vH = field.vH + k3vH;
+
+			usedF(t + h, temp, invM, Sx, Sy, mesh, solverParams.boundaryConditions);
+			k4H = temp.DeltaH*h;
+			k4uH = temp.DeltauH*h;
+			k4vH = temp.DeltavH*h;
+
+			field.H += (k1H + 2*k2H + 2*k3H + k4H)/6;
+			field.uH += (k1uH + 2*k2uH + 2*k3uH + k4uH)/6;
+			field.vH += (k1vH + 2*k2vH + 2*k3vH + k4vH)/6;	
+		}
 
 		// check that it does not diverge
-		assert(field.H.maxCoeff() <= 1E5);
+		//assert(field.H.maxCoeff() <= 1.5);
 
 		// add time step
 		t += solverParams.timeStep;
@@ -299,7 +371,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
                 uDisplay[count] = std::move(temp);
             }
 
-            gmsh::view::addModelData(viewTag, nbrStep, modelName,dataType, elementTags,
+            gmsh::view::addModelData(viewTag, nbrStep, modelName, dataType, elementTags,
                 uDisplay, t, 1);
         }
 	}
