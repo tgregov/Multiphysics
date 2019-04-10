@@ -89,7 +89,6 @@ static void Fstrong(double t, Field& field, const Eigen::SparseMatrix<double>& i
     field.DeltaH = invM*(IH - Sx*field.FxH - Sy*field.FyH);
     field.DeltauH = invM*(IuH - Sx*field.FxuH - Sy*field.FyuH);
     field.DeltavH = invM*(IvH - Sx*field.FxvH - Sy*field.FyvH);
-    //std::cout << "\n DeltauH:\n" << field.DeltauH << std::endl;
 }
 
 //Documentation in .hpp
@@ -350,7 +349,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 		}
 
 		// check that it does not diverge
-		//assert(field.H.maxCoeff() <= 1.5);
+		assert(field.H.maxCoeff() <= 1E5);
 
 		// add time step
 		t += solverParams.timeStep;
