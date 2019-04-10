@@ -96,6 +96,16 @@ struct ElementProperty
 };
 
 
+struct NodeData
+{
+    unsigned int numNodes;
+    std::vector<int> elementTags;
+    std::vector<unsigned int> elementNumNodes;
+    std::vector<int> nodeTags;
+    std::vector<std::vector<double>> coord;
+};
+
+
 /**
  * \struct Mesh
  * \brief Represents a mesh.
@@ -108,9 +118,9 @@ struct Mesh
 
     std::vector<Entity> entities;   /**< List of entities inside the mesh */
 
-    unsigned int numNodes;          /**< Number of nodes inside the mesh */
-
     unsigned short dim;             /**< Mesh dimension (1, 2, (3)) */
+
+    NodeData nodeData;
 };
 
 /**

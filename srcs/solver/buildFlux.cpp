@@ -72,8 +72,7 @@ static double computeC(const std::vector<double>& normal,
 
 
 // see .hpp file for description
-void buildFlux(const Mesh& mesh, Eigen::VectorXd& IH,Eigen::VectorXd& IuH,
-			Eigen::VectorXd& IvH, Field& field, double factor, double t, 
+void buildFlux(const Mesh& mesh, Field& field, double factor, double t, 
 			const std::map<std::string, ibc>& boundaries)
 {
 
@@ -96,7 +95,7 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& IH,Eigen::VectorXd& IuH,
 			// local I vector for the current element
 			Eigen::VectorXd partialIH(elmPropHD.nSF); partialIH.setZero();
 			Eigen::VectorXd partialIuH(elmPropHD.nSF); partialIuH.setZero();
-			Eigen::VectorXd partialIvH(elmPropHD.nSF); partialIvH.setZero(); // necessary
+			Eigen::VectorXd partialIvH(elmPropHD.nSF); partialIvH.setZero();
 
 			// loop over the edges for the current element
 			unsigned int nSigma = element.edges.size();
@@ -138,16 +137,30 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& IH,Eigen::VectorXd& IuH,
 						// physical flux "in front" (at boundary condition)
                         flux(fxAtBC, fyAtBC, uAtBC, fluxCoeffs);*/
 
+
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"
+						
+/*
+						double C = sqrt(9.81);
+						gxH[edge.offsetInElm[j]] += -1;//-(field.FxH[indexJ] + field.FxH[indexJ])/2;
+						gxuH[edge.offsetInElm[j]] += -1;//-(field.FxuH[indexJ] + field.FxuH[indexJ])/2;
+						gxvH[edge.offsetInElm[j]] += -1;//-(field.FxvH[indexJ] + field.FxvH[indexJ])/2;
+						gyH[edge.offsetInElm[j]] += -1;//-(field.FyH[indexJ] + field.FyH[indexJ])/2;
+						gyuH[edge.offsetInElm[j]] += -1;//-(field.FyuH[indexJ] + field.FyuH[indexJ])/2;
+						gyvH[edge.offsetInElm[j]] += -1;//-(field.FyvH[indexJ] + field.FyvH[indexJ])/2;
+						*/
+						
+						
 						gxH[edge.offsetInElm[j]] += 0;
 						gxuH[edge.offsetInElm[j]] += 0;
 						gxvH[edge.offsetInElm[j]] += 0;
-						//-(factor*fx[indexJ] + fxAtBC)/2
-						//	- C*edge.normal[0]*(u[indexJ] - uAtBC)/2;
 						gyH[edge.offsetInElm[j]] += 0;
 						gyuH[edge.offsetInElm[j]] += 0;
 						gyvH[edge.offsetInElm[j]] += 0;
+						
+						//-(factor*fx[indexJ] + fxAtBC)/2
+						//	- C*edge.normal[0]*(u[indexJ] - uAtBC)/2;
 						//-(factor*fy[indexJ] + fyAtBC)/2
 						//	- C*edge.normal[1]*(u[indexJ] - uAtBC)/2;
 					}
@@ -217,9 +230,9 @@ void buildFlux(const Mesh& mesh, Eigen::VectorXd& IH,Eigen::VectorXd& IuH,
 			// [TO DO]: find some Eigen function that allows to do that efficiently
 			for(unsigned int j = 0 ; j < elmPropHD.nSF ; ++j)
 			{
-				IH[element.offsetInU + j] = partialIH[j];
-				IuH[element.offsetInU + j] = partialIuH[j];
-				IvH[element.offsetInU + j] = partialIvH[j];
+				field.IH[element.offsetInU + j] = partialIH[j];
+				field.IuH[element.offsetInU + j] = partialIuH[j];
+				field.IvH[element.offsetInU + j] = partialIvH[j];
 			}
 		}
 	}

@@ -2,9 +2,9 @@ Gauss10
 Lagrange
 RK1
 strong
-2
+0.2
 0.001
-0.01
+0.001
 1.0,0.0
 BC_Left
 	constant
@@ -20,4 +20,4 @@ BC_Down
 	0
 Init_Cond
 	gaussian2D
-	0.2,0.5,0.01,0.5,0.01
+	0.5,0.5,0.01,0.5,0.01

@@ -9,6 +9,50 @@
 #include "Mesh.hpp"
 #include "../utils.hpp"
 
+
+static void loadNodeData(Mesh& mesh)
+{
+
+    unsigned int numNodes = 0;
+    std::vector<int> elementTags;
+    std::vector<unsigned int> elementNumNodes;
+    std::vector<int> nodeTags;
+    std::vector<std::vector<double>> coord;
+
+    // loop over the entities
+    for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
+    {
+        Entity entity = mesh.entities[ent];
+
+        // loop over the elements
+        for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
+        {
+            Element element = entity.elements[elm];
+            elementTags.push_back(element.elementTag);
+            elementNumNodes.push_back(element.nodeTags.size());
+
+            for(size_t n = 0 ; n < element.nodeTags.size() ; ++n)
+            {
+                std::vector<double> temp;
+                temp.push_back(element.nodesCoord[n][0]);
+                temp.push_back(element.nodesCoord[n][1]);                    
+                coord.push_back(temp);                
+                    
+                nodeTags.push_back(element.nodeTags[n]);
+                numNodes++;
+
+            }
+        }
+    }
+
+    mesh.nodeData.numNodes = numNodes;
+    mesh.nodeData.elementTags = elementTags;
+    mesh.nodeData.elementNumNodes = elementNumNodes;    
+    mesh.nodeData.nodeTags = nodeTags;
+    mesh.nodeData.coord = coord;
+}
+
+
 /**
  * \brief Loads the name order, dimension, number of nodes,
  *  basis functions, integration points for a certain element type into a map.
@@ -532,7 +576,6 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
                         mesh.elementProperties, mesh.dim);
 
             currentOffset += elementOffset;
-            mesh.numNodes += numNodes;
         }
 
          std::cout  << "\r" << "Entity [" << entity.entityTagHD << "]: "
@@ -650,7 +693,6 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
 
 
     unsigned int currentOffset = 0;
-    mesh.numNodes = 0;
 
     //We add each identified entity to the mesh.
     for(auto entityTag : entitiesTag)
@@ -658,6 +700,8 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
         if(!addEntity(mesh, entityTag, currentOffset, intScheme, basisFuncType))
             return false;
     }
+
+    loadNodeData(mesh);
 
     gmsh::finalize();
 

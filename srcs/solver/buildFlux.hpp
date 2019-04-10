@@ -40,8 +40,7 @@ void flux(std::vector<double>& Fx, std::vector<double>& Fy,
  * \param t Time.
  * \param boundaries Information about the boundaries.
  */
-void buildFlux(const Mesh& mesh, Eigen::VectorXd& IH,Eigen::VectorXd& IuH,
-			Eigen::VectorXd& IvH, Field& field, double factor, double t, 
+void buildFlux(const Mesh& mesh, Field& field, double factor, double t, 
 			const std::map<std::string, ibc>& boundaries);
 
 #endif /* buildFlux_hpp */
