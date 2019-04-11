@@ -1,26 +1,26 @@
 #include <iostream>
 #include <cmath>
 #include "buildFlux.hpp"
+#include <Eigen/Dense>
 
 // see .hpp file for description
 void flux(Field& field)
 {
-
-	// TO DO: add Joachim's solution
-	// TO DO: div by zero warning
-	for(size_t i = 0 ; i < field.H.size() ; ++i)
+	if (field.H.minCoeff() <= 0)
 	{
-		field.FxH[i] = field.uH[i];
-		field.FyH[i] = field.vH[i];
-
-		field.FxuH[i] = (field.uH[i]*field.uH[i])/field.H[i] 
-						+ 9.81/2*field.H[i]*field.H[i];
-		field.FxvH[i] = field.uH[i]*field.vH[i]/field.H[i];
-
-		field.FyuH[i] = field.uH[i]*field.vH[i]/field.H[i];
-		field.FyvH[i] = (field.vH[i]*field.vH[i])/field.H[i] 
-						+ 9.81/2*field.H[i]*field.H[i];
+		std::cerr << "WARNING: Negative height or division by 0 !" << std::endl;
 	}
+
+	field.FxH = field.uH;
+	field.FyH = field.vH;
+
+	field.FxuH = field.uH.array().square()/field.H.array()
+				+ 9.81/2*field.H.array().square();
+	field.FxvH = field.uH.array()*field.vH.array()/field.H.array();
+
+	field.FyuH = field.uH.array()*field.vH.array()/field.H.array();
+	field.FyvH = field.vH.array().square()/field.H.array()
+				+ 9.81/2*field.H.array().square();
 }
 
 

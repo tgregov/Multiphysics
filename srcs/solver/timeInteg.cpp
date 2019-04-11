@@ -39,11 +39,11 @@ static void Fweak(double t, Field& field, const Matrix& matrix, const Mesh& mesh
 
  	// compute the increment
     field.DeltaH 
-    	= matrix.invM*(field.IH - matrix.Sx*field.FxH - matrix.Sy*field.FyH);
+    	= matrix.invM*(field.IH + matrix.Sx*field.FxH + matrix.Sy*field.FyH);
     field.DeltauH 
-    	= matrix.invM*(field.IuH - matrix.Sx*field.FxuH - matrix.Sy*field.FyuH);
+    	= matrix.invM*(field.IuH + matrix.Sx*field.FxuH + matrix.Sy*field.FyuH);
     field.DeltavH 
-    	= matrix.invM*(field.IvH - matrix.Sx*field.FxvH - matrix.Sy*field.FyvH);
+    	= matrix.invM*(field.IvH + matrix.Sx*field.FxvH + matrix.Sy*field.FyvH);
 }
 
 /**
@@ -119,24 +119,8 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
      	usedF = Fstrong;
   	}
 
-  	Field field;
-
-  	// [TO DO]: put it in a constructor
-  	field.H.resize(mesh.nodeData.numNodes); 		
-  	field.uH.resize(mesh.nodeData.numNodes);
-  	field.vH.resize(mesh.nodeData.numNodes);
-  	field.FxH.resize(mesh.nodeData.numNodes);
-  	field.FxuH.resize(mesh.nodeData.numNodes);
-  	field.FxvH.resize(mesh.nodeData.numNodes);
-  	field.FyH.resize(mesh.nodeData.numNodes);
-  	field.FyuH.resize(mesh.nodeData.numNodes);
-  	field.FyvH.resize(mesh.nodeData.numNodes);
-  	field.DeltaH.resize(mesh.nodeData.numNodes);
-  	field.DeltauH.resize(mesh.nodeData.numNodes);
-  	field.DeltavH.resize(mesh.nodeData.numNodes);
-  	field.IH.resize(mesh.nodeData.numNodes); 	
-  	field.IuH.resize(mesh.nodeData.numNodes);
-  	field.IvH.resize(mesh.nodeData.numNodes);
+  	//Initialization of the field of unknowns
+  	Field field(mesh.nodeData.numNodes);
 
 
 	/*******************************************************************************
