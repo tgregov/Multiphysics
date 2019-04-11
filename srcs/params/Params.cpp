@@ -170,7 +170,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     std::getline(paramFile, temp);
 
-    if(!(temp == "RK1" || temp == "RK4"))
+    if(!(temp == "RK1" || temp == "RK2" || temp == "RK3" || temp == "RK4"))
     {
         std::cerr << "Unexpected time integration type " << temp
                   << " in parameter file " << fileName << std::endl;

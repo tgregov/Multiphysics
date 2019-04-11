@@ -280,8 +280,8 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 			k2vH = temp.DeltavH*h;
 			
 			temp.H = field.H - k1H + 2*k2H;
-			temp.uH = field.H - k1uH + 2*k2uH;
-			temp.vH = field.H - k1vH + 2*k2vH;
+			temp.uH = field.uH - k1uH + 2*k2uH;
+			temp.vH = field.vH - k1vH + 2*k2vH;
 
 			usedF(t + h, temp, matrix, mesh, solverParams.boundaryConditions);
 			k3H = temp.DeltaH*h;
