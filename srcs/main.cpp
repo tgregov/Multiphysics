@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string>
+#if defined(_OPENMP)
+    #include <omp.h>
+#endif
 #include <Eigen/Core>
 #include "mesh/Mesh.hpp"
 #include "mesh/displayMesh.hpp"
@@ -45,8 +48,9 @@ int main(int argc, char **argv)
         return -1;
    }
 
-    // omp_set_num_threads(2);
-    // Eigen::setNbThreads(2);
+    #if defined(_OPENMP)
+        Eigen::setNbThreads(omp_get_num_threads());
+    #endif
 
     // displayMesh(mesh);
     std::cout   << "================================================================"
