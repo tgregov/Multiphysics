@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <gmsh.h>
 #include "Mesh.hpp"
 #include "../utils.hpp"
@@ -35,9 +36,9 @@ static void loadNodeData(Mesh& mesh)
             {
                 std::vector<double> temp;
                 temp.push_back(element.nodesCoord[n][0]);
-                temp.push_back(element.nodesCoord[n][1]);                    
-                coord.push_back(temp);                
-                    
+                temp.push_back(element.nodesCoord[n][1]);
+                coord.push_back(temp);
+
                 nodeTags.push_back(element.nodeTags[n]);
                 numNodes++;
 
@@ -47,7 +48,7 @@ static void loadNodeData(Mesh& mesh)
 
     mesh.nodeData.numNodes = numNodes;
     mesh.nodeData.elementTags = elementTags;
-    mesh.nodeData.elementNumNodes = elementNumNodes;    
+    mesh.nodeData.elementNumNodes = elementNumNodes;
     mesh.nodeData.nodeTags = nodeTags;
     mesh.nodeData.coord = coord;
 }
@@ -649,6 +650,14 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
 {
     gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
+    std::ifstream file(fileName);
+    if(file.is_open())
+        file.close();
+    else
+    {
+        std::cerr << "File: " << fileName << " does not exist!" << std::endl;
+        return false;
+    }
     gmsh::open(fileName);
 
     //Check that the mesh is not 3D
