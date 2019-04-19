@@ -1,6 +1,6 @@
 # MATH 0471: Multiphysics integrated computational project 
 ## Goal
-Development of the Discontinuous Galerkin method (DG) applied to 2D shallow water equations.  
+Development of the [Discontinuous Galerkin method](https://en.wikipedia.org/wiki/Discontinuous_Galerkin_method) (DG) applied to 2D [shallow water equations](https://en.wikipedia.org/wiki/Shallow_water_equations).  
 [Link](http://www.montefiore.ulg.ac.be/~geuzaine/MATH0471/enonce2019.pdf) of the problem statement.
 
 ## Useful reminders
@@ -10,11 +10,7 @@ Development of the Discontinuous Galerkin method (DG) applied to 2D shallow wate
 Current status: [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?branch=master)](https://travis-ci.org/tgregov/Multiphysics)
 
 ## Assumptions
-### On the field:
-* Scalar field
-
 ### On the mesh:
-* 2D mesh
 * The elements edges are straight (constant normal vector over it)
 
 ## Compilation procedure
@@ -36,5 +32,3 @@ Submit a batch file:
 cd ./run/NIC4
 sbatch slurm.sh
 ```
-
-
