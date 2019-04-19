@@ -63,7 +63,6 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 						boundary.ibcFunc(field.uAtBC, edge.nodeCoordinate[j], t,
                                          field.uForBC, edge.normal, boundary.coefficients);
 
-                        double C = solverParams.phiPsyC(edge.normal, field, false, indexJ, 0, solverParams);
                         solverParams.flux(field, solverParams, true);
 
                         // compute the numerical flux
@@ -73,7 +72,8 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
                             for(unsigned short unk = 0 ; unk < field.g[dim].size() ; ++unk)
                             {
                                 field.g[dim][unk][edge.offsetInElm[j]] +=
-                                solverParams.phiPsy(edge.normal, field, dim, unk, factor, true, indexJ, 0, C);
+                                solverParams.phiPsy(edge.normal, field, dim, unk, 
+                                	factor, true, indexJ, 0, solverParams);
                             }
                         }
 					}
@@ -90,16 +90,15 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
                        					.edges[edge.edgeInFront.second]
                        					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
 
-                        double C = solverParams.phiPsyC(edge.normal, field, false, indexJ, indexFrontJ, solverParams);
-
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"
                         for(unsigned short dim = 0 ; dim < field.g.size() ; ++dim)
                         {
                             for(unsigned short unk = 0 ; unk < field.g[dim].size() ; ++unk)
                             {
-                                    field.g[dim][unk][edge.offsetInElm[j]] +=
-                                    solverParams.phiPsy(edge.normal, field, dim, unk, factor, false, indexJ, indexFrontJ, C);
+								field.g[dim][unk][edge.offsetInElm[j]] +=
+                                    solverParams.phiPsy(edge.normal, field, dim, unk,
+                                   	factor, false, indexJ, indexFrontJ, solverParams);
                             }
                         }
 					}

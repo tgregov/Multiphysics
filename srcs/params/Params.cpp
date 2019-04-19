@@ -296,13 +296,16 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     {
         solverParams.fluxType = temp;
         solverParams.phiPsy = LF;
-        solverParams.phiPsyC = LFShallowC;
+    }
+    else if(temp == "Roe")
+    {
+        solverParams.fluxType = temp;
+        solverParams.phiPsy = Roe;        
     }
     else if(temp == "mean")
     {
         solverParams.fluxType = temp;
-        solverParams.phiPsy = LF;
-        solverParams.phiPsyC = meanC;
+        solverParams.phiPsy = mean;
     }
     else
     {

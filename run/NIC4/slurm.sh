@@ -12,4 +12,4 @@
 export OMP_NUM_THREADS=10
 
 cd $HOME/Multiphysics
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle5.msh ./Params/param.dat
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh ./Params/param.dat

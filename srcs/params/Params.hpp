@@ -40,12 +40,9 @@ struct SolverParams
 
     std::function<double(const std::vector<double>& edgeNormal, const Field& field,
                  unsigned int dim, unsigned int unk, double factor, bool boundary,
-                 unsigned int indexJ, unsigned int indexFrontJ, double C)> phiPsy;
+                 unsigned int indexJ, unsigned int indexFrontJ, 
+                 const SolverParams& solverParams)> phiPsy;
 
-    std::function<double(const std::vector<double>& edgeNormal,
-                         const Field& field, bool boundary,
-                         unsigned int indexJ, unsigned int indexFrontJ,
-                         const SolverParams& solverParams)> phiPsyC;
 };
 
 /**

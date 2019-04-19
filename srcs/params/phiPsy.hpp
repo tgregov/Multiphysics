@@ -7,12 +7,16 @@
 
 double LF(const std::vector<double>& edgeNormal, const Field& field,
           unsigned int dim, unsigned int unk, double factor, bool boundary,
-          unsigned int indexJ, unsigned int indexFrontJ, double C);
+          unsigned int indexJ, unsigned int indexFrontJ, 
+          const SolverParams& solverParams);
 
-double LFShallowC(const std::vector<double>& edgeNormal, const Field& field, bool boundary,
-                  unsigned int indexJ, unsigned int indexFrontJ, const SolverParams& solverParams);
+double Roe(const std::vector<double>& edgeNormal, const Field& field,
+          unsigned int dim, unsigned int unk, double factor, bool boundary,
+          unsigned int indexJ, unsigned int indexFrontJ, 
+          const SolverParams& solverParams);
 
-double meanC(const std::vector<double>& edgeNormal, const Field& field, bool boundary,
-             unsigned int indexJ, unsigned int indexFrontJ, const SolverParams& solverParams);
-
+double mean(const std::vector<double>& edgeNormal, const Field& field,
+          unsigned int dim, unsigned int unk, double factor, bool boundary,
+          unsigned int indexJ, unsigned int indexFrontJ, 
+          const SolverParams& solverParams);
 #endif // phiPsy_hpp_included
