@@ -3,6 +3,7 @@
 #include "buildFlux.hpp"
 #include <Eigen/Dense>
 
+
 // see .hpp file for description
 void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
                const SolverParams& solverParams)
@@ -55,20 +56,26 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 					// case of a boundary condition
 					if (edge.edgeInFront.first == -1)
 					{
-					    //[TO DO]: Fix boundary for shallow water
-					    for(unsigned short unk = 0 ; unk < field.uForBC.size() ; ++unk)
+					    // [TO DO]: Fix boundary for shallow water
+					    for(unsigned short unk = 0 ; unk < field.uForBC.size() ; 
+					    	++unk)
+					    {
                             field.uForBC[unk] = field.u[unk][indexJ];
+                        }
 
-						ibc boundary = solverParams.boundaryConditions.at(edge.bcName);
+                        // compute the 
+						ibc boundary 
+							= solverParams.boundaryConditions.at(edge.bcName);
 						boundary.ibcFunc(field.uAtBC, edge.nodeCoordinate[j], t,
-                                         field.uForBC, edge.normal, boundary.coefficients);
+											field.uForBC, edge.normal, 
+											boundary.coefficients);
 
                         solverParams.flux(field, solverParams, true);
 
                         // compute the numerical flux
-                        // the weak/strong form is stored in "factor"
-                        solverParams.phiPsy(edge, field, j, factor,
-                                            true, indexJ, 0, solverParams);
+                        // (the weak/strong form is stored in "factor")
+                        solverParams.phiPsi(edge, field, j, factor, true, indexJ, 0, 
+                        					solverParams);
 					}
 					else // general case
 					{
@@ -84,17 +91,19 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
                        					.offsetInElm[edge.nodeIndexEdgeInFront[j]];
 
                         // compute the numerical flux
-                        // the weak/strong form is stored in "factor"
-                        solverParams.phiPsy(edge, field, j, factor,
-                                            false, indexJ, indexFrontJ, solverParams);
+                        // (the weak/strong form is stored in "factor")
+                        solverParams.phiPsi(edge, field, j, factor, false, indexJ, 
+                        					indexFrontJ, solverParams);
 					}
 				}
 
 				// dot product between dM and the normal
 				for(unsigned short unk = 0 ; unk < field.partialIu.size() ; ++unk)
                 {
-                    field.partialIu[unk]+= edge.determinantLD[0]*(
-					edge.normal[0]*element.dM[s]*field.g[0][unk] + edge.normal[1]*element.dM[s]*field.g[1][unk]);
+                    field.partialIu[unk]+= 
+                    	edge.determinantLD[0]*(
+							edge.normal[0]*element.dM[s]*field.g[0][unk] 
+							+ edge.normal[1]*element.dM[s]*field.g[1][unk]);
                 }
 			}
 

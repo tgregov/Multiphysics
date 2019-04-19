@@ -1,31 +1,21 @@
-/**
- * \file timeInteg.cpp
- * \brief Implementation of the required function to time integrate the DG-FEM equations.
- */
-
 #include <iostream>
 #include <cassert>
 #include <gmsh.h>
 #include "../matrices/buildMatrix.hpp"
 #include "../matrices/matrix.hpp"
-#include "buildFlux.hpp"
+#include "../flux/buildFlux.hpp"
 #include "timeInteg.hpp"
 #include "field.hpp"
 
+
 /**
- * \brief Compute the Du vector.
+ * \brief Compute the increment vector of the unknown fields, for the weak form.
  * \param t Current time.
  * \param u Current solution.
- * \param fx Vector of flux along x.
- * \param fy Vector of flux along y.
- * \param invM Inverse of the mass matrix.
- * \param SxTranspose Transpose of the x stiffness matrix.
- * \param SyTranspose Transpose of the y stiffness matrix.
- * \param numNodes Number of nodes in the mesh.
+ * \param field Field that contains all the main variables.
+ * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
- * \param boundaries Map to access mathematical function
- * \return DU vector.
- * for each BC at each boundaries.
+ * \param solverParams Parameters of the solver.
  */
 static void Fweak(double t, Field& field, const Matrix& matrix, const Mesh& mesh,
                   const SolverParams& solverParams)
@@ -40,24 +30,20 @@ static void Fweak(double t, Field& field, const Matrix& matrix, const Mesh& mesh
  	for(unsigned short unk = 0 ; unk < field.DeltaU.size() ; ++unk)
     {
         field.DeltaU[unk]
-            = matrix.invM*(field.Iu[unk] + matrix.Sx*field.flux[0][unk] + matrix.Sy*field.flux[1][unk]);
+            = matrix.invM*(field.Iu[unk] + matrix.Sx*field.flux[0][unk] 
+            				+ matrix.Sy*field.flux[1][unk]);
     }
 }
 
+
 /**
- * \brief Compute the Du vector.
+ * \brief Compute the increment vector of the unknown fields, for the strong form.
  * \param t Current time.
  * \param u Current solution.
- * \param fx Vector of flux along x.
- * \param fy Vector of flux along y.
- * \param invM Inverse of the mass matrix.
- * \param Sx x stiffness matrix.
- * \param Sy y stiffness matrix.
- * \param numNodes Number of nodes in the mesh.
+ * \param field Field that contains all the main variables.
+ * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
- * \param boundaries Map to access mathematical function
- * \return DU vector.
- * for each BC at each boundaries.
+ * \param solverParams Parameters of the solver.
  */
 static void Fstrong(double t, Field& field, const Matrix& matrix, const Mesh& mesh,
                     const SolverParams& solverParams)
@@ -72,11 +58,13 @@ static void Fstrong(double t, Field& field, const Matrix& matrix, const Mesh& me
     for(unsigned short unk = 0 ; unk < field.DeltaU.size() ; ++unk)
     {
         field.DeltaU[unk]
-            = matrix.invM*(field.Iu[unk] - matrix.Sx*field.flux[0][unk] - matrix.Sy*field.flux[1][unk]);
+            = matrix.invM*(field.Iu[unk] - matrix.Sx*field.flux[0][unk] 
+            				- matrix.Sy*field.flux[1][unk]);
     }
 }
 
-//Documentation in .hpp
+
+// see .hpp file for description
 bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 				const std::string& fileName)
 {

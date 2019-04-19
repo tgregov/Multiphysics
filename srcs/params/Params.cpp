@@ -9,8 +9,8 @@
 #include <cstring>
 #include <vector>
 #include "Params.hpp"
-#include "phiPsy.hpp"
-#include "flux.hpp"
+#include "../flux/phiPsi.hpp"
+#include "../flux/flux.hpp"
 
 
 static void getLine(std::ifstream& file, std::string& line)
@@ -43,6 +43,7 @@ static void getLine(std::ifstream& file, std::string& line)
         }
     }
 }
+
 
 /**
  * \brief Load boundary conditions from a file
@@ -313,17 +314,17 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         if(temp == "LF")
         {
             solverParams.fluxType = temp;
-            solverParams.phiPsy = LFShallow;
+            solverParams.phiPsi = LFShallow;
         }
         else if(temp == "Roe")
         {
             solverParams.fluxType = temp;
-            solverParams.phiPsy = Roe;
+            solverParams.phiPsi = Roe;
         }
         else if(temp == "mean")
         {
             solverParams.fluxType = temp;
-            solverParams.phiPsy = mean;
+            solverParams.phiPsi = mean;
         }
         else
         {
@@ -340,12 +341,12 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         if(temp == "LF")
         {
             solverParams.fluxType = temp;
-            solverParams.phiPsy = LFTransport;
+            solverParams.phiPsi = LFTransport;
         }
         else if(temp == "mean")
         {
             solverParams.fluxType = temp;
-            solverParams.phiPsy = mean;
+            solverParams.phiPsi = mean;
         }
         else
         {

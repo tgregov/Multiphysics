@@ -41,7 +41,7 @@ struct SolverParams
 
     std::function<void(const Edge& edge, Field& field, unsigned int j,
                        double factor, bool boundary, unsigned int indexJ,
-                       unsigned int indexFrontJ, const SolverParams& solverParams)> phiPsy;
+                       unsigned int indexFrontJ, const SolverParams& solverParams)> phiPsi;
 
 };
 

@@ -8,7 +8,7 @@
 #include <fstream>
 #include <gmsh.h>
 #include "Mesh.hpp"
-#include "../utils.hpp"
+#include "../utils/utils.hpp"
 
 
 static void loadNodeData(Mesh& mesh)

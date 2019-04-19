@@ -3,7 +3,8 @@
 
 #include "../mesh/Mesh.hpp"
 #include "../params/Params.hpp"
-#include "field.hpp"
+#include "../solver/field.hpp"
+
 
 /**
  * \brief Function that allows to build the rhs of the DG method.
