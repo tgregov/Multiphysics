@@ -31,10 +31,10 @@ Automatically build the code:
 ```bash
 . ./build_nic4.sh 
 ```
-Run the code:
+Submit a batch file:
 ```bash
-cd ..
-./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh ./Params/param.dat
+cd ./run/NIC4
+sbatch slurm.sh
 ```
 
 
