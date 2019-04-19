@@ -6,6 +6,7 @@
 #include <functional>
 #include "ibvFunction.hpp"
 #include "../solver/field.hpp"
+#include "../mesh/Mesh.hpp"
 
 /**
  * \struct SolverParams
@@ -38,10 +39,9 @@ struct SolverParams
 
     std::string fluxType;        /**< Type of numerical flux (mean, Lax-Friedirichs, Roe, ...)*/
 
-    std::function<double(const std::vector<double>& edgeNormal, const Field& field,
-                 unsigned int dim, unsigned int unk, double factor, bool boundary,
-                 unsigned int indexJ, unsigned int indexFrontJ, 
-                 const SolverParams& solverParams)> phiPsy;
+    std::function<void(const Edge& edge, Field& field, unsigned int j,
+                       double factor, bool boundary, unsigned int indexJ,
+                       unsigned int indexFrontJ, const SolverParams& solverParams)> phiPsy;
 
 };
 

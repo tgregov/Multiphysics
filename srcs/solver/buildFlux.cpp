@@ -67,15 +67,8 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"
-                        for(unsigned short dim = 0 ; dim < field.g.size() ; ++dim)
-                        {
-                            for(unsigned short unk = 0 ; unk < field.g[dim].size() ; ++unk)
-                            {
-                                field.g[dim][unk][edge.offsetInElm[j]] +=
-                                solverParams.phiPsy(edge.normal, field, dim, unk, 
-                                	factor, true, indexJ, 0, solverParams);
-                            }
-                        }
+                        solverParams.phiPsy(edge, field, j, factor,
+                                            true, indexJ, 0, solverParams);
 					}
 					else // general case
 					{
@@ -92,15 +85,8 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 
                         // compute the numerical flux
                         // the weak/strong form is stored in "factor"
-                        for(unsigned short dim = 0 ; dim < field.g.size() ; ++dim)
-                        {
-                            for(unsigned short unk = 0 ; unk < field.g[dim].size() ; ++unk)
-                            {
-								field.g[dim][unk][edge.offsetInElm[j]] +=
-                                    solverParams.phiPsy(edge.normal, field, dim, unk,
-                                   	factor, false, indexJ, indexFrontJ, solverParams);
-                            }
-                        }
+                        solverParams.phiPsy(edge, field, j, factor,
+                                            false, indexJ, indexFrontJ, solverParams);
 					}
 				}
 

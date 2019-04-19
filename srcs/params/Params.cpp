@@ -100,6 +100,12 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "gaussian2DShallow")
             tempCondition.ibcFunc = gaussian2DShallow;
 
+        else if(bcType == "gaussian1DShallowX")
+            tempCondition.ibcFunc = gaussian1DShallowX;
+
+        else if(bcType == "gaussian1DShallowY")
+            tempCondition.ibcFunc = gaussian1DShallowY;
+
         else
         {
             std::cerr << "Unhandled boundary condtion type " << bcType
@@ -300,7 +306,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     else if(temp == "Roe")
     {
         solverParams.fluxType = temp;
-        solverParams.phiPsy = Roe;        
+        solverParams.phiPsy = Roe;
     }
     else if(temp == "mean")
     {

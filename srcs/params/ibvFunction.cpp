@@ -62,3 +62,31 @@ void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& p
     uAtIBC[1] = 0;
     uAtIBC[2] = 0;
 }
+
+void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                        const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs)
+{
+    assert(coeffs.size() == 4);
+    assert(pos.size() == 3);
+
+    double X = (pos[0]-coeffs[1])*(pos[0]-coeffs[1])/(2*coeffs[2]);
+
+    uAtIBC[0] = coeffs[0]*exp(-(X))+coeffs[3];
+    uAtIBC[1] = 0;
+    uAtIBC[2] = 0;
+}
+
+void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                        const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs)
+{
+    assert(coeffs.size() == 4);
+    assert(pos.size() == 3);
+
+    double Y = (pos[1]-coeffs[1])*(pos[1]-coeffs[1])/(2*coeffs[2]);
+
+    uAtIBC[0] = coeffs[0]*exp(-(Y))+coeffs[3];
+    uAtIBC[1] = 0;
+    uAtIBC[2] = 0;
+}
