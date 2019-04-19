@@ -1,8 +1,11 @@
 #ifndef Params_hpp_included
 #define Params_hpp_included
 
+#include <vector>
 #include <string>
+#include <functional>
 #include "ibvFunction.hpp"
+#include "../solver/field.hpp"
 
 /**
  * \struct SolverParams
@@ -23,7 +26,26 @@ struct SolverParams
     std::map<std::string, ibc> boundaryConditions;
     ibc initCondition;
 
-    std::vector<double> fluxCoeffs;
+    std::string problemType;     /**< Equations to solve (transport, shallow, ...)*/
+
+    std::function<void(Field& field,
+                       const SolverParams& solverParams,
+                       bool boundary)> flux;
+
+    std::vector<double> fluxCoeffs; /**< Coefficient of the physical flux*/
+
+    unsigned short nUnknowns;    /**< Number of scalar unknowns (determined by the type of problem)*/
+
+    std::string fluxType;        /**< Type of numerical flux (mean, Lax-Friedirichs, Roe, ...)*/
+
+    std::function<double(const std::vector<double>& edgeNormal, const Field& field,
+                 unsigned int dim, unsigned int unk, double factor, bool boundary,
+                 unsigned int indexJ, unsigned int indexFrontJ, double C)> phiPsy;
+
+    std::function<double(const std::vector<double>& edgeNormal,
+                         const Field& field, bool boundary,
+                         unsigned int indexJ, unsigned int indexFrontJ,
+                         const SolverParams& solverParams)> phiPsyC;
 };
 
 /**

@@ -1,23 +1,25 @@
-Gauss10
+Gauss9
 Lagrange
 RK1
 strong
-0.2
-0.001
-0.001
-1.0,0.0
+2
+0.0001
+0.01
+shallow
+LF
+9.81
 BC_Left
-	constant
+	reflectShallow
 	0
 BC_Right
-	constant
+	reflectShallow
 	0
 BC_Up
-	constant
+	reflectShallow
 	0
 BC_Down
-	constant
+	reflectShallow
 	0
 Init_Cond
-	gaussian2D
-	0.5,0.5,0.01,0.5,0.01
+	gaussian2DShallow
+	0.5,0.5,0.005,0.5,0.005,1

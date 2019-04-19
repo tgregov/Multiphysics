@@ -12,9 +12,9 @@
 struct ibc
 {
     std::vector<double> coefficients;   /**< Coefficient for the mathematical function */
-    std::function<double(const std::vector<double>& pos,
-                         double u, double t,
-                         std::vector<double> coeffs)> ibcFunc; /**< Pointer to the mathematical function */
+    std::function<void(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                        const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs)> ibcFunc; /**< Pointer to the mathematical function */
 };
 
 
@@ -27,8 +27,9 @@ struct ibc
  * coeffs[2] = phi.
  * \return Value of the function at (x, y , z, t).
  */
-double sinus(const std::vector<double>& pos, double u,
-             double t, const std::vector<double>& coeffs);
+void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+            const std::vector<double>& u, const std::vector<double>& edgeNormal,
+            const std::vector<double>& coeffs);
 
 /**
  * \brief Compute a simple A*exp(-(t-t_peak)^2/(2*var))
@@ -39,8 +40,9 @@ double sinus(const std::vector<double>& pos, double u,
  * coeffs[2] = var.
  * \return Value of the function at (x, y , z, t).
  */
-double gaussian(const std::vector<double>& pos, double u,
-                double t, const std::vector<double>& coeffs);
+void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                    const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs);
 
 /**
  * \brief Compute a constant
@@ -50,8 +52,9 @@ double gaussian(const std::vector<double>& pos, double u,
  * \param coeffs Coefficient for the constant. coeffs[0] = constant.
  * \return Value of the function at (x, y , z, t).
  */
-double constant(const std::vector<double>& pos, double u,
-                double t, const std::vector<double>& coeffs);
+void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                const std::vector<double>& coeffs);
 
 /**
  * \brief Compute a Von Neumann constant value
@@ -61,8 +64,13 @@ double constant(const std::vector<double>& pos, double u,
  * \param coeffs Coefficient (not used here).
  * \return u.
  */
-double constantNeumann(const std::vector<double>& pos, double u,
-                       double t, const std::vector<double>& coeffs);
+void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                    const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs);
+
+void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                    const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs);
 
 /**
  * \brief Compute a simple A*exp(-(x-x0)^2/(2*var_y) -(y-y0)^2/(2*var_y))
@@ -73,7 +81,8 @@ double constantNeumann(const std::vector<double>& pos, double u,
  * coeffs[2] = var_x, coeffs[3]=y_0, coeffs[4]=var_y.
  * \return Value of the function at (x, y , z, t).
  */
-double gaussian2D(const std::vector<double>& pos, double u,
-                  double t, const std::vector<double>& coeffs);
+void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                        const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs);
 
 #endif // bcFunction_hpp_included
