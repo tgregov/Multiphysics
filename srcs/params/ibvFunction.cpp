@@ -90,3 +90,16 @@ void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& 
     uAtIBC[1] = 0;
     uAtIBC[2] = 0;
 }
+
+void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                        const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs)
+{
+    assert(coeffs.size() == 6);
+    assert(pos.size() == 3);
+
+    double X = (pos[0]-coeffs[1])*(pos[0]-coeffs[1])/(2*coeffs[2]);
+    double Y = (pos[1]-coeffs[3])*(pos[1]-coeffs[3])/(2*coeffs[4]);
+
+    uAtIBC[0] = coeffs[0]*exp(-(X+Y))+coeffs[5];
+}

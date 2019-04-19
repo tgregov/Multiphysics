@@ -97,8 +97,12 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "reflectShallow")
             tempCondition.ibcFunc = reflectShallow;
 
+
         else if(bcType == "gaussian2DShallow")
             tempCondition.ibcFunc = gaussian2DShallow;
+
+        else if(bcType == "gaussian2DTransport")
+            tempCondition.ibcFunc = gaussian2DTransport;
 
         else if(bcType == "gaussian1DShallowX")
             tempCondition.ibcFunc = gaussian1DShallowX;
@@ -287,6 +291,12 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         solverParams.nUnknowns = 3;
         solverParams.flux = fluxShallow;
     }
+    else if(temp == "transport")
+    {
+        solverParams.problemType = temp;
+        solverParams.nUnknowns = 1;
+        solverParams.flux = fluxTransport;
+    }
     else
     {
         std::cerr << "Unexpected problem type " << temp
@@ -298,29 +308,57 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
 
     temp.clear();
     getLine(paramFile, temp);
-    if(temp == "LF")
+    if(solverParams.problemType == "shallow")
     {
-        solverParams.fluxType = temp;
-        solverParams.phiPsy = LF;
-    }
-    else if(temp == "Roe")
-    {
-        solverParams.fluxType = temp;
-        solverParams.phiPsy = Roe;
-    }
-    else if(temp == "mean")
-    {
-        solverParams.fluxType = temp;
-        solverParams.phiPsy = mean;
-    }
-    else
-    {
-        std::cerr << "Unexpected flux type type " << temp
-                  << " in parameter file " << fileName << std::endl;
+        if(temp == "LF")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsy = LFShallow;
+        }
+        else if(temp == "Roe")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsy = Roe;
+        }
+        else if(temp == "mean")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsy = mean;
+        }
+        else
+        {
+            std::cerr << "Unexpected flux type type " << temp
+                      << " for problem type " << solverParams.problemType
+                      << " in parameter file " << fileName << std::endl;
 
-        paramFile.close();
-        return false;
+            paramFile.close();
+            return false;
+        }
     }
+    else if(solverParams.problemType == "transport")
+    {
+        if(temp == "LF")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsy = LFTransport;
+        }
+        else if(temp == "mean")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsy = mean;
+        }
+        else
+        {
+            std::cerr << "Unexpected flux type type " << temp
+                      << " for problem type " << solverParams.problemType
+                      << " in parameter file " << fileName << std::endl;
+
+            paramFile.close();
+            return false;
+        }
+    }
+
+
 
 
     temp.clear();

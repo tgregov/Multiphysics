@@ -1,6 +1,6 @@
 #include "phiPsy.hpp"
 
-void LF(const Edge& edge, Field& field, unsigned int j,
+void LFShallow(const Edge& edge, Field& field, unsigned int j,
         double factor, bool boundary, unsigned int indexJ,
         unsigned int indexFrontJ, const SolverParams& solverParams)
 {
@@ -120,6 +120,39 @@ void Roe(const Edge& edge, Field& field, unsigned int j,
                      (1 - Fr)*field.flux[dim][unk][indexFrontJ])/2
                      - cRoe*(1-Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
                      - field.u[unk][indexFrontJ])/2;
+            }
+        }
+    }
+}
+
+void LFTransport(const Edge& edge, Field& field, unsigned int j,
+        double factor, bool boundary, unsigned int indexJ,
+        unsigned int indexFrontJ, const SolverParams& solverParams)
+{
+    double C = fabs(solverParams.fluxCoeffs[0]*edge.normal[0] + solverParams.fluxCoeffs[1]*edge.normal[1]);
+
+    // compute the flux
+    if(boundary)
+    {
+        for(unsigned short dim = 0 ; dim < field.g.size() ; ++dim)
+        {
+            for(unsigned short unk = 0 ; unk < field.g[dim].size() ; ++unk)
+            {
+                field.g[dim][unk][edge.offsetInElm[j]] +=
+                    -(factor*field.flux[dim][unk][indexJ] + field.FluxAtBC[dim][unk])/2
+                    - C*edge.normal[dim]*(field.u[unk][indexJ] - field.uAtBC[unk])/2;
+            }
+        }
+    }
+    else
+    {
+        for(unsigned short dim = 0 ; dim < field.g.size() ; ++dim)
+        {
+            for(unsigned short unk = 0 ; unk < field.g[dim].size() ; ++unk)
+            {
+                field.g[dim][unk][edge.offsetInElm[j]] +=
+                    -(factor*field.flux[dim][unk][indexJ] + field.flux[dim][unk][indexFrontJ])/2
+                    - C*edge.normal[dim]*(field.u[unk][indexJ] - field.u[unk][indexFrontJ])/2;
             }
         }
     }

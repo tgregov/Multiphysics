@@ -5,7 +5,7 @@
 #include "Params.hpp"
 #include "../solver/field.hpp"
 
-void LF(const Edge& edge, Field& field, unsigned int j,
+void LFShallow(const Edge& edge, Field& field, unsigned int j,
         double factor, bool boundary, unsigned int indexJ,
         unsigned int indexFrontJ, const SolverParams& solverParams);
 
@@ -16,4 +16,8 @@ void Roe(const Edge& edgel, Field& field, unsigned int j,
 void mean(const Edge& edge, Field& field, unsigned int j,
             double factor, bool boundary, unsigned int indexJ,
             unsigned int indexFrontJ, const SolverParams& solverParams);
+
+void LFTransport(const Edge& edge, Field& field, unsigned int j,
+        double factor, bool boundary, unsigned int indexJ,
+        unsigned int indexFrontJ, const SolverParams& solverParams);
 #endif // phiPsy_hpp_included

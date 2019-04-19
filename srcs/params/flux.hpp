@@ -6,5 +6,6 @@
 
 
 void fluxShallow(Field& field, const SolverParams& solverParams, bool boundary);
+void fluxTransport(Field& field, const SolverParams& solverParams, bool boundary);
 
 #endif // flux_hpp_included

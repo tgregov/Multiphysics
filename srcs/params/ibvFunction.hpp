@@ -93,4 +93,8 @@ void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& 
                         const std::vector<double>& u, const std::vector<double>& edgeNormal,
                         const std::vector<double>& coeffs);
 
+void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
+                        const std::vector<double>& u, const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs);
+
 #endif // bcFunction_hpp_included

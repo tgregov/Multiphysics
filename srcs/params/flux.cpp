@@ -1,6 +1,21 @@
 #include <iostream>
 #include "flux.hpp"
 
+void fluxTransport(Field& field, const SolverParams& solverParams, bool boundary)
+{
+    if(boundary)
+    {
+        field.FluxAtBC[0][0] = solverParams.fluxCoeffs[0]*field.uAtBC[0];
+        field.FluxAtBC[1][0] = solverParams.fluxCoeffs[1]*field.uAtBC[0];
+    }
+    else
+    {
+        field.flux[0][0] = solverParams.fluxCoeffs[0]*field.u[0];
+        field.flux[1][0] = solverParams.fluxCoeffs[1]*field.u[0];
+    }
+}
+
+
 void fluxShallow(Field& field, const SolverParams& solverParams, bool boundary)
 {
     double g = solverParams.fluxCoeffs[0];
