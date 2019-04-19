@@ -9,6 +9,40 @@
 #include <cstring>
 #include <vector>
 #include "Params.hpp"
+#include "phiPsy.hpp"
+#include "flux.hpp"
+
+
+static void getLine(std::ifstream& file, std::string& line)
+{
+    std::string tempLine;
+    while(true) //be careful with this
+    {
+        std::getline(file, tempLine);
+        if(tempLine.compare(0, 2, "//") != 0)
+        {
+            std::size_t pos;
+            pos = tempLine.find("//");
+            if(pos != std::string::npos)
+            {
+                while(true)
+                {
+                    if(tempLine.at(pos-1) == ' ' || tempLine.at(pos-1) == '\t')
+                        tempLine.erase(pos-1, 1);
+                    else
+                    {
+                        tempLine.erase(pos);
+                        break;
+                    }
+                    pos = tempLine.find("//");
+                }
+            }
+
+            line = tempLine;
+            return;
+        }
+    }
+}
 
 /**
  * \brief Load boundary conditions from a file
