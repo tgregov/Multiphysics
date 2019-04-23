@@ -9,6 +9,10 @@
 #SBATCH --partition=defq 
 #SBATCH --output=out.txt
 
+module load gcc/4.9.2
+export CC=gcc
+export CXX=g++
+export FC=gfortran
 export OMP_NUM_THREADS=10
 
 cd $HOME/Multiphysics
