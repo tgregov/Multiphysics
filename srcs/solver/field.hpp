@@ -11,29 +11,28 @@
  */
 struct Field
 {
-	// solution fields (of size equal to the number of scalar unknowns)
-	std::vector<Eigen::VectorXd> u;
+	std::vector<Eigen::VectorXd> u; /**< Solution fields (of size equal to the number of scalar unknowns) */
 
-	// physical flux fields (of size equal to the number of dimension, with each
-    // dimension as a size equal to the number of scalar unknowns)
-	std::vector<std::vector<Eigen::VectorXd>> flux;
+	std::vector<std::vector<Eigen::VectorXd>> flux; /**< Physical flux fields (of size equal to the number of dimension, with each
+                                                         dimension as a size equal to the number of scalar unknowns) */
 
-	// time-integration increment
-	std::vector<Eigen::VectorXd> DeltaU;
+	std::vector<Eigen::VectorXd> DeltaU; /**< Time-integration increment */
 
-	// rhs fields
-    std::vector<Eigen::VectorXd> Iu;
+    std::vector<Eigen::VectorXd> Iu; /**< RHS fields */
 
-    // temporary integration variables (useful for RK schemes)
-    std::vector<Eigen::VectorXd> k1;
-    std::vector<Eigen::VectorXd> k2;
-    std::vector<Eigen::VectorXd> k3;
-    std::vector<Eigen::VectorXd> k4;
+    std::vector<Eigen::VectorXd> k1; /**< Temporary integration variables (useful for RK schemes) */
+    std::vector<Eigen::VectorXd> k2; /**< Temporary integration variables (useful for RK schemes) */
+    std::vector<Eigen::VectorXd> k3; /**< Temporary integration variables (useful for RK schemes) */
+    std::vector<Eigen::VectorXd> k4; /**< Temporary integration variables (useful for RK schemes) */
 
-	// constructor of the Field structure
+	/**
+     * \brief Constructor
+     * \param numNodes The number of nodes in the mesh.
+     * \param numUnknown The number of unknowns of the problem.
+     * \param dim The dimension of the mesh.
+     */
 	Field(unsigned int numNodes, unsigned short numUnknown, unsigned short dim)
 	{
-
         // resize each field
 	    flux.resize(dim);
 	    for(unsigned short i = 0 ; i < dim ; ++i)
@@ -61,16 +60,23 @@ struct Field
 	}
 };
 
+/**
+ * \struct PartialField
+ * \brief Structure that contains temporary unknowns while computing th fluxes.
+ */
 struct PartialField
 {
-    std::vector<Eigen::VectorXd> partialIu;
-    // partial fiels (useful for the computation of the flux at the nodes)
-    std::vector<std::vector<Eigen::VectorXd>> g;
+    std::vector<Eigen::VectorXd> partialIu;         /**< Partial RHS */
+    std::vector<std::vector<Eigen::VectorXd>> g;    /**< Partial fields (useful for the computation of the flux at the nodes) */
 
-    // boundary fields (useful for the computation of the flux at BC)
-    std::vector<std::vector<double>> FluxAtBC;
-    std::vector<double> uAtBC;
+    std::vector<std::vector<double>> FluxAtBC;  /**< Boundary fluxes */
+    std::vector<double> uAtBC;                  /**< Boundary fields (useful for the computation of the flux at BC) */
 
+    /**
+     * \brief Constructor
+     * \param numUnknown The number of unknowns of the problem.
+     * \param dim The dimension of the mesh.
+     */
     PartialField(unsigned short numUnknown, unsigned short dim)
     {
         partialIu.resize(numUnknown);
