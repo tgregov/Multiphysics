@@ -11,7 +11,7 @@
  * \param solverParams Structure containing the solver's parameters.
  * \param boundary Boolean that specifies if we consider a boundary (1) or not (0).
  */
-void fluxShallow(Field& field, const SolverParams& solverParams, bool boundary);
+void fluxShallow(Field& field, PartialField& partialField, const SolverParams& solverParams, bool boundary);
 
 
 /**
@@ -20,6 +20,6 @@ void fluxShallow(Field& field, const SolverParams& solverParams, bool boundary);
  * \param solverParams Structure containing the solver's parameters.
  * \param boundary Boolean that specifies if we consider a boundary (1) or not (0).
  */
-void fluxTransport(Field& field, const SolverParams& solverParams, bool boundary);
+void fluxTransport(Field& field, PartialField& partialField, const SolverParams& solverParams, bool boundary);
 
 #endif // flux_hpp_included

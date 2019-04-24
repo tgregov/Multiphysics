@@ -22,6 +22,8 @@ struct Edge
     std::vector<std::vector<double>> nodeCoordinate; /**< Coordinate of the node*/
     std::vector<double> normal;   /**< Edge normal point outwards the element*/
 
+    double length;
+
     //std::optional :cry:
     std::pair<unsigned int, unsigned int> edgeInFront = std::pair<unsigned int, unsigned>(-1, -1); /**<
                                                         Element index and edge index to find the
@@ -121,6 +123,8 @@ struct Mesh
     unsigned short dim;             /**< Mesh dimension (1, 2, (3)) */
 
     NodeData nodeData;
+
+    double DxMin;
 };
 
 /**

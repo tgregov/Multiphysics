@@ -4,9 +4,10 @@
 
 
 // see .hpp file for description
-void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
-            const std::vector<double>& u, const std::vector<double>& edgeNormal,
-            const std::vector<double>& coeffs)
+void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+           double t, const Field& field, unsigned int indexJ,
+           const std::vector<double>& edgeNormal,
+           const std::vector<double>& coeffs)
 {
 
     // check that there is enough coefficients
@@ -18,9 +19,10 @@ void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t
 
 
 // see .hpp file for description
-void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
-                const std::vector<double>& u, const std::vector<double>& edgeNormal,
-                const std::vector<double>& coeffs)
+void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+              double t, const Field& field, unsigned int indexJ,
+              const std::vector<double>& edgeNormal,
+              const std::vector<double>& coeffs)
 {
 
     // check that there is enough coefficients
@@ -32,16 +34,17 @@ void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos, doubl
 
 
 // see .hpp file for description
-void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
-                const std::vector<double>& u, const std::vector<double>& edgeNormal,
-                const std::vector<double>& coeffs)
+void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+              double t, const Field& field, unsigned int indexJ,
+              const std::vector<double>& edgeNormal,
+              const std::vector<double>& coeffs)
 {
 
     // check that there is enough values
     assert(coeffs.size() == uAtIBC.size());
 
     // compute constant values
-    for(unsigned short unk = 0 ; unk < u.size() ; ++unk)
+    for(unsigned short unk = 0 ; unk < field.u.size() ; ++unk)
     {
         uAtIBC[unk] = coeffs[unk];
     }
@@ -49,24 +52,25 @@ void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos, doubl
 
 
 // see .hpp file for description
-void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
-                    double t, const std::vector<double>& u,  
-                    const std::vector<double>& edgeNormal, 
-                    const std::vector<double>& coeffs)
+void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                   double t, const Field& field, unsigned int indexJ,
+                   const std::vector<double>& edgeNormal,
+                   const std::vector<double>& coeffs)
 {
 
     // check that there is enough values
     assert(u.size() == uAtIBC.size());
 
     // compute same values
-    uAtIBC = u;
+    for(unsigned short unk = 0 ; unk < field.u.size() ; ++unk)
+        uAtIBC[unk] = field.u[unk][indexJ];
 }
 
 
 // see .hpp file for description
-void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
-                    double t, const std::vector<double>& u, 
-                    const std::vector<double>& edgeNormal, 
+void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
                     const std::vector<double>& coeffs)
 {
 
@@ -74,19 +78,19 @@ void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
     assert(u.size() == uAtIBC.size());
 
     // compute a physical reflection
-    uAtIBC[0] = u[0];
-    uAtIBC[1] = (-2*edgeNormal[0]*edgeNormal[0]+1)*u[1]
-                    -2*edgeNormal[0]*edgeNormal[1]*u[2];
-    uAtIBC[2] = (-2*edgeNormal[1]*edgeNormal[1]+1)*u[2]
-                    -2*edgeNormal[0]*edgeNormal[1]*u[1];
+    uAtIBC[0] = field.u[0][indexJ];
+    uAtIBC[1] = (-2*edgeNormal[0]*edgeNormal[0]+1)*field.u[1][indexJ]
+                    -2*edgeNormal[0]*edgeNormal[1]*field.u[2][indexJ];
+    uAtIBC[2] = (-2*edgeNormal[1]*edgeNormal[1]+1)*field.u[2][indexJ]
+                    -2*edgeNormal[0]*edgeNormal[1]*field.u[1][indexJ];
 }
 
 
 // see .hpp file for description
-void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
-                        double t, const std::vector<double>& u, 
-                        const std::vector<double>& edgeNormal, 
-                        const std::vector<double>& coeffs)
+void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                       double t, const Field& field, unsigned int indexJ,
+                       const std::vector<double>& edgeNormal,
+                       const std::vector<double>& coeffs)
 {
 
     // check that there is enough coefficients
@@ -104,8 +108,8 @@ void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& p
 
 
 // see .hpp file for description
-void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
-                        double t, const std::vector<double>& u, 
+void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                        double t, const Field& field, unsigned int indexJ,
                         const std::vector<double>& edgeNormal,
                         const std::vector<double>& coeffs)
 {
@@ -124,13 +128,13 @@ void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& 
 
 
 // see .hpp file for description
-void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
-                        double t, const std::vector<double>& u, 
+void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                        double t, const Field& field, unsigned int indexJ,
                         const std::vector<double>& edgeNormal,
                         const std::vector<double>& coeffs)
 {
 
-    // check that there is enough coefficients    
+    // check that there is enough coefficients
     assert(coeffs.size() == 4);
     assert(pos.size() == 3);
 
@@ -144,13 +148,13 @@ void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& 
 
 
 // see .hpp file for description
-void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
-                            double t, const std::vector<double>& u, 
-                            const std::vector<double>& edgeNormal,
-                            const std::vector<double>& coeffs)
+void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                        double t, const Field& field, unsigned int indexJ,
+                        const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs)
 {
 
-    // check that there is enough coefficients    
+    // check that there is enough coefficients
     assert(coeffs.size() == 6);
     assert(pos.size() == 3);
 

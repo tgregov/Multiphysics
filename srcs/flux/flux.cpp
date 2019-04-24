@@ -3,15 +3,15 @@
 
 
 // see .hpp file for description
-void fluxTransport(Field& field, const SolverParams& solverParams, bool boundary)
+void fluxTransport(Field& field, PartialField& partialField, const SolverParams& solverParams, bool boundary)
 {
-    // the physical flux is F = a*Q", where "a" is a 2D vector 
+    // the physical flux is F = a*Q", where "a" is a 2D vector
     if(boundary)
     {
         // flux for the x coordinate
-        field.FluxAtBC[0][0] = solverParams.fluxCoeffs[0]*field.uAtBC[0];
+        partialField.FluxAtBC[0][0] = solverParams.fluxCoeffs[0]*partialField.uAtBC[0];
         // flux for the y coordinate
-        field.FluxAtBC[1][0] = solverParams.fluxCoeffs[1]*field.uAtBC[0];
+        partialField.FluxAtBC[1][0] = solverParams.fluxCoeffs[1]*partialField.uAtBC[0];
     }
     else
     {
@@ -24,7 +24,7 @@ void fluxTransport(Field& field, const SolverParams& solverParams, bool boundary
 
 
 // see .hpp file for description
-void fluxShallow(Field& field, const SolverParams& solverParams, bool boundary)
+void fluxShallow(Field& field, PartialField& partialField, const SolverParams& solverParams, bool boundary)
 {
     // gravity parameter
     double g = solverParams.fluxCoeffs[0];
@@ -32,22 +32,22 @@ void fluxShallow(Field& field, const SolverParams& solverParams, bool boundary)
     // the physical flux is given by
     //  Fx = [H*u,   H*u^2 + g*H^2/2,    H*u*v       ]
     //  Fy = [H*v,   H*u*v,              H*v^2 + g*H ]
-    
+
     if(boundary)
     {
         // flux for the (x, y) coordinates for H
-        field.FluxAtBC[0][0] = field.uAtBC[1];
-        field.FluxAtBC[1][0] = field.uAtBC[2];
+        partialField.FluxAtBC[0][0] = partialField.uAtBC[1];
+        partialField.FluxAtBC[1][0] = partialField.uAtBC[2];
 
         // flux for the (x, y) coordinates for H*u
-        field.FluxAtBC[0][1] = field.uAtBC[1]*field.uAtBC[1]/field.uAtBC[0] 
-                                + g/2*field.uAtBC[0]*field.uAtBC[0];
-        field.FluxAtBC[0][2] = field.uAtBC[1]*field.uAtBC[2]/field.uAtBC[0];
+        partialField.FluxAtBC[0][1] = partialField.uAtBC[1]*partialField.uAtBC[1]/partialField.uAtBC[0]
+                                + g/2*partialField.uAtBC[0]*partialField.uAtBC[0];
+        partialField.FluxAtBC[0][2] = partialField.uAtBC[1]*partialField.uAtBC[2]/partialField.uAtBC[0];
 
         // flux for the (x, y) coordinates for H*v
-        field.FluxAtBC[1][1] = field.uAtBC[1]*field.uAtBC[2]/field.uAtBC[0];
-        field.FluxAtBC[1][2] = field.uAtBC[2]*field.uAtBC[2]/field.uAtBC[0] 
-                                + g/2*field.uAtBC[0]*field.uAtBC[0];
+        partialField.FluxAtBC[1][1] = partialField.uAtBC[1]*partialField.uAtBC[2]/partialField.uAtBC[0];
+        partialField.FluxAtBC[1][2] = partialField.uAtBC[2]*partialField.uAtBC[2]/partialField.uAtBC[0]
+                                + g/2*partialField.uAtBC[0]*partialField.uAtBC[0];
     }
     else
     {

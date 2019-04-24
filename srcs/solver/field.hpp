@@ -23,15 +23,6 @@ struct Field
 
 	// rhs fields
     std::vector<Eigen::VectorXd> Iu;
-    std::vector<Eigen::VectorXd> partialIu;
-
-    // boundary fields (useful for the computation of the flux at BC)
-    std::vector<std::vector<double>> FluxAtBC;
-    std::vector<double> uAtBC;
-    std::vector<double> uForBC;
-
-    // partial fiels (useful for the computation of the flux at the nodes)
-    std::vector<std::vector<Eigen::VectorXd>> g;
 
     // temporary integration variables (useful for RK schemes)
     std::vector<Eigen::VectorXd> k1;
@@ -45,21 +36,14 @@ struct Field
 
         // resize each field
 	    flux.resize(dim);
-	    FluxAtBC.resize(dim);
-        g.resize(dim);
 	    for(unsigned short i = 0 ; i < dim ; ++i)
         {
             flux[i].resize(numUnknown);
-            FluxAtBC[i].resize(numUnknown);
-            g[i].resize(numUnknown);
         }
 
 		u.resize(numUnknown);
-		uAtBC.resize(numUnknown);
-		uForBC.resize(numUnknown);
 		DeltaU.resize(numUnknown);
 		Iu.resize(numUnknown);
-		partialIu.resize(numUnknown);
 		for(unsigned short i = 0 ; i < numUnknown ; ++i)
         {
             u[i].resize(numNodes);
@@ -75,6 +59,30 @@ struct Field
         k3.resize(numNodes);
         k4.resize(numNodes);
 	}
+};
+
+struct PartialField
+{
+    std::vector<Eigen::VectorXd> partialIu;
+    // partial fiels (useful for the computation of the flux at the nodes)
+    std::vector<std::vector<Eigen::VectorXd>> g;
+
+    // boundary fields (useful for the computation of the flux at BC)
+    std::vector<std::vector<double>> FluxAtBC;
+    std::vector<double> uAtBC;
+
+    PartialField(unsigned short numUnknown, unsigned short dim)
+    {
+        partialIu.resize(numUnknown);
+        uAtBC.resize(numUnknown);
+        g.resize(dim);
+        FluxAtBC.resize(dim);
+        for(unsigned short i = 0 ; i < dim ; ++i)
+        {
+            FluxAtBC[i].resize(numUnknown);
+            g[i].resize(numUnknown);
+        }
+    }
 };
 
 #endif /* field_hpp */

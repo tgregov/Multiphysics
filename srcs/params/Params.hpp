@@ -30,6 +30,7 @@ struct SolverParams
     std::string problemType;     /**< Equations to solve (transport, shallow, ...)*/
 
     std::function<void(Field& field,
+                       PartialField& partialField,
                        const SolverParams& solverParams,
                        bool boundary)> flux;
 
@@ -39,9 +40,9 @@ struct SolverParams
 
     std::string fluxType;        /**< Type of numerical flux (mean, Lax-Friedirichs, Roe, ...)*/
 
-    std::function<void(const Edge& edge, Field& field, unsigned int j,
-                       double factor, bool boundary, unsigned int indexJ,
-                       unsigned int indexFrontJ, const SolverParams& solverParams)> phiPsi;
+    std::function<void(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
+                    bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
+                    const SolverParams& solverParams)> phiPsi;
 
 };
 
