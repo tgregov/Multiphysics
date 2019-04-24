@@ -275,23 +275,32 @@ static void findInFrontEdge(Entity& entity, Edge& currentEdge, unsigned int edge
     //previously computed elements).
     unsigned int elVecSize = entity.elements.size();
     unsigned int nEdgePerEl = entity.elements[0].edges.size();
-    for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
-    {
-        for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
-        {
-            std::vector<int> nodesTagsInfront = entity.elements[elm].edges[k].nodeTags;
-            std::vector<unsigned int> permutation1, permutation2;
 
-            //If the nodes tags of an edge is the permutation of the nodes tags of
-            //another, we have found the "edge in front"
-            if(isPermutation(currentEdge.nodeTags, nodesTagsInfront, permutation1, permutation2))
+    #pragma omp parallel default(none) shared(entity, elVecSize, nEdgePerEl, currentEdge, edgePos)
+    {
+        #pragma omp for
+        for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
+        {
+            for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
             {
-                currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
-                entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
-                currentEdge.nodeIndexEdgeInFront = std::move(permutation1);
-                entity.elements[elm].edges[k].nodeIndexEdgeInFront = std::move(permutation2);
-                return;
+                std::vector<int> nodesTagsInfront = entity.elements[elm].edges[k].nodeTags;
+                std::vector<unsigned int> permutation1, permutation2;
+
+                //If the nodes tags of an edge is the permutation of the nodes tags of
+                //another, we have found the "edge in front"
+                if(isPermutation(currentEdge.nodeTags, nodesTagsInfront, permutation1, permutation2))
+                {
+                    #pragma omp critical
+                    {
+                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
+                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
+                        currentEdge.nodeIndexEdgeInFront = std::move(permutation1);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront = std::move(permutation2);
+                    }
+                    #pragma omp cancel for
+                }
             }
+            #pragma omp cancellation point for
         }
     }
 }
