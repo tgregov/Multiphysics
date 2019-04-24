@@ -59,7 +59,7 @@ void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 {
 
     // check that there is enough values
-    assert(u.size() == uAtIBC.size());
+    assert(field.u.size() == uAtIBC.size());
 
     // compute same values
     for(unsigned short unk = 0 ; unk < field.u.size() ; ++unk)
@@ -75,7 +75,7 @@ void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 {
 
     // check that there is enough values
-    assert(u.size() == uAtIBC.size());
+    assert(field.u.size() == uAtIBC.size());
 
     // compute a physical reflection
     uAtIBC[0] = field.u[0][indexJ];
