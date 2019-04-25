@@ -65,8 +65,10 @@ struct Field
             u[i].resize(numNodes);
             DeltaU[i].resize(numNodes);
             Iu[i].resize(numNodes);
-            for(unsigned short j = 0 ; j < dim ; ++j){
+            for(unsigned short j = 0 ; j < dim ; ++j)
+            {
                 flux[j][i].resize(numUnknown);
+                flux[j][i] = Eigen::VectorXd::Zero(numNodes);
             }
         }
 

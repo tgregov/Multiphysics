@@ -2,6 +2,8 @@
 #include <cassert>
 #include "ibvFunction.hpp"
 
+#include <iostream>
+
 
 // see .hpp file for description
 void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
@@ -79,6 +81,29 @@ void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                     -2*edgeNormal[0]*edgeNormal[1]*u[2];
     uAtIBC[2] = (-2*edgeNormal[1]*edgeNormal[1]+1)*u[2]
                     -2*edgeNormal[0]*edgeNormal[1]*u[1];
+}
+
+
+// see .hpp file for description
+void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
+                    double t, const std::vector<double>& u, 
+                    const std::vector<double>& edgeNormal, 
+                    const std::vector<double>& coeffs)
+{
+
+    // check that there is enough values
+    assert(u.size() == uAtIBC.size());
+
+    // compute a physical reflection
+    double g = 9.81;
+    double H = coeffs[0];
+    double alpha = (edgeNormal[0]*u[1] + edgeNormal[1]*u[2])/u[0] 
+                    - sqrt(g/H)*(u[0]-H);
+
+
+    uAtIBC[0] = H;
+    uAtIBC[1] = alpha*edgeNormal[0];
+    uAtIBC[2] = alpha*edgeNormal[1];
 }
 
 

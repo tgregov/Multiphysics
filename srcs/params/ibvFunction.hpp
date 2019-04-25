@@ -108,6 +108,20 @@ void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 
 
 /**
+ * \brief Compute a physical reflection -- for shallow waters.
+ * \param pos Node position.
+ * \param u The current solution.
+ * \param t Current time.
+ * \param coeffs Coefficient (not used here).
+ * \return Physically reflected values.
+ */
+void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
+                    double t, const std::vector<double>& u, 
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs);
+
+
+/**
  * \brief Compute a 2D gaussian: A*exp(-(x-x0)^2/(2*var_y)-(y-y0)^2/(2*var_y)) -- for
  * shallow waters
  * \param pos Node position.
