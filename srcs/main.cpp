@@ -36,8 +36,8 @@ int main(int argc, char **argv)
     #if defined(_OPENMP)
         unsigned int n = std::atoi(std::getenv("OMP_NUM_THREADS"));
         omp_set_num_threads(n);
-        Eigen::setNbThreads(n);
-        std::cout << "Number of threads: " << Eigen::nbThreads() << std::endl;;
+        Eigen::setNbThreads(1);
+        std::cout << "Number of threads: " << n << std::endl;;
     #endif
 
     // load the mesh
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
         return -1;
    }
 
-    // displayMesh(mesh);
+   // displayMesh(mesh);
     std::cout   << "================================================================"
                 << std::endl
                 << "                     EXECUTING THE SOLVER                       "

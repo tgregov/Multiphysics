@@ -7,6 +7,152 @@
 #include "timeInteg.hpp"
 #include "field.hpp"
 
+//typedef to lighten the notations
+typedef std::function<void (double, Field &, PartialField &, const Matrix &,
+      const Mesh &, const SolverParams &)> UsedF;
+
+typedef std::function<void(double, Field&, PartialField&, const Matrix&,
+         const Mesh&, const SolverParams&, Field&, UsedF)> IntegScheme;
+
+
+/**
+ * \brief Compute the numerical time integration using the method of Runge-Kutta order 1
+    i.e. explicit Euler
+ * \param t Current time.
+ * \param field Field that contains all the main variables.
+ * \param partialField Field that contains all the main variables (private)
+ * \param matrix Structure that contains the matrices of the DG method.
+ * \param mesh Mesh representing the domain.
+ * \param solverParams Parameters of the solver.
+ * \param temp temporary Field needed to compute the different k's
+ * \param usedF pointer to the function Fweak or Fstrong
+ */
+static void RK1(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+{
+    usedF(t, field, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+        field.u[unk] += field.DeltaU[unk]*solverParams.timeStep;
+}
+
+
+/**
+ * \brief Compute the numerical time integration using the method of Runge-Kutta order 2
+    i.e. explicit Euler
+ * \param t Current time.
+ * \param field Field that contains all the main variables.
+ * \param partialField Field that contains all the main variables (private)
+ * \param matrix Structure that contains the matrices of the DG method.
+ * \param mesh Mesh representing the domain.
+ * \param solverParams Parameters of the solver.
+ * \param temp temporary Field needed to compute the different k's
+ * \param usedF pointer to the function Fweak or Fstrong
+ */
+static void RK2(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+{
+
+    double h = solverParams.timeStep;
+
+    usedF(t, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k1[unk] = temp.DeltaU[unk]*h;
+        temp.u[unk] = field.u[unk] + field.k1[unk]/2;
+    }
+
+    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k2[unk] = temp.DeltaU[unk]*h;
+        field.u[unk] += field.k2[unk];
+    }
+}
+
+/**
+ * \brief Compute the numerical time integration using the method of Runge-Kutta order 3
+    i.e. explicit Euler
+ * \param t Current time.
+ * \param field Field that contains all the main variables.
+ * \param partialField Field that contains all the main variables (private)
+ * \param matrix Structure that contains the matrices of the DG method.
+ * \param mesh Mesh representing the domain.
+ * \param solverParams Parameters of the solver.
+ * \param temp temporary Field needed to compute the different k's
+ * \param usedF pointer to the function Fweak or Fstrong
+ */
+static void RK3(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+{
+    double h = solverParams.timeStep;
+
+    usedF(t, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k1[unk] = temp.DeltaU[unk]*h;
+        temp.u[unk] = field.u[unk] + field.k1[unk]/2;
+    }
+
+    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k2[unk] = temp.DeltaU[unk]*h;
+        temp.u[unk] = field.u[unk] - field.k1[unk] + 2*field.k2[unk];
+    }
+
+    usedF(t + h, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < 3 ; ++unk)
+    {
+        field.k3[unk] = temp.DeltaU[unk]*h;
+        field.u[unk] += (field.k1[unk] + 4*field.k2[unk] + field.k3[unk])/6;
+    }
+}
+
+/**
+ * \brief Compute the numerical time integration using the method of Runge-Kutta order 4
+    i.e. explicit Euler
+ * \param t Current time.
+ * \param field Field that contains all the main variables.
+ * \param partialField Field that contains all the main variables (private)
+ * \param matrix Structure that contains the matrices of the DG method.
+ * \param mesh Mesh representing the domain.
+ * \param solverParams Parameters of the solver.
+ * \param temp temporary Field needed to compute the different k's
+ * \param usedF pointer to the function Fweak or Fstrong
+ */
+static void RK4(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+{
+    double h = solverParams.timeStep;
+
+    usedF(t, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k1[unk] = temp.DeltaU[unk]*h;
+        temp.u[unk] = field.u[unk] + field.k1[unk]/2;
+    }
+
+    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k2[unk] = temp.DeltaU[unk]*h;
+        temp.u[unk] = field.u[unk] + field.k2[unk]/2;
+    }
+
+    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k3[unk] = temp.DeltaU[unk]*h;
+        temp.u[unk] = field.u[unk] + field.k3[unk];
+    }
+
+    usedF(t + h, temp, partialField, matrix, mesh, solverParams);
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        field.k4[unk] = temp.DeltaU[unk]*h;
+        field.u[unk] += (field.k1[unk] + 2*field.k2[unk] + 2*field.k3[unk] + field.k4[unk])/6;
+    }
+}
 
 /**
  * \brief Compute the increment vector of the unknown fields, for the weak form.
@@ -17,11 +163,11 @@
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
  */
-static void Fweak(double t, Field& field, const Matrix& matrix, const Mesh& mesh,
+static void Fweak(double t, Field& field, PartialField& partialField, const Matrix& matrix, const Mesh& mesh,
                   const SolverParams& solverParams)
 {
  	// compute the nodal physical fluxes
- 	solverParams.flux(field, solverParams, false);
+ 	solverParams.flux(field, partialField, solverParams, false);
 
 	// compute the right-hand side of the master equation (phi or psi)
  	buildFlux(mesh, field, 1, t, solverParams);
@@ -30,7 +176,7 @@ static void Fweak(double t, Field& field, const Matrix& matrix, const Mesh& mesh
  	for(unsigned short unk = 0 ; unk < field.DeltaU.size() ; ++unk)
     {
         field.DeltaU[unk]
-            = matrix.invM*(field.Iu[unk] + matrix.Sx*field.flux[0][unk] 
+            = matrix.invM*(field.Iu[unk] + matrix.Sx*field.flux[0][unk]
             				+ matrix.Sy*field.flux[1][unk]);
     }
 }
@@ -45,11 +191,11 @@ static void Fweak(double t, Field& field, const Matrix& matrix, const Mesh& mesh
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
  */
-static void Fstrong(double t, Field& field, const Matrix& matrix, const Mesh& mesh,
+static void Fstrong(double t, Field& field, PartialField& partialField, const Matrix& matrix, const Mesh& mesh,
                     const SolverParams& solverParams)
 {
  	// compute the nodal physical fluxes
- 	solverParams.flux(field, solverParams, false);
+ 	solverParams.flux(field, partialField, solverParams, false);
 
 	// compute the right-hand side of the master equation (phi or psi)
  	buildFlux(mesh, field, -1, t, solverParams);
@@ -58,7 +204,7 @@ static void Fstrong(double t, Field& field, const Matrix& matrix, const Mesh& me
     for(unsigned short unk = 0 ; unk < field.DeltaU.size() ; ++unk)
     {
         field.DeltaU[unk]
-            = matrix.invM*(field.Iu[unk] - matrix.Sx*field.flux[0][unk] 
+            = matrix.invM*(field.Iu[unk] - matrix.Sx*field.flux[0][unk]
             				- matrix.Sy*field.flux[1][unk]);
     }
 }
@@ -89,7 +235,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 *						       WEAK AND STRONG FORM 						   *
 	 *******************************************************************************/
   	//Function pointer to the used function (weak vs strong form)
-  	std::function<void(double t, Field& field, const Matrix& matrix,
+  	std::function<void(double t, Field& field, PartialField& partialField, const Matrix& matrix,
 	const Mesh& mesh,
     const SolverParams& solverParams)> usedF;
 
@@ -106,6 +252,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 
   	//Initialization of the field of unknowns
   	Field field(mesh.nodeData.numNodes, solverParams.nUnknowns, mesh.dim);
+  	PartialField partialField(solverParams.nUnknowns, mesh.dim);
 
 
 	/*******************************************************************************
@@ -119,7 +266,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         {
             for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
             {
-                solverParams.initCondition.ibcFunc(uIC, element.nodesCoord[n], 0, {}, {},
+                solverParams.initCondition.ibcFunc(uIC, element.nodesCoord[n], 0, field, 0, {},
 					solverParams.initCondition.coefficients, solverParams.fluxCoeffs);
 
                 for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
@@ -172,9 +319,28 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 *******************************************************************************/
 	// temporary vectors (only for RK4, but I don't want to define them at each time
 	// iteration)
-	Field temp = field; //[TO DO]: INEFFICIENT
+	Field temp = field;
 
-	double h = solverParams.timeStep;
+    //Function pointer to the used integration scheme
+    IntegScheme integScheme;
+
+    if (solverParams.timeIntType == "RK1")
+    {
+        integScheme = RK1;
+    }
+    else if (solverParams.timeIntType == "RK2")
+    {
+        integScheme = RK2;
+    }
+    else if (solverParams.timeIntType == "RK3")
+    {
+        integScheme = RK3;
+    }
+    else if (solverParams.timeIntType == "RK4")
+    {
+        integScheme = RK4;
+    }
+    
 
 	// numerical integration
 	unsigned int ratio, currentDecade = 0;
@@ -191,86 +357,9 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
             currentDecade = ratio + 1;
         }
 
-		if(solverParams.timeIntType == "RK1")
-		{
-			//Numerical time integration using the method of Runge-Kutta order 1
-			// i.e. explicit Euler
-			usedF(t, field, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-                field.u[unk] += field.DeltaU[unk]*h;
-		}
-		else if(solverParams.timeIntType == "RK2")
-		{
-			//Numerical time integration using the method of Runge-Kutta order 2
-			usedF(t, temp, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k1[unk] = temp.DeltaU[unk]*h;
-                temp.u[unk] = field.u[unk] + field.k1[unk]/2;
-            }
 
-			usedF(t + h/2, temp, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k2[unk] = temp.DeltaU[unk]*h;
-                field.u[unk] += field.k2[unk];
-            }
-		}
-		else if(solverParams.timeIntType == "RK3")
-		{
-			//Numerical time integration using the method of Runge-Kutta order 3
-			usedF(t, temp, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k1[unk] = temp.DeltaU[unk]*h;
-                temp.u[unk] = field.u[unk] + field.k1[unk]/2;
-            }
+        integScheme(t, field, partialField, matrix, mesh, solverParams, temp, usedF);
 
-			usedF(t + h/2, temp, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k2[unk] = temp.DeltaU[unk]*h;
-                temp.u[unk] = field.u[unk] - field.k1[unk] + 2*field.k2[unk];
-            }
-
-			usedF(t + h, temp, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < 3 ; ++unk)
-            {
-                field.k3[unk] = temp.DeltaU[unk]*h;
-                field.u[unk] += (field.k1[unk] + 4*field.k2[unk] + field.k3[unk])/6;
-            }
-		}
-		else if(solverParams.timeIntType == "RK4")
-		{
-			//Numerical time integration using the method of Runge-Kutta order 4
-			usedF(t, temp, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k1[unk] = temp.DeltaU[unk]*h;
-                temp.u[unk] = field.u[unk] + field.k1[unk]/2;
-            }
-
-			usedF(t + h/2, temp, matrix, mesh, solverParams);
-			for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k2[unk] = temp.DeltaU[unk]*h;
-                temp.u[unk] = field.u[unk] + field.k2[unk]/2;
-            }
-
-			usedF(t + h/2, temp, matrix, mesh, solverParams);
-            for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k3[unk] = temp.DeltaU[unk]*h;
-                temp.u[unk] = field.u[unk] + field.k3[unk];
-            }
-
-			usedF(t + h, temp, matrix, mesh, solverParams);
-            for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-            {
-                field.k4[unk] = temp.DeltaU[unk]*h;
-                field.u[unk] += (field.k1[unk] + 2*field.k2[unk] + 2*field.k3[unk] + field.k4[unk])/6;
-            }
-		}
 
 		// check that it does not diverge
 		// assert(field.u[0].maxCoeff() <= 1E5);
