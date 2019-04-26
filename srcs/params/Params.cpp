@@ -101,6 +101,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "openShallow")
             tempCondition.ibcFunc = openShallow;
 
+        else if(bcType == "openShallowLin")
+            tempCondition.ibcFunc = openShallowLin;
+
         else if(bcType == "gaussian2DShallow")
             tempCondition.ibcFunc = gaussian2DShallow;
 

@@ -116,6 +116,31 @@ void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 }
 
 
+// see .hpp file for description
+void openShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs)
+{
+
+    // check that there is enough values
+    assert(field.u.size() == uAtIBC.size());
+
+    // compute a physical reflection
+    double g = fluxCoeffs[0];
+    double h0 = fluxCoeffs[1];
+    double H = coeffs[0];
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/h0
+                    - sqrt(g/H)*(field.u[0][indexJ] - H);
+
+    uAtIBC[0] = H;
+    uAtIBC[1] = alpha*edgeNormal[0];
+    uAtIBC[2] = alpha*edgeNormal[1];
+}
+
+
+// see .hpp file for description
 void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                        double t, const Field& field, unsigned int indexJ,
                        const std::vector<double>& edgeNormal,

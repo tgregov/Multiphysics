@@ -139,6 +139,13 @@ void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                     const std::vector<double>& fluxCoeffs);
 
 
+void openShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs);
+
+
 /**
  * \brief Compute a 2D gaussian: A*exp(-(x-x0)^2/(2*var_y)-(y-y0)^2/(2*var_y)) -- for
  * shallow waters
