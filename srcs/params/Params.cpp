@@ -103,7 +103,19 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         }
         else if(solverParams.problemType == "shallow")
         {
-            if(bcType == "openShallow")
+            if(bcType == "reflectShallow")
+                tempCondition.ibcFunc = reflectShallow;
+
+            else if(bcType == "gaussian2DShallow")
+                tempCondition.ibcFunc = gaussian2DShallow;
+
+            else if(bcType == "gaussian1DShallowX")
+                tempCondition.ibcFunc = gaussian1DShallowX;
+
+            else if(bcType == "gaussian1DShallowY")
+                tempCondition.ibcFunc = gaussian1DShallowY;
+
+            else if(bcType == "openShallow")
                 tempCondition.ibcFunc = openShallow;
 
             else
@@ -111,16 +123,6 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
 
         }
         else if(solverParams.problemType == "shallowLin")
-        {
-            if(bcType == "openShallowLin")
-                tempCondition.ibcFunc = openShallowLin;
-
-            else
-                error = true;
-        }
-
-        if(solverParams.problemType == "shallowLin" ||
-           solverParams.problemType == "shallow")
         {
             if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
@@ -133,6 +135,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
 
             else if(bcType == "gaussian1DShallowY")
                 tempCondition.ibcFunc = gaussian1DShallowY;
+
+            else if(bcType == "openShallowLin")
+                tempCondition.ibcFunc = openShallowLin;
 
             else
                 error = true;
@@ -148,7 +153,7 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         {
             std::cerr << "Unhandled boundary condition type " << bcType
                       << " for boundary " << std::endl << bcName
-                      << "for problem type "
+                      << " for problem type "
                       << solverParams.problemType << " in parameter file "
                       << fileName <<std::endl;
 
