@@ -75,7 +75,7 @@ void fluxShallow(Field& field, PartialField& partialField, const SolverParams& s
 
 
 // see .hpp file for description
-void fluxShallowLin(Field& field, const SolverParams& solverParams, bool boundary)
+void fluxShallowLin(Field& field, PartialField& partialField, const SolverParams& solverParams, bool boundary)
 {
 
     // the physical flux is given by
@@ -85,18 +85,18 @@ void fluxShallowLin(Field& field, const SolverParams& solverParams, bool boundar
     if(boundary)
     {
         // flux for the (x, y) coordinates for H
-        field.FluxAtBC[0][0] = field.uAtBC[1];
-        field.FluxAtBC[1][0] = field.uAtBC[2];
+        partialField.FluxAtBC[0][0] = partialField.uAtBC[1];
+        partialField.FluxAtBC[1][0] = partialField.uAtBC[2];
 
         // flux for the (x, y) coordinates for H*u
-        field.FluxAtBC[0][1] = solverParams.fluxCoeffs[0]
-                                *field.uAtBC[0]*solverParams.fluxCoeffs[1];
-        field.FluxAtBC[0][2] = 0.0;
+        partialField.FluxAtBC[0][1] = solverParams.fluxCoeffs[0]
+                                *partialField.uAtBC[0]*solverParams.fluxCoeffs[1];
+        partialField.FluxAtBC[0][2] = 0.0;
 
         // flux for the (x, y) coordinates for H*v
-        field.FluxAtBC[1][1] = 0.0;
-        field.FluxAtBC[1][2] = solverParams.fluxCoeffs[0]
-                                *field.uAtBC[0]*solverParams.fluxCoeffs[1];
+        partialField.FluxAtBC[1][1] = 0.0;
+        partialField.FluxAtBC[1][2] = solverParams.fluxCoeffs[0]
+                                *partialField.uAtBC[0]*solverParams.fluxCoeffs[1];
     }
     else
     {
