@@ -50,7 +50,7 @@ struct Field
             Iu[i].resize(numNodes);
             for(unsigned short j = 0 ; j < dim ; ++j)
             {
-                flux[j][i].resize(numUnknown);
+                flux[j][i].resize(numNodes);
                 flux[j][i] = Eigen::VectorXd::Zero(numNodes);
             }
         }
