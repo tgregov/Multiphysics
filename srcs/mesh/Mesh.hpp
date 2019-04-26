@@ -22,6 +22,8 @@ struct Edge
     std::vector<std::vector<double>> nodeCoordinate; /**< Coordinate of the node*/
     std::vector<double> normal;   /**< Edge normal point outwards the element*/
 
+    double length;
+
     //std::optional :cry:
     std::pair<unsigned int, unsigned int> edgeInFront = std::pair<unsigned int, unsigned>(-1, -1); /**<
                                                         Element index and edge index to find the
@@ -96,6 +98,16 @@ struct ElementProperty
 };
 
 
+struct NodeData
+{
+    unsigned int numNodes;
+    std::vector<int> elementTags;
+    std::vector<unsigned int> elementNumNodes;
+    std::vector<int> nodeTags;
+    std::vector<std::vector<double>> coord;
+};
+
+
 /**
  * \struct Mesh
  * \brief Represents a mesh.
@@ -108,9 +120,11 @@ struct Mesh
 
     std::vector<Entity> entities;   /**< List of entities inside the mesh */
 
-    unsigned int numNodes;          /**< Number of nodes inside the mesh */
-
     unsigned short dim;             /**< Mesh dimension (1, 2, (3)) */
+
+    NodeData nodeData;
+
+    double DxMin;
 };
 
 /**

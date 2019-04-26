@@ -7,6 +7,7 @@
 #include "../mesh/Mesh.hpp"
 #include "../params/Params.hpp"
 
+
 /**
  * \brief Time integrate the equations (DG-FEM)
  * \param mesh The mesh representing the domain of interest
@@ -14,7 +15,7 @@
  * \param fileName The name of the file containing the mesh.
  * \return true if time integration happened without problems, false otherwise.
  */
-bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
-	             const std::string& fileName);
+bool timeInteg(const Mesh& mesh, const SolverParams& solverParams, 
+				const std::string& fileName);
 
 #endif /* timeInteg_hpp */

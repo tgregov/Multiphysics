@@ -16,7 +16,7 @@
  * already computed in the mesh, it suffices to compute the components of the inverse
  * change of variable between the reference and physical frame (the dX/dx), to
  * calculate the sum, and store the result in a sparse matrix.
- * \param mesh2D The structure that contains the mesh.
+ * \param mesh The structure that contains the mesh.
  * \param Sx The Eigen::SparseMatrix in which the matrix [Sx] components will be
  * stored.
  * \param Sy The Eigen::SparseMatrix in which the matrix [Sx] components will be

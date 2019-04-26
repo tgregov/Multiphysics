@@ -9,6 +9,41 @@
 #include <cstring>
 #include <vector>
 #include "Params.hpp"
+#include "../flux/phiPsi.hpp"
+#include "../flux/flux.hpp"
+
+
+static void getLine(std::ifstream& file, std::string& line)
+{
+    std::string tempLine;
+    while(true) //be careful with this
+    {
+        std::getline(file, tempLine);
+        if(tempLine.compare(0, 2, "//") != 0)
+        {
+            std::size_t pos;
+            pos = tempLine.find("//");
+            if(pos != std::string::npos)
+            {
+                while(true)
+                {
+                    if(tempLine.at(pos-1) == ' ' || tempLine.at(pos-1) == '\t')
+                        tempLine.erase(pos-1, 1);
+                    else
+                    {
+                        tempLine.erase(pos);
+                        break;
+                    }
+                    pos = tempLine.find("//");
+                }
+            }
+
+            line = tempLine;
+            return;
+        }
+    }
+}
+
 
 /**
  * \brief Load boundary conditions from a file
@@ -36,9 +71,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             std::cout << "End of file reached." << std::endl;
             break;
         }
-        std::getline(paramFile, bcName);
+        getLine(paramFile, bcName);
 
-        std::getline(paramFile, bcType);
+        getLine(paramFile, bcType);
         if(bcType[0] != '\t') //Let's make them tabulated for easier reading
         {
             std::cerr << "Bad type format for BC  " << bcName
@@ -57,22 +92,37 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "constant")
             tempCondition.ibcFunc = constant;
 
-        else if(bcType == "constantNeumann")
-            tempCondition.ibcFunc = constantNeumann;
+        else if(bcType == "freeTransport")
+            tempCondition.ibcFunc = freeTransport;
 
-        else if(bcType == "gaussian2D")
-            tempCondition.ibcFunc = gaussian2D;
+        else if(bcType == "reflectShallow")
+            tempCondition.ibcFunc = reflectShallow;
+
+        else if(bcType == "openShallow")
+            tempCondition.ibcFunc = openShallow;
+
+        else if(bcType == "gaussian2DShallow")
+            tempCondition.ibcFunc = gaussian2DShallow;
+
+        else if(bcType == "gaussian2DTransport")
+            tempCondition.ibcFunc = gaussian2DTransport;
+
+        else if(bcType == "gaussian1DShallowX")
+            tempCondition.ibcFunc = gaussian1DShallowX;
+
+        else if(bcType == "gaussian1DShallowY")
+            tempCondition.ibcFunc = gaussian1DShallowY;
 
         else
         {
-            std::cerr << "Unhandled boundary condtion type " << bcType
+            std::cerr << "Unhandled boundary condition type " << bcType
                       << " for boundary " << bcName << " in parameter file "
                       << fileName <<std::endl;
 
             return false;
         }
 
-        std::getline(paramFile, tempBcCoeff);
+        getLine(paramFile, tempBcCoeff);
         if(tempBcCoeff[0] != '\t') //Let's make them tabulated for easier reading
         {
             std::cerr << "Bad coefficient format for BC  " << bcName
@@ -138,7 +188,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     }
 
     std::string temp;
-    std::getline(paramFile, temp);
+    getLine(paramFile, temp);
 
     if(temp.compare(0, 5, "Gauss") != 0
        || !(temp.substr(5, temp.size() - 5).find_first_not_of("0123456789")
@@ -154,7 +204,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     solverParams.spaceIntType = temp;
 
     temp.clear();
-    std::getline(paramFile, temp);
+    getLine(paramFile, temp);
 
     if(!(temp == "Lagrange" || temp == "Isoparametric"))
     {
@@ -168,9 +218,9 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     solverParams.basisFuncType = temp;
 
     temp.clear();
-    std::getline(paramFile, temp);
+    getLine(paramFile, temp);
 
-    if(!(temp == "RK1" || temp == "RK4"))
+    if(!(temp == "RK1" || temp == "RK2" || temp == "RK3" || temp == "RK4"))
     {
         std::cerr << "Unexpected time integration type " << temp
                   << " in parameter file " << fileName << std::endl;
@@ -182,7 +232,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     solverParams.timeIntType = temp;
 
     temp.clear();
-    std::getline(paramFile, temp);
+    getLine(paramFile, temp);
 
     if(!(temp == "strong" || temp == "weak"))
     {
@@ -196,7 +246,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     solverParams.solverType = temp;
 
     temp.clear();
-    std::getline(paramFile, temp);
+    getLine(paramFile, temp);
 
     if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
     {
@@ -210,7 +260,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     solverParams.simTime = std::stod(temp);
 
     temp.clear();
-    std::getline(paramFile, temp);
+    getLine(paramFile, temp);
 
     if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
     {
@@ -224,7 +274,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     solverParams.timeStep = std::stod(temp);
 
     temp.clear();
-    std::getline(paramFile, temp);
+    getLine(paramFile, temp);
 
     if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
     {
@@ -236,7 +286,93 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     }
     solverParams.simTimeDtWrite = std::stod(temp);
 
-    std::getline(paramFile, temp);
+    temp.clear();
+    getLine(paramFile, temp);
+    if(temp == "shallow")
+    {
+        solverParams.problemType = temp;
+        solverParams.nUnknowns = 3;
+        solverParams.flux = fluxShallow;
+    }
+    else if(temp == "transport")
+    {
+        solverParams.problemType = temp;
+        solverParams.nUnknowns = 1;
+        solverParams.flux = fluxTransport;
+    }
+    else if(temp == "shallowLin")
+    {
+        solverParams.problemType = temp;
+        solverParams.nUnknowns = 3;
+        solverParams.flux = fluxShallowLin;        
+    }
+    else
+    {
+        std::cerr << "Unexpected problem type " << temp
+                  << " in parameter file " << fileName << std::endl;
+
+        paramFile.close();
+        return false;
+    }
+
+    temp.clear();
+    getLine(paramFile, temp);
+    if(solverParams.problemType == "shallow" 
+        || solverParams.problemType == "shallowLin")
+    {
+        if(temp == "LF")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = LFShallow;
+        }
+        else if(temp == "Roe")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = Roe;
+        }
+        else if(temp == "mean")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = mean;
+        }
+        else
+        {
+            std::cerr << "Unexpected flux type type " << temp
+                      << " for problem type " << solverParams.problemType
+                      << " in parameter file " << fileName << std::endl;
+
+            paramFile.close();
+            return false;
+        }
+    }
+    else if(solverParams.problemType == "transport")
+    {
+        if(temp == "LF")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = LFTransport;
+        }
+        else if(temp == "mean")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = mean;
+        }
+        else
+        {
+            std::cerr << "Unexpected flux type type " << temp
+                      << " for problem type " << solverParams.problemType
+                      << " in parameter file " << fileName << std::endl;
+
+            paramFile.close();
+            return false;
+        }
+    }
+
+
+
+
+    temp.clear();
+    getLine(paramFile, temp);
     unsigned int precComaPos = -1;
     for(unsigned int i = 0 ; i < temp.size() ; ++i)
     {
@@ -271,6 +407,8 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << "Time step: " << solverParams.timeStep << "s"
                 << std::endl
                 << "Time between data writing: " << solverParams.simTimeDtWrite << "s"
+                << std::endl
+                << "Numerical Flux: " << solverParams.fluxType
                 << std::endl;
 
     return true;

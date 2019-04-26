@@ -1,5 +1,9 @@
 #include <iostream>
 #include <string>
+#if defined(_OPENMP)
+    #include <cstdlib>
+    #include <omp.h>
+#endif
 #include <Eigen/Core>
 #include "mesh/Mesh.hpp"
 #include "mesh/displayMesh.hpp"
@@ -29,6 +33,13 @@ int main(int argc, char **argv)
     if(!loadSolverParams(std::string(argv[2]), solverParams))
         return -1;
 
+    #if defined(_OPENMP)
+        unsigned int n = std::atoi(std::getenv("OMP_NUM_THREADS"));
+        omp_set_num_threads(n);
+        Eigen::setNbThreads(1);
+        std::cout << "Number of threads: " << n << std::endl;;
+    #endif
+
     // load the mesh
     std::cout   << "================================================================"
                 << std::endl
@@ -45,10 +56,7 @@ int main(int argc, char **argv)
         return -1;
    }
 
-    // omp_set_num_threads(2);
-    // Eigen::setNbThreads(2);
-
-    // displayMesh(mesh);
+   // displayMesh(mesh);
     std::cout   << "================================================================"
                 << std::endl
                 << "                     EXECUTING THE SOLVER                       "

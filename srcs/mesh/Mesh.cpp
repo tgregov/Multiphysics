@@ -5,9 +5,55 @@
 
 #include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <limits>
 #include <gmsh.h>
 #include "Mesh.hpp"
-#include "../utils.hpp"
+#include "../utils/utils.hpp"
+
+
+static void loadNodeData(Mesh& mesh)
+{
+
+    unsigned int numNodes = 0;
+    std::vector<int> elementTags;
+    std::vector<unsigned int> elementNumNodes;
+    std::vector<int> nodeTags;
+    std::vector<std::vector<double>> coord;
+
+    // loop over the entities
+    for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
+    {
+        Entity entity = mesh.entities[ent];
+
+        // loop over the elements
+        for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
+        {
+            Element element = entity.elements[elm];
+            elementTags.push_back(element.elementTag);
+            elementNumNodes.push_back(element.nodeTags.size());
+
+            for(size_t n = 0 ; n < element.nodeTags.size() ; ++n)
+            {
+                std::vector<double> temp;
+                temp.push_back(element.nodesCoord[n][0]);
+                temp.push_back(element.nodesCoord[n][1]);
+                coord.push_back(temp);
+
+                nodeTags.push_back(element.nodeTags[n]);
+                numNodes++;
+
+            }
+        }
+    }
+
+    mesh.nodeData.numNodes = numNodes;
+    mesh.nodeData.elementTags = elementTags;
+    mesh.nodeData.elementNumNodes = elementNumNodes;
+    mesh.nodeData.nodeTags = nodeTags;
+    mesh.nodeData.coord = coord;
+}
+
 
 /**
  * \brief Loads the name order, dimension, number of nodes,
@@ -172,6 +218,10 @@ static void computeEdgeNormalCoord(Edge& edge, unsigned int meshDim,
                 coord2 = std::move(coord);
     }
 
+    edge.length=sqrt((coord1[0]-coord2[0])*(coord1[0]-coord2[0])
+                             +(coord1[1]-coord2[1])*(coord1[1]-coord2[1])
+                             +(coord1[2]-coord2[2])*(coord1[2]-coord2[2]));
+
     switch(meshDim)
     {
         case 1:
@@ -225,23 +275,32 @@ static void findInFrontEdge(Entity& entity, Edge& currentEdge, unsigned int edge
     //previously computed elements).
     unsigned int elVecSize = entity.elements.size();
     unsigned int nEdgePerEl = entity.elements[0].edges.size();
-    for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
-    {
-        for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
-        {
-            std::vector<int> nodesTagsInfront = entity.elements[elm].edges[k].nodeTags;
-            std::vector<unsigned int> permutation1, permutation2;
 
-            //If the nodes tags of an edge is the permutation of the nodes tags of
-            //another, we have found the "edge in front"
-            if(isPermutation(currentEdge.nodeTags, nodesTagsInfront, permutation1, permutation2))
+    #pragma omp parallel default(none) shared(entity, elVecSize, nEdgePerEl, currentEdge, edgePos)
+    {
+        #pragma omp for
+        for(unsigned int elm = 0 ; elm < elVecSize ; ++elm)
+        {
+            for(unsigned int k = 0 ; k < nEdgePerEl ; ++k)
             {
-                currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
-                entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
-                currentEdge.nodeIndexEdgeInFront = std::move(permutation1);
-                entity.elements[elm].edges[k].nodeIndexEdgeInFront = std::move(permutation2);
-                return;
+                std::vector<int> nodesTagsInfront = entity.elements[elm].edges[k].nodeTags;
+                std::vector<unsigned int> permutation1, permutation2;
+
+                //If the nodes tags of an edge is the permutation of the nodes tags of
+                //another, we have found the "edge in front"
+                if(isPermutation(currentEdge.nodeTags, nodesTagsInfront, permutation1, permutation2))
+                {
+                    #pragma omp critical
+                    {
+                        currentEdge.edgeInFront =  std::pair<unsigned int, unsigned int>(elm, k);
+                        entity.elements[elm].edges[k].edgeInFront = std::pair<unsigned int, unsigned int>(elVecSize, edgePos);
+                        currentEdge.nodeIndexEdgeInFront = std::move(permutation1);
+                        entity.elements[elm].edges[k].nodeIndexEdgeInFront = std::move(permutation2);
+                    }
+                    #pragma omp cancel for
+                }
             }
+            #pragma omp cancellation point for
         }
     }
 }
@@ -306,7 +365,7 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
                         const std::vector<double>& elementBarycenter,
                         const std::map<std::string, std::vector<int>>& nodesTagBoundaries,
                         const std::map<int, ElementProperty>& elementProperty,
-                        unsigned int meshDim)
+                        unsigned int meshDim, double& dx)
 {
     //Fill an element structure
     Element element;
@@ -331,6 +390,8 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
     //Compute the number of edge and of nodes per edge of that element
     unsigned int nEdge = determinantsLD.size()/nGPLD;
     unsigned int nNodePerEdge = elementProperty.at(eleTypeLD).numNodes;
+
+    double lmin = std::numeric_limits<double>::max();
 
     //For each edge, we add an edge to the element.edges field
     for(unsigned int i = 0 ; i < nEdge ; ++i)
@@ -357,6 +418,9 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
             IsBounbdary(nodesTagBoundaries, element.edges[i]);
         }
 
+        if(element.edges[i].length < lmin)
+            lmin = element.edges[i].length;
+
         //Compute the normal of the edge and get the nodes coordinates of the edge
         computeEdgeNormalCoord(element.edges[i], meshDim, elementBarycenter);
 
@@ -376,6 +440,8 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
         dMs.setFromTriplets(indices.begin(), indices.end());
         element.dM.push_back(dMs);
     }
+
+    dx = lmin;
 
     //Add the element to the entity
     entity.elements.push_back(element);
@@ -519,6 +585,8 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
             //Offset of the element in the unknown vector
             unsigned int elementOffset = numNodes;
 
+            double dx;
+
             //Add the element to the entity
             addElement(entity, elementTags[i], eleTypeHD, eleTypeLD,
                         std::move(jacobiansElementHD),
@@ -529,10 +597,12 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
                         std::move(nodeTagsElement),
                         elementBarycenter,
                         mesh.nodesTagBoundary,
-                        mesh.elementProperties, mesh.dim);
+                        mesh.elementProperties, mesh.dim, dx);
+
+            if(dx < mesh.DxMin)
+                mesh.DxMin = dx;
 
             currentOffset += elementOffset;
-            mesh.numNodes += numNodes;
         }
 
          std::cout  << "\r" << "Entity [" << entity.entityTagHD << "]: "
@@ -606,6 +676,14 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
 {
     gmsh::initialize();
     gmsh::option::setNumber("General.Terminal", 1);
+    std::ifstream file(fileName);
+    if(file.is_open())
+        file.close();
+    else
+    {
+        std::cerr << "File: " << fileName << " does not exist!" << std::endl;
+        return false;
+    }
     gmsh::open(fileName);
 
     //Check that the mesh is not 3D
@@ -650,7 +728,8 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
 
 
     unsigned int currentOffset = 0;
-    mesh.numNodes = 0;
+
+    mesh.DxMin = std::numeric_limits<double>::max();
 
     //We add each identified entity to the mesh.
     for(auto entityTag : entitiesTag)
@@ -658,6 +737,8 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
         if(!addEntity(mesh, entityTag, currentOffset, intScheme, basisFuncType))
             return false;
     }
+
+    loadNodeData(mesh);
 
     gmsh::finalize();
 
