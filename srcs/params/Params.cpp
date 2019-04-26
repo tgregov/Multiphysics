@@ -86,7 +86,10 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         bool error = false;
         if(solverParams.problemType == "transport")
         {
-            if(bcType == "sinus")
+            if(bcType == "constant")
+                tempCondition.ibcFunc = constant;
+
+            else if(bcType == "sinus")
                 tempCondition.ibcFunc = sinus;
 
             else if(bcType == "gaussian")
@@ -103,7 +106,10 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         }
         else if(solverParams.problemType == "shallow")
         {
-            if(bcType == "reflectShallow")
+            if(bcType == "constant")
+                tempCondition.ibcFunc = constant;
+
+            else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
 
             else if(bcType == "gaussian2DShallow")
@@ -124,7 +130,10 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         }
         else if(solverParams.problemType == "shallowLin")
         {
-            if(bcType == "reflectShallow")
+            if(bcType == "constant")
+                tempCondition.ibcFunc = constant;
+
+            else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
 
             else if(bcType == "gaussian2DShallow")
@@ -142,12 +151,6 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             else
                 error = true;
         }
-
-        if(bcType == "constant")
-            tempCondition.ibcFunc = constant;
-
-        else
-            error = true;
 
         if(error)
         {
