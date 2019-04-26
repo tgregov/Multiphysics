@@ -49,13 +49,12 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 					// case of a boundary condition
 					if (entity.elements[elm].edges[s].edgeInFront.first == -1)
 					{
-
-                        // compute the boundary condition
+              // compute the boundary condition
 						ibc boundary
 							= solverParams.boundaryConditions.at(entity.elements[elm].edges[s].bcName);
 						boundary.ibcFunc(partialField.uAtBC, entity.elements[elm].edges[s].nodeCoordinate[j], t,
 											field, indexJ, entity.elements[elm].edges[s].normal,
-											boundary.coefficients);
+											boundary.coefficients, solverParams.fluxCoeffs);
 
                         solverParams.flux(field, partialField, solverParams, true);
 
@@ -87,7 +86,7 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 				// dot product between dM and the normal
 				for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
                 {
-                    partialField.partialIu[unk]+=
+                    partialField.partialIu[unk] +=
                     	entity.elements[elm].edges[s].determinantLD[0]*(
 							entity.elements[elm].edges[s].normal[0]*entity.elements[elm].dM[s]*partialField.g[0][unk]
 							+ entity.elements[elm].edges[s].normal[1]*entity.elements[elm].dM[s]*partialField.g[1][unk]);

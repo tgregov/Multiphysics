@@ -267,7 +267,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
             for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
             {
                 solverParams.initCondition.ibcFunc(uIC, element.nodesCoord[n], 0, field, 0, {},
-					solverParams.initCondition.coefficients);
+					solverParams.initCondition.coefficients, solverParams.fluxCoeffs);
 
                 for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
                     field.u[unk](element.offsetInU + n) = uIC[unk];

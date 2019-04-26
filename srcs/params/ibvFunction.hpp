@@ -17,7 +17,8 @@ struct ibc
     std::function<void(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                         double t, const Field& field, unsigned int indexJ,
                         const std::vector<double>& edgeNormal,
-                        const std::vector<double>& coeffs)> ibcFunc; /**< Pointer to the mathematical function */
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs)> ibcFunc; /**< Pointer to the mathematical function */
 };
 
 
@@ -35,7 +36,8 @@ struct ibc
 void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos,
            double t, const Field& field, unsigned int indexJ,
            const std::vector<double>& edgeNormal,
-           const std::vector<double>& coeffs);
+           const std::vector<double>& coeffs,
+           const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -52,7 +54,8 @@ void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos,
               double t, const Field& field, unsigned int indexJ,
               const std::vector<double>& edgeNormal,
-              const std::vector<double>& coeffs);
+              const std::vector<double>& coeffs,
+              const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -67,9 +70,10 @@ void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos,
  * \return Value of the function at (x, y, z, t).
  */
 void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos,
-                        double t, const Field& field, unsigned int indexJ,
-                        const std::vector<double>& edgeNormal,
-                        const std::vector<double>& coeffs);
+                         double t, const Field& field, unsigned int indexJ,
+                         const std::vector<double>& edgeNormal,
+                         const std::vector<double>& coeffs,
+                         const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -84,7 +88,8 @@ void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>&
 void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                    double t, const Field& field, unsigned int indexJ,
                    const std::vector<double>& edgeNormal,
-                   const std::vector<double>& coeffs);
+                   const std::vector<double>& coeffs,
+                   const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -99,7 +104,8 @@ void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos,
               double t, const Field& field, unsigned int indexJ,
               const std::vector<double>& edgeNormal,
-              const std::vector<double>& coeffs);
+              const std::vector<double>& coeffs,
+              const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -114,7 +120,23 @@ void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                     double t, const Field& field, unsigned int indexJ,
                     const std::vector<double>& edgeNormal,
-                    const std::vector<double>& coeffs);
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs);
+
+
+/**
+ * \brief Compute a physical reflection -- for shallow waters.
+ * \param pos Node position.
+ * \param u The current solution.
+ * \param t Current time.
+ * \param coeffs Coefficient (not used here).
+ * \return Physically reflected values.
+ */
+void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -131,7 +153,8 @@ void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                         double t, const Field& field, unsigned int indexJ,
                         const std::vector<double>& edgeNormal,
-                        const std::vector<double>& coeffs);
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -148,7 +171,8 @@ void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& p
 void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                         double t, const Field& field, unsigned int indexJ,
                         const std::vector<double>& edgeNormal,
-                        const std::vector<double>& coeffs);
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs);
 
 
 /**
@@ -165,6 +189,7 @@ void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& 
 void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                         double t, const Field& field, unsigned int indexJ,
                         const std::vector<double>& edgeNormal,
-                        const std::vector<double>& coeffs);
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs);
 
 #endif // bcFunction_hpp_included

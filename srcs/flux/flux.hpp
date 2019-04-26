@@ -24,4 +24,7 @@ void fluxShallow(Field& field, PartialField& partialField, const SolverParams& s
  */
 void fluxTransport(Field& field, PartialField& partialField, const SolverParams& solverParams, bool boundary);
 
+
+void fluxShallowLin(Field& field, PartialField& partialField, const SolverParams& solverParams, bool boundary);
+
 #endif // flux_hpp_included

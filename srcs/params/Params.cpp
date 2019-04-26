@@ -98,6 +98,8 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         else if(bcType == "reflectShallow")
             tempCondition.ibcFunc = reflectShallow;
 
+        else if(bcType == "openShallow")
+            tempCondition.ibcFunc = openShallow;
 
         else if(bcType == "gaussian2DShallow")
             tempCondition.ibcFunc = gaussian2DShallow;
@@ -113,7 +115,7 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
 
         else
         {
-            std::cerr << "Unhandled boundary condtion type " << bcType
+            std::cerr << "Unhandled boundary condition type " << bcType
                       << " for boundary " << bcName << " in parameter file "
                       << fileName <<std::endl;
 
@@ -298,6 +300,12 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         solverParams.nUnknowns = 1;
         solverParams.flux = fluxTransport;
     }
+    else if(temp == "shallowLin")
+    {
+        solverParams.problemType = temp;
+        solverParams.nUnknowns = 3;
+        solverParams.flux = fluxShallowLin;        
+    }
     else
     {
         std::cerr << "Unexpected problem type " << temp
@@ -309,7 +317,8 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
 
     temp.clear();
     getLine(paramFile, temp);
-    if(solverParams.problemType == "shallow")
+    if(solverParams.problemType == "shallow" 
+        || solverParams.problemType == "shallowLin")
     {
         if(temp == "LF")
         {

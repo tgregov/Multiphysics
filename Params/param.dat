@@ -1,25 +1,25 @@
-Gauss15
+Gauss10
 Lagrange
 RK1
-strong
-3
+weak
+0.1
 0.0001
-0.0001
-shallow
-Roe
-9.81
+0.001
+shallowLin
+LF
+9.81,10
 BC_Left
-	reflectShallow
-	0
+	openShallow
+	10
 BC_Right
-	reflectShallow
-	0
+	openShallow
+	10
 BC_Up
-	reflectShallow
-	0
+	openShallow
+	10
 BC_Down
-	reflectShallow
-	0
+	openShallow
+	10
 Init_Cond
 	gaussian2DShallow
-	0.3,0.5,0.005,0.5,0.005,1
+	0.3,0.5,0.005,0.5,0.005,10

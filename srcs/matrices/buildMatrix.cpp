@@ -14,15 +14,15 @@ void buildMatrix(const Mesh& mesh, Matrix& matrix)
     // build the invM matrix
     std::cout   << "Building the invM matrix...";
     buildM(mesh, matrix.invM);
-    //std::cout << "invM:\n" << invM;
+    // std::cout << "invM:\n" << matrix.invM;
     std::cout   << "\rBuilding the invM matrix...       Done"       << std::flush
                 << std::endl;
 
     // build the Sx and Sy matrices
     std::cout   << "Building the Sx and Sy matrices...";
     buildS(mesh, matrix.Sx, matrix.Sy);
-    //std::cout << "Sx:\n" << Sx;
-    //std::cout << "Sy:\n" << Sy;
+    // std::cout << "Sx:\n" << matrix.Sx;
+    // std::cout << "Sy:\n" << matrix.Sy;
     std::cout   << "\rBuilding the Sx and Sy matrices...    Done"   << std::flush
                 << std::endl;
 
