@@ -68,7 +68,8 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 							= solverParams.boundaryConditions.at(edge.bcName);
 						boundary.ibcFunc(field.uAtBC, edge.nodeCoordinate[j], t,
 											field.uForBC, edge.normal, 
-											boundary.coefficients);
+											boundary.coefficients,
+											solverParams.fluxCoeffs);
 
                         solverParams.flux(field, solverParams, true);
 
@@ -100,7 +101,7 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 				// dot product between dM and the normal
 				for(unsigned short unk = 0 ; unk < field.partialIu.size() ; ++unk)
                 {
-                    field.partialIu[unk]+= 
+                    field.partialIu[unk] += 
                     	edge.determinantLD[0]*(
 							edge.normal[0]*element.dM[s]*field.g[0][unk] 
 							+ edge.normal[1]*element.dM[s]*field.g[1][unk]);

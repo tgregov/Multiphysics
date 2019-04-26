@@ -8,7 +8,8 @@
 // see .hpp file for description
 void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
             const std::vector<double>& u, const std::vector<double>& edgeNormal,
-            const std::vector<double>& coeffs)
+            const std::vector<double>& coeffs,
+            const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough coefficients
@@ -22,7 +23,8 @@ void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t
 // see .hpp file for description
 void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
                 const std::vector<double>& u, const std::vector<double>& edgeNormal,
-                const std::vector<double>& coeffs)
+                const std::vector<double>& coeffs,
+                const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough coefficients
@@ -36,7 +38,8 @@ void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos, doubl
 // see .hpp file for description
 void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos, double t,
                 const std::vector<double>& u, const std::vector<double>& edgeNormal,
-                const std::vector<double>& coeffs)
+                const std::vector<double>& coeffs,
+                const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough values
@@ -54,7 +57,8 @@ void constant(std::vector<double>& uAtIBC, const std::vector<double>& pos, doubl
 void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
                     double t, const std::vector<double>& u,  
                     const std::vector<double>& edgeNormal, 
-                    const std::vector<double>& coeffs)
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough values
@@ -69,7 +73,8 @@ void freeTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
                     double t, const std::vector<double>& u, 
                     const std::vector<double>& edgeNormal, 
-                    const std::vector<double>& coeffs)
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough values
@@ -88,18 +93,18 @@ void reflectShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
                     double t, const std::vector<double>& u, 
                     const std::vector<double>& edgeNormal, 
-                    const std::vector<double>& coeffs)
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough values
     assert(u.size() == uAtIBC.size());
 
     // compute a physical reflection
-    double g = 9.81;
+    double g = fluxCoeffs[0];
     double H = coeffs[0];
     double alpha = (edgeNormal[0]*u[1] + edgeNormal[1]*u[2])/u[0] 
-                    - sqrt(g/H)*(u[0]-H);
-
+                    - sqrt(g/H)*(u[0] - H);
 
     uAtIBC[0] = H;
     uAtIBC[1] = alpha*edgeNormal[0];
@@ -111,7 +116,8 @@ void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
                         double t, const std::vector<double>& u, 
                         const std::vector<double>& edgeNormal, 
-                        const std::vector<double>& coeffs)
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough coefficients
@@ -132,7 +138,8 @@ void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& p
 void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
                         double t, const std::vector<double>& u, 
                         const std::vector<double>& edgeNormal,
-                        const std::vector<double>& coeffs)
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough coefficients
@@ -152,7 +159,8 @@ void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& 
 void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
                         double t, const std::vector<double>& u, 
                         const std::vector<double>& edgeNormal,
-                        const std::vector<double>& coeffs)
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough coefficients    
@@ -172,7 +180,8 @@ void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& 
 void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>& pos, 
                             double t, const std::vector<double>& u, 
                             const std::vector<double>& edgeNormal,
-                            const std::vector<double>& coeffs)
+                            const std::vector<double>& coeffs,
+                            const std::vector<double>& fluxCoeffs)
 {
 
     // check that there is enough coefficients    
