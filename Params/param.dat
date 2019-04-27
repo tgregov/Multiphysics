@@ -8,6 +8,7 @@ weak
 shallowLin
 LF
 9.81,10
+no
 BC_Left
 	openShallow
 	10

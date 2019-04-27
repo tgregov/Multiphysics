@@ -11,6 +11,7 @@
 #include "Params.hpp"
 #include "../flux/phiPsi.hpp"
 #include "../flux/flux.hpp"
+#include "../source/source.hpp"
 
 
 static void getLine(std::ifstream& file, std::string& line)
@@ -415,12 +416,14 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     {
         if(temp[i] == ',')
         {
-            solverParams.fluxCoeffs.push_back(std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
+            solverParams.fluxCoeffs.push_back(
+                    std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
             precComaPos = i;
         }
     }
     //At the end, still one push_back to do
-    solverParams.fluxCoeffs.push_back(std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
+    solverParams.fluxCoeffs.push_back(
+            std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
 
     error = false;
     if(solverParams.problemType == "shallow")
@@ -451,6 +454,72 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         return false;
     }
 
+    temp.clear();
+    getLine(paramFile, temp);
+    if(temp == "no")
+    {
+        solverParams.IsSourceTerms = false;
+    }
+    else
+    {
+        unsigned int precComaPos = -1;
+        for(unsigned int i = 0 ; i < temp.size() ; ++i)
+        {
+            if(temp[i] == ',')
+            {
+                solverParams.sourceCoeffs.push_back(
+                    std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
+                precComaPos = i;
+            }
+        }
+        //At the end, still one push_back to do
+        solverParams.sourceCoeffs.push_back(
+            std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
+
+        solverParams.IsSourceTerms = true;
+    }
+
+    error = false;
+    if(solverParams.problemType == "shallow")
+    {
+        if(solverParams.IsSourceTerms)
+        {
+            if(solverParams.sourceCoeffs.size() != 1)
+            {
+                error = true;
+            }
+            else
+                solverParams.sourceTerm = sourceShallow;
+        }
+    }
+    else if(solverParams.problemType == "shallowLin")
+    {
+        if(solverParams.IsSourceTerms)
+        {
+            if(solverParams.sourceCoeffs.size() != 1)
+            {
+                error = true;
+            }
+            else
+                solverParams.sourceTerm = sourceShallowLin;
+        }
+    }
+    else
+    {
+        solverParams.IsSourceTerms = false;
+    }
+
+    if(error)
+    {
+        std::cerr << "Unexpected number of source terms coefficients ("
+                      << solverParams.sourceCoeffs.size() << ") for problem type "
+                      << solverParams.problemType << std::endl;
+
+        paramFile.close();
+
+        return false;
+    }
+
     if(!handleBoundaryCondition(paramFile, solverParams, fileName))
     {
         paramFile.close();
@@ -475,6 +544,8 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << "Time between data writing: " << solverParams.simTimeDtWrite << "s"
                 << std::endl
                 << "Problem type: " << solverParams.problemType
+                << std::endl
+                << "Source terms: " << (solverParams.IsSourceTerms ? "yes" : "no")
                 << std::endl
                 << "Numerical Flux: " << solverParams.fluxType
                 << std::endl;

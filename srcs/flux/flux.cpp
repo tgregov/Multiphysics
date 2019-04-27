@@ -81,7 +81,7 @@ void fluxShallowLin(Field& field, PartialField& partialField, const SolverParams
     // the physical flux is given by
     //  Fx = [h0*u,     g*h0*H, 0       ]
     //  Fy = [h0*v,     0,      g*h_0*h ]
-    
+
     if(boundary)
     {
         // flux for the (x, y) coordinates for H

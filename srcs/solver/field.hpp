@@ -16,6 +16,8 @@ struct Field
 	std::vector<std::vector<Eigen::VectorXd>> flux; /**< Physical flux fields (of size equal to the number of dimension, with each
                                                          dimension as a size equal to the number of scalar unknowns) */
 
+    std::vector<Eigen::VectorXd> s;
+
 	std::vector<Eigen::VectorXd> DeltaU; /**< Time-integration increment */
 
     std::vector<Eigen::VectorXd> Iu; /**< RHS fields */
@@ -41,6 +43,7 @@ struct Field
         }
 
 		u.resize(numUnknown);
+		s.resize(numUnknown);
 		DeltaU.resize(numUnknown);
 		Iu.resize(numUnknown);
 		for(unsigned short i = 0 ; i < numUnknown ; ++i)
@@ -48,6 +51,7 @@ struct Field
             u[i].resize(numNodes);
             DeltaU[i].resize(numNodes);
             Iu[i].resize(numNodes);
+            s[i].resize(numNodes);
             for(unsigned short j = 0 ; j < dim ; ++j)
             {
                 flux[j][i].resize(numNodes);

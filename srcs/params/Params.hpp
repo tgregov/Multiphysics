@@ -32,18 +32,28 @@ struct SolverParams
     std::function<void(Field& field,
                        PartialField& partialField,
                        const SolverParams& solverParams,
-                       bool boundary)> flux;    /**< Pointer to the flux function (represents the physics of the problem)*/
+                       bool boundary)> flux;    /**< Pointer to the flux function
+                                            (represents the physics of the problem)*/
 
     std::vector<double> fluxCoeffs; /**< Coefficient of the physical flux*/
 
-    unsigned short nUnknowns;    /**< Number of scalar unknowns (determined by the type of problem)*/
+    unsigned short nUnknowns;    /**< Number of scalar unknowns
+                                      (determined by the type of problem)*/
 
-    std::string fluxType;        /**< Type of numerical flux (mean, Lax-Friedirichs, Roe, ...)*/
+    std::string fluxType;        /**< Type of numerical flux
+                                      (mean, Lax-Friedirichs, Roe, ...)*/
 
-    std::function<void(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
-                    bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-                    const SolverParams& solverParams)> phiPsi; /**< Pointer to the rhs function (phi or psi depending of the type of scheme)*/
+    std::function<void(const Edge& edge, Field& field, PartialField& partialField,
+                       unsigned int j, double factor, bool boundary,
+                       unsigned int indexJ, unsigned int indexFrontJ,
+                       const SolverParams& solverParams)> phiPsi; /**< Pointer to the
+                       rhs function (phi or psi depending of the type of scheme)*/
 
+    bool IsSourceTerms;
+
+    std::vector<double> sourceCoeffs;
+
+    std::function<void(Field& field, const SolverParams& solverParams)> sourceTerm;
 };
 
 /**

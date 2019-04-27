@@ -169,6 +169,9 @@ static void Fweak(double t, Field& field, PartialField& partialField, const Matr
  	// compute the nodal physical fluxes
  	solverParams.flux(field, partialField, solverParams, false);
 
+ 	if(solverParams.IsSourceTerms)
+        solverParams.sourceTerm(field, solverParams);
+
 	// compute the right-hand side of the master equation (phi or psi)
  	buildFlux(mesh, field, 1, t, solverParams);
 
@@ -178,6 +181,10 @@ static void Fweak(double t, Field& field, PartialField& partialField, const Matr
         field.DeltaU[unk]
             = matrix.invM*(field.Iu[unk] + matrix.Sx*field.flux[0][unk]
             				+ matrix.Sy*field.flux[1][unk]);
+
+        if(solverParams.IsSourceTerms)
+            field.DeltaU[unk]+=field.s[unk];
+
     }
 }
 
@@ -197,6 +204,9 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
  	// compute the nodal physical fluxes
  	solverParams.flux(field, partialField, solverParams, false);
 
+ 	if(solverParams.IsSourceTerms)
+        solverParams.sourceTerm(field, solverParams);
+
 	// compute the right-hand side of the master equation (phi or psi)
  	buildFlux(mesh, field, -1, t, solverParams);
 
@@ -206,6 +216,9 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
         field.DeltaU[unk]
             = matrix.invM*(field.Iu[unk] - matrix.Sx*field.flux[0][unk]
             				- matrix.Sy*field.flux[1][unk]);
+
+        if(solverParams.IsSourceTerms)
+            field.DeltaU[unk]+=field.s[unk];
     }
 }
 
@@ -340,7 +353,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
     {
         integScheme = RK4;
     }
-    
+
 
 	// numerical integration
 	unsigned int ratio, currentDecade = 0;
