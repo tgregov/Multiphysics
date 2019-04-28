@@ -457,56 +457,62 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
     if(temp == "no")
+         solverParams.IsSourceTerms = false;
+    else if(temp == "shallowCst" && solverParams.problemType == "shallow")
     {
-        solverParams.IsSourceTerms = false;
+        solverParams.IsSourceTerms = true;
+        solverParams.sourceType = temp;
+        solverParams.sourceTerm = sourceShallowCst;
+    }
+    else if(temp == "shallowLinCst" && solverParams.problemType == "shallowLin")
+    {
+        solverParams.IsSourceTerms = true;
+        solverParams.sourceType = temp;
+        solverParams.sourceTerm = sourceShallowLinCst;
     }
     else
     {
-        unsigned int precComaPos = -1;
-        for(unsigned int i = 0 ; i < temp.size() ; ++i)
-        {
-            if(temp[i] == ',')
-            {
-                solverParams.sourceCoeffs.push_back(
-                    std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
-                precComaPos = i;
-            }
-        }
-        //At the end, still one push_back to do
-        solverParams.sourceCoeffs.push_back(
-            std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
+        std::cerr << "Unexpected source function ("
+                  << solverParams.sourceType << ") for problem type "
+                  << solverParams.problemType << std::endl;
 
-        solverParams.IsSourceTerms = true;
+        paramFile.close();
+        return false;
     }
+
+    temp.clear();
+    getLine(paramFile, temp);
+    precComaPos = -1;
+    for(unsigned int i = 0 ; i < temp.size() ; ++i)
+    {
+        if(temp[i] == ',')
+        {
+            solverParams.sourceCoeffs.push_back(
+                std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
+            precComaPos = i;
+        }
+    }
+    //At the end, still one push_back to do
+    solverParams.sourceCoeffs.push_back(
+        std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
+
 
     error = false;
-    if(solverParams.problemType == "shallow")
+    if(solverParams.sourceType == "shallowCst")
+    {
+        if(solverParams.IsSourceTerms)
+        {
+            if(solverParams.sourceCoeffs.size() != 3)
+                error = true;
+        }
+    }
+    else if(solverParams.sourceType == "shallowLinCst")
     {
         if(solverParams.IsSourceTerms)
         {
             if(solverParams.sourceCoeffs.size() != 1)
-            {
                 error = true;
-            }
-            else
-                solverParams.sourceTerm = sourceShallow;
         }
-    }
-    else if(solverParams.problemType == "shallowLin")
-    {
-        if(solverParams.IsSourceTerms)
-        {
-            if(solverParams.sourceCoeffs.size() != 1)
-            {
-                error = true;
-            }
-            else
-                solverParams.sourceTerm = sourceShallowLin;
-        }
-    }
-    else
-    {
-        solverParams.IsSourceTerms = false;
     }
 
     if(error)

@@ -5,9 +5,9 @@
 #include "../params/Params.hpp"
 #include "../solver/field.hpp"
 
-void sourceShallow(Field& field, const SolverParams& solverParams);
+void sourceShallowCst(Field& field, const SolverParams& solverParams);
 
-void sourceShallowLin(Field& field, const SolverParams& solverParams);
+void sourceShallowLinCst(Field& field, const SolverParams& solverParams);
 
 
 #endif // source_hpp_included

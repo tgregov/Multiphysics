@@ -51,6 +51,8 @@ struct SolverParams
 
     bool IsSourceTerms;
 
+    std::string sourceType;
+
     std::vector<double> sourceCoeffs;
 
     std::function<void(Field& field, const SolverParams& solverParams)> sourceTerm;
