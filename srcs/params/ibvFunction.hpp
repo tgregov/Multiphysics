@@ -62,6 +62,44 @@ void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 
 
 /**
+ * \brief Compute a wave of the shape A*sin(2*pi*nu*t + phi) + B -- for the
+ * shallow water.
+ * \param uAtIBC Value of the BC unknowns at (x, y, z, t).
+ * \param pos Node position.
+ * \param t Current time.
+ * \param field Structure containing the current solution.
+ * \param indexJ Index of the node corresponding to the boundary in the field structure.
+ * \param coeffs Coefficients for the sinus: coeffs[0] = A, coeffs[1] = nu,
+ * coeffs[2] = phi, coeffs[3] = B.
+ * \param fluxCoeffs Coefficients of the physical fluxes.
+ */
+void movingShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs);
+
+
+/**
+ * \brief Compute a wave of the shape A*sin(2*pi*nu*t + phi) + B -- for the
+ * linear shallow water.
+ * \param uAtIBC Value of the BC unknowns at (x, y, z, t).
+ * \param pos Node position.
+ * \param t Current time.
+ * \param field Structure containing the current solution.
+ * \param indexJ Index of the node corresponding to the boundary in the field structure.
+ * \param coeffs Coefficients for the sinus: coeffs[0] = A, coeffs[1] = nu,
+ * coeffs[2] = phi, coeffs[3] = B.
+ * \param fluxCoeffs Coefficients of the physical fluxes.
+ */
+void movingShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs);
+
+
+/**
  * \brief Compute a 2D gaussian:  A*exp(-(x-x0)^2/(2*var_y)-(y-y0)^2/(2*var_y)) --
  * for the pure transport case.
  * \param uAtIBC Value of the BC unknowns at (x, y, z, t).

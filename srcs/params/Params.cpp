@@ -110,6 +110,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             if(bcType == "constant")
                 tempCondition.ibcFunc = constant;
 
+            else if(bcType == "sinusShallow")
+                tempCondition.ibcFunc = sinusShallow;
+
             else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
 
@@ -133,6 +136,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         {
             if(bcType == "constant")
                 tempCondition.ibcFunc = constant;
+
+            else if(bcType == "movingShallowLin")
+                tempCondition.ibcFunc = movingShallowLin;
 
             else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
@@ -457,7 +463,10 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
     if(temp == "no")
-         solverParams.IsSourceTerms = false;
+    {
+        solverParams.IsSourceTerms = false;
+        solverParams.sourceType = temp;
+    }
     else if(temp == "sourceShallowCstGradCstFrict"
             && solverParams.problemType == "shallow")
     {
@@ -567,7 +576,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << std::endl
                 << "Problem type: " << solverParams.problemType
                 << std::endl
-                << "Source terms: " << (solverParams.IsSourceTerms ? "yes" : "no")
+                << "Source terms: " << solverParams.sourceType
                 << std::endl
                 << "Numerical Flux: " << solverParams.fluxType
                 << std::endl;

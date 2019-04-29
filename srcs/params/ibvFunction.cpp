@@ -12,12 +12,11 @@ void sinus(std::vector<double>& uAtIBC, const std::vector<double>& pos,
            const std::vector<double>& coeffs,
            const std::vector<double>& fluxCoeffs)
 {
-
     // check that there is enough coefficients
-    assert(coeffs.size() == 3);
+    assert(coeffs.size() == 4);
 
     // compute a sine wave
-    uAtIBC[0] = coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2]);
+    uAtIBC[0] = coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2])+coeffs[3];
 }
 
 
@@ -100,7 +99,6 @@ void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                     const std::vector<double>& coeffs,
                     const std::vector<double>& fluxCoeffs)
 {
-
     // check that there is enough values
     assert(field.u.size() == uAtIBC.size());
 
@@ -117,13 +115,59 @@ void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
 
 
 // see .hpp file for description
+void sinusShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs)
+{
+    // check that there is enough values
+    assert(field.u.size() == uAtIBC.size());
+    assert(coeffs.size() == 4);
+
+    // compute a physical reflection
+    double g = fluxCoeffs[0];
+    double H = coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2])+coeffs[3];
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
+                    - sqrt(g/H)*(field.u[0][indexJ] - H);
+
+    uAtIBC[0] = H;
+    uAtIBC[1] = alpha*edgeNormal[0];
+    uAtIBC[2] = alpha*edgeNormal[1];
+}
+
+
+// see .hpp file for description
+void sinusShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                    double t, const Field& field, unsigned int indexJ,
+                    const std::vector<double>& edgeNormal,
+                    const std::vector<double>& coeffs,
+                    const std::vector<double>& fluxCoeffs)
+{
+    // check that there is enough values
+    assert(field.u.size() == uAtIBC.size());
+    assert(coeffs.size() == 4);
+
+    // compute a physical reflection
+    double g = fluxCoeffs[0];
+    double h0 = fluxCoeffs[1];
+    double H = coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2])+coeffs[3];
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/h0
+                    - sqrt(g/H)*(field.u[0][indexJ] - H);
+
+    uAtIBC[0] = H;
+    uAtIBC[1] = alpha*edgeNormal[0];
+    uAtIBC[2] = alpha*edgeNormal[1];
+}
+
+
+// see .hpp file for description
 void openShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                     double t, const Field& field, unsigned int indexJ,
                     const std::vector<double>& edgeNormal,
                     const std::vector<double>& coeffs,
                     const std::vector<double>& fluxCoeffs)
 {
-
     // check that there is enough values
     assert(field.u.size() == uAtIBC.size());
 
@@ -147,7 +191,6 @@ void gaussian2DShallow(std::vector<double>& uAtIBC, const std::vector<double>& p
                        const std::vector<double>& coeffs,
                        const std::vector<double>& fluxCoeffs)
 {
-
     // check that there is enough coefficients
     assert(coeffs.size() == 6);
     assert(pos.size() == 3);
@@ -169,7 +212,6 @@ void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& 
                         const std::vector<double>& coeffs,
                         const std::vector<double>& fluxCoeffs)
 {
-
     // check that there is enough coefficients
     assert(coeffs.size() == 4);
     assert(pos.size() == 3);
@@ -190,7 +232,6 @@ void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& 
                         const std::vector<double>& coeffs,
                         const std::vector<double>& fluxCoeffs)
 {
-
     // check that there is enough coefficients
     assert(coeffs.size() == 4);
     assert(pos.size() == 3);
@@ -211,7 +252,6 @@ void gaussian2DTransport(std::vector<double>& uAtIBC, const std::vector<double>&
                         const std::vector<double>& coeffs,
                          const std::vector<double>& fluxCoeffs)
 {
-
     // check that there is enough coefficients
     assert(coeffs.size() == 6);
     assert(pos.size() == 3);
