@@ -458,11 +458,19 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     getLine(paramFile, temp);
     if(temp == "no")
          solverParams.IsSourceTerms = false;
-    else if(temp == "shallowCst" && solverParams.problemType == "shallow")
+    else if(temp == "sourceShallowCstGradCstFrict"
+            && solverParams.problemType == "shallow")
     {
         solverParams.IsSourceTerms = true;
         solverParams.sourceType = temp;
-        solverParams.sourceTerm = sourceShallowCst;
+        solverParams.sourceTerm = sourceShallowCstGradCstFrict;
+    }
+    else if(temp == "sourceShallowCstGradQuadFrict"
+            && solverParams.problemType == "shallow")
+    {
+        solverParams.IsSourceTerms = true;
+        solverParams.sourceType = temp;
+        solverParams.sourceTerm = sourceShallowCstGradQuadFrict;
     }
     else if(temp == "shallowLinCst" && solverParams.problemType == "shallowLin")
     {
@@ -498,11 +506,19 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
 
 
     error = false;
-    if(solverParams.sourceType == "shallowCst")
+    if(solverParams.sourceType == "sourceShallowCstGradCstFrict")
     {
         if(solverParams.IsSourceTerms)
         {
-            if(solverParams.sourceCoeffs.size() != 3)
+            if(solverParams.sourceCoeffs.size() != 5)
+                error = true;
+        }
+    }
+    if(solverParams.sourceType == "sourceShallowCstGradQuadFrict")
+    {
+        if(solverParams.IsSourceTerms)
+        {
+            if(solverParams.sourceCoeffs.size() != 5)
                 error = true;
         }
     }
