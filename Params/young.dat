@@ -23,7 +23,7 @@ BC_Down_2
 	reflectShallow
 	1,0,0
 BC_Left
-	movingShallowLin
+	sinusShallowLin
 	0.1,12.4,0,10
 BC_Right
 	openShallowLin

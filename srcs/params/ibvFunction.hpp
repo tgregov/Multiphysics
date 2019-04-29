@@ -73,7 +73,7 @@ void gaussian(std::vector<double>& uAtIBC, const std::vector<double>& pos,
  * coeffs[2] = phi, coeffs[3] = B.
  * \param fluxCoeffs Coefficients of the physical fluxes.
  */
-void movingShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+void sinusShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                     double t, const Field& field, unsigned int indexJ,
                     const std::vector<double>& edgeNormal,
                     const std::vector<double>& coeffs,
@@ -92,7 +92,7 @@ void movingShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
  * coeffs[2] = phi, coeffs[3] = B.
  * \param fluxCoeffs Coefficients of the physical fluxes.
  */
-void movingShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+void sinusShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
                     double t, const Field& field, unsigned int indexJ,
                     const std::vector<double>& edgeNormal,
                     const std::vector<double>& coeffs,

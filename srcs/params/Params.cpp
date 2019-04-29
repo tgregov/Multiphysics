@@ -137,8 +137,8 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             if(bcType == "constant")
                 tempCondition.ibcFunc = constant;
 
-            else if(bcType == "movingShallowLin")
-                tempCondition.ibcFunc = movingShallowLin;
+            else if(bcType == "sinusShallowLin")
+                tempCondition.ibcFunc = sinusShallowLin;
 
             else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
