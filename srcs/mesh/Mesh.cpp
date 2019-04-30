@@ -106,7 +106,6 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
             {
                 std::vector<double> wll;
                 std::vector<double> wl;
-
                 for(unsigned int i = 0 ; i < elementProperty.nSF ; ++i)
                 {
 
@@ -357,6 +356,7 @@ static bool IsBounbdary(const std::map<std::string, std::vector<int>>& nodesTagB
  */
 static void addElement(Entity& entity, int elementTag, int eleTypeHD,
                         int eleTypeLD, std::vector<double> jacobiansHD,
+                        std::vector<double> physIntPointsHD,
                         std::vector<double> determinantsHD,
                         std::vector<double> determinantsLD,
                         unsigned int nGPLD, unsigned int offsetInU,
@@ -378,6 +378,7 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
     element.determinantHD = std::move(determinantsHD);
     element.jacobianHD = std::move(jacobiansHD);
     element.nodeTags = std::move(nodesTags);
+    element.physIntPointsHD = std::move(physIntPointsHD);
 
     for(unsigned int i = 0 ; i < element.nodeTags.size() ; ++i)
     {
@@ -525,9 +526,9 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
 
         //We then load jacobian matrices and their determinants of the mesh.dim D
         //and mesh.dim -1 D elements (useful for M, Sx, Sy, Sz)
-        std::vector<double> jacobiansHD, determinantsHD, dummyPointsHD;
+        std::vector<double> jacobiansHD, determinantsHD, physIntPointsHD;
         gmsh::model::mesh::getJacobians(eleTypeHD, intScheme, jacobiansHD,
-                                        determinantsHD, dummyPointsHD,
+                                        determinantsHD, physIntPointsHD,
                                         entityTag);
 
         std::vector<double> dummyJacobiansLD, determinantsLD, dummyPointsLD;
@@ -563,6 +564,9 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
             std::vector<double> jacobiansElementHD(
                                             jacobiansHD.begin() + 9*nGPHD*i,
                                             jacobiansHD.begin() + 9*nGPHD*(1 + i));
+            std::vector<double> physIntPointsElementHD(
+                                            physIntPointsHD.begin() + 3*nGPHD*i,
+                                            physIntPointsHD.begin() + 3*nGPHD*(1 + i));
             std::vector<double> determinantsElementHD(
                                             determinantsHD.begin() + nGPHD*i,
                                             determinantsHD.begin() + nGPHD*(1 + i));
@@ -590,6 +594,7 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
             //Add the element to the entity
             addElement(entity, elementTags[i], eleTypeHD, eleTypeLD,
                         std::move(jacobiansElementHD),
+                        std::move(physIntPointsElementHD),
                         std::move(determinantsElementHD),
                         std::move(determinantElementLD),
                         nGPLD, currentOffset,

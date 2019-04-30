@@ -57,6 +57,7 @@ struct Element
     std::vector<std::vector<double>> nodesCoord;    /**< Node coordinates of the elemnts */
 
     std::vector<Eigen::SparseMatrix<double>> dM;    /**< Partial M matrix */
+    std::vector<double> physIntPointsHD;
 };
 
 /**

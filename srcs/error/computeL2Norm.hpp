@@ -1,11 +1,8 @@
-#ifndef timeInteg_hpp_included
-#define timeInteg_hpp_included
+#ifndef computeL2Norm_hpp_included
+#define computeL2Norm_hpp_included
 
-#include <string>
 #include <Eigen/Dense>
-#include <Eigen/Sparse>
 #include "../mesh/Mesh.hpp"
-#include "../params/Params.hpp"
 
 
 /**
@@ -15,7 +12,6 @@
  * \param fileName The name of the file containing the mesh.
  * \return true if time integration happened without problems, false otherwise.
  */
-bool timeInteg(const Mesh& mesh, const SolverParams& solverParams, 
-				const std::string& fileName, const std::string& resultsName);
+double computeL2Norm(const Mesh& mesh, double t, Eigen::VectorXd u);
 
-#endif /* timeInteg_hpp */
+#endif /* computeError2_hpp */

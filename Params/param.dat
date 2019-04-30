@@ -1,4 +1,4 @@
-Gauss10
+Gauss5
 Lagrange
 RK1
 weak
@@ -8,19 +8,19 @@ weak
 shallowLin
 LF
 9.81,10
-no
+0
 BC_Left
-	openShallow
+	openShallowLin
 	10
 BC_Right
-	openShallow
+	openShallowLin
 	10
 BC_Up
-	openShallow
+	openShallowLin
 	10
 BC_Down
-	openShallow
+	openShallowLin
 	10
 Init_Cond
-	gaussian2DShallow
-	0.3,0.5,0.005,0.5,0.005,10
+	gaussian1DShallowX
+	0.3,0.5,0.005,10

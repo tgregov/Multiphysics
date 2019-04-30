@@ -9,6 +9,7 @@
 #include "mesh/displayMesh.hpp"
 #include "solver/timeInteg.hpp"
 #include "params/Params.hpp"
+#include "error/computeError.hpp"
 
 int main(int argc, char **argv)
 {
@@ -54,18 +55,30 @@ int main(int argc, char **argv)
         std::cerr   << "Something went wrong when reading mesh file: "
                     << argv[1] << std::endl;
         return -1;
-   }
+    }
 
    // displayMesh(mesh);
-    std::cout   << "================================================================"
+   std::cout   << "================================================================"
                 << std::endl
                 << "                     EXECUTING THE SOLVER                       "
                 << std::endl
                 << "================================================================"
                 << std::endl;
-    if(!timeInteg(mesh, solverParams, std::string(argv[1])))
+    if(!timeInteg(mesh, solverParams, std::string(argv[1]), std::string(argv[3])))
     {
         std::cerr   << "Something went wrong when time integrating" << std::endl;
+        return -1;
+    }
+
+      std::cout   << "================================================================"
+                << std::endl
+                << "                       ERROR COMPUTATION                           "
+                << std::endl
+                << "==================================================================="
+                << std::endl;
+    if(!computeError(mesh, std::string(argv[1]), std::string(argv[3])))
+    {
+        std::cerr << "Something went wrong when computing the error" << std::endl;
         return -1;
     }
 
