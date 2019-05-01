@@ -3,15 +3,17 @@
 
 #include <Eigen/Dense>
 #include "../mesh/Mesh.hpp"
+#include "../params/Params.hpp"
 
 
 /**
- * \brief Time integrate the equations (DG-FEM)
+ * \brief compute the L2 norm of the error
  * \param mesh The mesh representing the domain of interest
  * \param solverParams The structure in which the parameters of the solver are.
- * \param fileName The name of the file containing the mesh.
- * \return true if time integration happened without problems, false otherwise.
+ * \param t time
+ * \param u the solution computed by timeInteg
+ * \return the value of the error
  */
-double computeL2Norm(const Mesh& mesh, double t, Eigen::VectorXd u);
+double computeL2Norm(const Mesh& mesh, const SolverParams& solverParams, double t, Eigen::VectorXd u);
 
-#endif /* computeError2_hpp */
+#endif /* computeL2Norm_hpp */

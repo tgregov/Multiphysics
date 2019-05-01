@@ -1,15 +1,21 @@
-#include <iostream>
 #include <gmsh.h>
 #include "computeL2Norm.hpp"
 
-double func(double x, double t){
-    double v = sqrt(9.81*10);
-return 0.5*(0.3*exp(-(x-0.5+v*t)*(x-0.5+v*t)/(2*0.005)) + 10 + 
-    0.3*exp(-(x-0.5-v*t)*(x-0.5-v*t)/(2*0.005)) + 10);}
+double func(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
 
-double computeL2Norm(const Mesh& mesh, double t, Eigen::VectorXd u)
+    double v = sqrt(fluxCoeffs[0]*fluxCoeffs[1]);
+
+return coeffs[3] + 0.5*(coeffs[0]*exp(-(x-coeffs[1]+v*t)*(x-coeffs[1]+v*t)/(2*coeffs[2]))+ 
+    coeffs[0]*exp(-(x-coeffs[1]-v*t)*(x-coeffs[1]-v*t)/(2*coeffs[2])));}
+
+
+double computeL2Norm(const Mesh& mesh, const SolverParams& solverParams, double t, Eigen::VectorXd u)
 {
     double sum = 0;
+
+    std::vector<double> coeffs = solverParams.initCondition.coefficients;
+    std::vector<double> fluxCoeffs = solverParams.fluxCoeffs;
+
     // loop over the entites
     for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
     {
@@ -72,7 +78,8 @@ double computeL2Norm(const Mesh& mesh, double t, Eigen::VectorXd u)
                 }
                 // error = sum_k{w_k*(u(x_k)-u_approx(x_k))^2*det[J](x_k)}
                 sum += determinantHD[k]*elmProp.intPoints[4*k+3]
-                    *(func(physIntPointsHD[3*k],t)-u_approx)*(func(physIntPointsHD[3*k],t)-u_approx);
+                    *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx)
+                    *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
             }
         }
     }

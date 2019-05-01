@@ -76,7 +76,7 @@ int main(int argc, char **argv)
                 << std::endl
                 << "==================================================================="
                 << std::endl;
-    if(!computeError(mesh, std::string(argv[1]), std::string(argv[3])))
+    if(!computeError(mesh, solverParams, std::string(argv[1]), std::string(argv[3])))
     {
         std::cerr << "Something went wrong when computing the error" << std::endl;
         return -1;
