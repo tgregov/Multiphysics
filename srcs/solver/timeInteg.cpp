@@ -213,7 +213,6 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	for(unsigned int nbrStep = 1 ; nbrStep < nTimeSteps + 1 ;
 		nbrStep++)
 	{
-
   		// display progress
 		ratio = int(100*double(nbrStep - 1)/double(nTimeSteps));
         if(ratio >= currentDecade)
@@ -223,9 +222,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
             currentDecade = ratio + 1;
         }
 
-
         integScheme(t, field, partialField, matrix, mesh, solverParams, temp, usedF);
-
 
 		// check that it does not diverge
 		// assert(field.u[0].maxCoeff() <= 1E5);

@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <string>
 #if defined(_OPENMP)
@@ -47,14 +48,22 @@ int main(int argc, char **argv)
                 << std::endl
                 << "================================================================"
                 << std::endl;
+
     Mesh mesh;
+    auto startTime = std::chrono::high_resolution_clock::now();
     if(!readMesh(mesh, std::string(argv[1]), solverParams.spaceIntType,
         solverParams.basisFuncType))
     {
         std::cerr   << "Something went wrong when reading mesh file: "
                     << argv[1] << std::endl;
         return -1;
-   }
+    }
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto ellapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+    std::cout << "Ellapsed time for mesh reading: "
+              << static_cast<double>(ellapsedTime.count())/1000.0
+              << " s" << std::endl;
 
    // displayMesh(mesh);
     std::cout   << "================================================================"
@@ -63,11 +72,19 @@ int main(int argc, char **argv)
                 << std::endl
                 << "================================================================"
                 << std::endl;
+
+    startTime = std::chrono::high_resolution_clock::now();
     if(!timeInteg(mesh, solverParams, std::string(argv[1])))
     {
         std::cerr   << "Something went wrong when time integrating" << std::endl;
         return -1;
     }
+    endTime = std::chrono::high_resolution_clock::now();
+    ellapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+    std::cout << "Ellapsed time for time integration: "
+              << static_cast<double>(ellapsedTime.count())/1000.0
+              << " s" << std::endl;
 
     return 0;
 }
