@@ -14,6 +14,6 @@
  * \param meshName the .msh file containing the mesh
  */
 bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std::string& meshName,
-				 const std::string& reslutsName);
+				 const std::string& reslutsName, double& error);
 
 #endif /* computeError_hpp */

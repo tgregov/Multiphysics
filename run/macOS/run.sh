@@ -2,7 +2,7 @@
 # Test on mac
 clear
 cd ../..
-./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.msh ./Params/param.dat ./results/results0_5.msh
+./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh ./Params/param.dat ./results/newResults.msh
 #cd ./run/macOS/
-#gmsh results/results0_1.msh
+#gmsh results/newResults.msh
 cd ./run/macOS

@@ -8,7 +8,7 @@
 
 
 bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std::string& meshName,
-                     const std::string& resultsName)
+                     const std::string& resultsName, double& error)
 {
 	gmsh::initialize();
 	gmsh::option::setNumber("General.Terminal", 1);
@@ -49,7 +49,7 @@ gmsh::finalize();
 gmsh::initialize();
 gmsh::option::setNumber("General.Terminal", 1);
 gmsh::open(meshName);
-double error = computeL2Norm(mesh, solverParams, t, u);
+error = computeL2Norm(mesh, solverParams, t, u);
 gmsh::finalize();
 
 std::cout << "Error value:" << error << std::endl;
