@@ -43,7 +43,7 @@ int main(int argc, char **argv)
         std::cout << "Number of threads: " << n << std::endl;;
     #endif
 
-    std::ofstream file1("out.txt", std::ios::out | std::ios::app); 
+    std::ofstream file1("errorVSmesh.txt", std::ios::out | std::ios::app); 
     if (file1)
     {
             file1 << "ORDER:" << "\t" << "ERROR:" << std::endl;
@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 
     unsigned int order;
     double errorValue = 0;
-    for (order = 1 ; order <= 10 ; order ++)
+    for (order = 1 ; order <= 5 ; order ++)
     {
         generateMesh(argv[1], argv[2], order);  
 
