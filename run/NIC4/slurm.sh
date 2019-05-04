@@ -16,7 +16,8 @@ export FC=gfortran
 export OMP_NUM_THREADS=16
 
 cd $HOME/Multiphysics
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param.dat ./Geometry/2D\ Rectangle/newResults.msh
 srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param.dat ./Geometry/2D\ Rectangle/newResults.msh
 srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param.dat ./Geometry/2D\ Rectangle/newResults.msh
 srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_1.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_05.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param.dat ./Geometry/2D\ Rectangle/newResults.msh

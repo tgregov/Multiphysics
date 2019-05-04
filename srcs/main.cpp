@@ -46,6 +46,8 @@ int main(int argc, char **argv)
     std::ofstream file1("errorVSmesh.txt", std::ios::out | std::ios::app); 
     if (file1)
     {
+            file1 << "mesh:" << "\t" << argv[1] << std::endl;
+            file1 << "param:" << "\t" << argv[3] << std::endl;
             file1 << "ORDER:" << "\t" << "ERROR:" << std::endl;
 
     }else
