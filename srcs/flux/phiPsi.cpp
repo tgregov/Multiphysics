@@ -37,9 +37,9 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -(factor*field.flux[dim][unk][indexJ]
-                        + partialField.FluxAtBC[dim][unk])/2
-                    - C*edge.normal[dim]*(field.u[unk][indexJ]
-                        - partialField.uAtBC[unk])/2;
+                        + partialField.FluxAtBC[dim][unk]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
+                        - partialField.uAtBC[unk]))/2;
             }
         }
     }
@@ -62,9 +62,9 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -(factor*field.flux[dim][unk][indexJ]
-                        + field.flux[dim][unk][indexFrontJ])/2
-                    - C*edge.normal[dim]*(field.u[unk][indexJ]
-                        - field.u[unk][indexFrontJ])/2;
+                        + field.flux[dim][unk][indexFrontJ]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
+                        - field.u[unk][indexFrontJ]))/2;
             }
         }
     }
@@ -115,9 +115,9 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned in
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -((Fr + factor)*field.flux[dim][unk][indexJ]+
-                        (1 - Fr)*partialField.FluxAtBC[dim][unk])/2
-                    - cRoe*(1-Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
-                        - partialField.uAtBC[unk])/2;
+                        (1 - Fr)*partialField.FluxAtBC[dim][unk]
+                    + cRoe*(1-Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
+                        - partialField.uAtBC[unk]))/2;
             }
         }
     }
@@ -154,9 +154,9 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned in
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -((Fr + factor)*field.flux[dim][unk][indexJ]+
-                        (1 - Fr)*field.flux[dim][unk][indexFrontJ])/2
-                    - cRoe*(1-Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
-                        - field.u[unk][indexFrontJ])/2;
+                        (1 - Fr)*field.flux[dim][unk][indexFrontJ]
+                    + cRoe*(1-Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
+                        - field.u[unk][indexFrontJ]))/2;
             }
         }
     }
@@ -182,9 +182,9 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField, uns
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -(factor*field.flux[dim][unk][indexJ]
-                        + partialField.FluxAtBC[dim][unk])/2
-                    - C*edge.normal[dim]*(field.u[unk][indexJ]
-                        - partialField.uAtBC[unk])/2;
+                        + partialField.FluxAtBC[dim][unk]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
+                        - partialField.uAtBC[unk]))/2;
             }
         }
     }
@@ -196,9 +196,9 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField, uns
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -(factor*field.flux[dim][unk][indexJ]
-                        + field.flux[dim][unk][indexFrontJ])/2
-                    - C*edge.normal[dim]*(field.u[unk][indexJ]
-                        - field.u[unk][indexFrontJ])/2;
+                        + field.flux[dim][unk][indexFrontJ]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
+                        - field.u[unk][indexFrontJ]))/2;
             }
         }
     }
