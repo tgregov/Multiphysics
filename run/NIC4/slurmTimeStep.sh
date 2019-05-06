@@ -18,22 +18,28 @@ export FC=gfortran
 export OMP_NUM_THREADS=16
 
 cd $HOME/Multiphysics
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_01.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_01.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_01.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_01.dat ./Geometry/2D\ Rectangle/newResults.msh
 
 srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_001.dat ./Geometry/2D\ Rectangle/newResults.msh
 srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_001.dat ./Geometry/2D\ Rectangle/newResults.msh
 srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_001.dat ./Geometry/2D\ Rectangle/newResults.msh
 srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_001.dat ./Geometry/2D\ Rectangle/newResults.msh
 
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0001.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0001.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0001.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0001.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0008.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0008.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0008.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0008.dat ./Geometry/2D\ Rectangle/newResults.msh
 
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_00001.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_00001.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_00001.dat ./Geometry/2D\ Rectangle/newResults.msh
-srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_00001.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0006.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0006.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0006.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0006.dat ./Geometry/2D\ Rectangle/newResults.msh
+
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0004.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0004.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0004.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0004.dat ./Geometry/2D\ Rectangle/newResults.msh
+
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_5.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0002.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_4.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0002.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_3.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0002.dat ./Geometry/2D\ Rectangle/newResults.msh
+srun ./build/bin/main ./Geometry/2D\ Rectangle/rectangle0_2.geo ./Geometry/2D\ Rectangle/newMesh.msh  ./Params/param0_0002.dat ./Geometry/2D\ Rectangle/newResults.msh

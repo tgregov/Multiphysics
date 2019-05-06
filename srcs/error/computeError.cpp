@@ -22,7 +22,7 @@ bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std:
 	std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
     std::vector<std::vector<double>> data(elementNumNodes.size());
 
-	double t = 0.03;
+	double t = 0.024;
 	int step = t/solverParams.timeStep;
 
     //get the results computed by the solver
