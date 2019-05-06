@@ -23,7 +23,7 @@ bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std:
     std::vector<std::vector<double>> data(elementNumNodes.size());
 
 	double t = 0.03;
-	int step = 300;
+	int step = t/solverParams.timeStep;
 
     //get the results computed by the solver
     gmsh::view::getModelData(tags[0], step, dataType, elementTags,

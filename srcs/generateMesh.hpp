@@ -10,4 +10,6 @@
  */
 void generateMesh(const std::string& model, const std::string& mesh, const unsigned int order);
 
+void generateMeshQuad(const std::string& model, const std::string& mesh, const unsigned int order);
+
 #endif /* generateMesh_hpp */

@@ -43,7 +43,7 @@ int main(int argc, char **argv)
         std::cout << "Number of threads: " << n << std::endl;;
     #endif
 
-    std::ofstream file1("errorVSgaussPoint.txt", std::ios::out | std::ios::app); 
+    std::ofstream file1("errorVStimeStep.txt", std::ios::out | std::ios::app); 
     if (file1)
     {
             file1 << "mesh:" << "\t" << argv[1] << std::endl;
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
             return -1;
         }
 
-       // displayMesh(mesh);
+       //displayMesh(mesh);
        std::cout   << "================================================================"
                     << std::endl
                     << "                     EXECUTING THE SOLVER                       "
@@ -97,17 +97,17 @@ int main(int argc, char **argv)
             return -1;
         }
 
-          std::cout   << "================================================================"
-                    << std::endl
-                    << "                       ERROR COMPUTATION                           "
-                    << std::endl
-                    << "==================================================================="
-                    << std::endl;
-        if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]), errorValue))
-        {
-            std::cerr << "Something went wrong when computing the error" << std::endl;
-            return -1;
-        }
+      std::cout   << "================================================================"
+                << std::endl
+                << "                       ERROR COMPUTATION                           "
+                << std::endl
+                << "==================================================================="
+                << std::endl;
+    if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]), errorValue))
+    {
+        std::cerr << "Something went wrong when computing the error" << std::endl;
+        return -1;
+    }
         file1 << order << "\t" << errorValue << std::endl;
     }
 
