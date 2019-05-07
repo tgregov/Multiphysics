@@ -4,6 +4,33 @@
 #include <vector>
 #include <Eigen/Dense>
 
+struct CompleteField
+{
+    std::vector<Eigen::VectorXd> u;
+
+	std::vector<std::vector<Eigen::VectorXd>> flux;
+
+	CompleteField(unsigned int numNodes, unsigned short numUnknown, unsigned short dim)
+	{
+        // resize each field
+	    flux.resize(dim);
+	    for(unsigned short i = 0 ; i < dim ; ++i)
+        {
+            flux[i].resize(numUnknown);
+        }
+
+		u.resize(numUnknown);
+
+		for(unsigned short i = 0 ; i < numUnknown ; ++i)
+        {
+            u[i].resize(numNodes);
+            for(unsigned short j = 0 ; j < dim ; ++j)
+            {
+                flux[j][i].resize(numNodes);
+            }
+        }
+	}
+};
 
 /**
  * \struct Field
@@ -15,7 +42,6 @@ struct Field
 
 	std::vector<std::vector<Eigen::VectorXd>> flux; /**< Physical flux fields (of size equal to the number of dimension, with each
                                                          dimension as a size equal to the number of scalar unknowns) */
-
     std::vector<Eigen::VectorXd> s;
 
 	std::vector<Eigen::VectorXd> DeltaU; /**< Time-integration increment */

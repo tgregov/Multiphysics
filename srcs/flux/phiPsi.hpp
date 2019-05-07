@@ -18,9 +18,10 @@
  * \param indexFrontJ Index of the oppsoite node, with respect to the whole mesh.
  * \param solverParams Structure containing the solver's parameters.
  */
-void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
-                    bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-                    const SolverParams& solverParams);
+void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
+               const CompleteField& compField, unsigned int j, double factor,
+               bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
+               const SolverParams& solverParams, unsigned int nodePrec);
 
 
 /**
@@ -35,9 +36,10 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
  * \param indexFrontJ Index of the oppsoite node, with respect to the whole mesh.
  * \param solverParams Structure containing the solver's parameters.
  */
-void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
-                    bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-                    const SolverParams& solverParams);
+void Roe(const Edge& edge, Field& field, PartialField& partialField,
+               const CompleteField& compField, unsigned int j, double factor,
+               bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
+               const SolverParams& solverParams, unsigned int nodePrec);
 
 
 /**
@@ -52,9 +54,10 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned in
  * \param indexFrontJ Index of the oppsoite node, with respect to the whole mesh.
  * \param solverParams Structure containing the solver's parameters.
  */
-void mean(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
-                    bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-                    const SolverParams& solverParams);
+void mean(const Edge& edge, Field& field, PartialField& partialField,
+               const CompleteField& compField, unsigned int j, double factor,
+               bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
+               const SolverParams& solverParams, unsigned int nodePrec);
 
 
 /**
@@ -69,8 +72,9 @@ void mean(const Edge& edge, Field& field, PartialField& partialField, unsigned i
  * \param indexFrontJ Index of the oppsoite node, with respect to the whole mesh.
  * \param solverParams Structure containing the solver's parameters.
  */
-void LFTransport(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
-                    bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-                    const SolverParams& solverParams);
+void LFTransport(const Edge& edge, Field& field, PartialField& partialField,
+               const CompleteField& compField, unsigned int j, double factor,
+               bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
+               const SolverParams& solverParams, unsigned int nodePrec);
 
 #endif // phiPsi_hpp_included

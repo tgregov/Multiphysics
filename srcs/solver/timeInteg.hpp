@@ -15,7 +15,7 @@
  * \param fileName The name of the file containing the mesh.
  * \return true if time integration happened without problems, false otherwise.
  */
-bool timeInteg(const Mesh& mesh, const SolverParams& solverParams, 
-				const std::string& fileName);
+bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
+               const std::string& fileName, int rank, int numberProc);
 
-#endif /* timeInteg_hpp */
+#endif /* timeInteg_hpp_included */

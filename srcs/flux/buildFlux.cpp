@@ -3,18 +3,18 @@
 #include "buildFlux.hpp"
 #include <Eigen/Dense>
 
-
 // see .hpp file for description
-void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
-               const SolverParams& solverParams)
+void buildFlux(const Mesh& mesh, Field& field, const CompleteField& compField,
+               double factor, double t, const SolverParams& solverParams,
+               const DomainDiv& domainDiv, unsigned int rank)
 {
 	// loop over the entities
 	for(size_t ent = 0 ; ent < mesh.entities.size() ; ent++)
 	{
 	    Entity entity = mesh.entities[ent];
 		// loop over the elements
-		#pragma omp parallel for default(none) shared(field, mesh, entity, solverParams, factor, t)
-		for(size_t elm = 0 ; elm < entity.elements.size() ; elm++)
+		//#pragma omp parallel for default(none) shared(field, compField, mesh, entity, solverParams, factor, t, nodePrec)
+		for(size_t elm = domainDiv.elementPrec[rank] ; elm < domainDiv.elementPrec[rank] + domainDiv.element[rank] ; elm++)
 		{
 			PartialField partialField(solverParams.nUnknowns, mesh.dim);
 
@@ -30,7 +30,6 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 			for(unsigned int s = 0 ; s < nSigma ; ++s)
 			{
 				// current edge
-
 				// we first compute the matrix-vector product of dM with gx and gy
 				for(unsigned short dim = 0 ; dim < mesh.dim ; ++dim)
                 {
@@ -49,19 +48,20 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 					// case of a boundary condition
 					if (entity.elements[elm].edges[s].edgeInFront.first == -1)
 					{
-              // compute the boundary condition
+                        // compute the boundary condition
 						ibc boundary
 							= solverParams.boundaryConditions.at(entity.elements[elm].edges[s].bcName);
 						boundary.ibcFunc(partialField.uAtBC, entity.elements[elm].edges[s].nodeCoordinate[j], t,
-											field, indexJ, entity.elements[elm].edges[s].normal,
+											field, indexJ-domainDiv.nodePrec[rank], entity.elements[elm].edges[s].normal,
 											boundary.coefficients, solverParams.fluxCoeffs);
 
                         solverParams.flux(field, partialField, solverParams, true);
 
                         // compute the numerical flux
                         // (the weak/strong form is stored in "factor")
-                        solverParams.phiPsi(entity.elements[elm].edges[s], field, partialField, j, factor, true, indexJ, 0,
-                        					solverParams);
+                        solverParams.phiPsi(entity.elements[elm].edges[s], field, partialField, compField, j, factor, true, indexJ, 0,
+                        					solverParams, domainDiv.nodePrec[rank]);
+
 					}
 					else // general case
 					{
@@ -78,8 +78,8 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
 
                         // compute the numerical flux
                         // (the weak/strong form is stored in "factor")
-                        solverParams.phiPsi(entity.elements[elm].edges[s], field, partialField, j, factor, false, indexJ,
-                        					indexFrontJ, solverParams);
+                        solverParams.phiPsi(entity.elements[elm].edges[s], field, partialField, compField, j, factor, false, indexJ, 0,
+                        					solverParams,  domainDiv.nodePrec[rank]);
 					}
 				}
 
@@ -99,7 +99,7 @@ void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
             {
                 for(unsigned int j = 0 ; j < mesh.elementProperties.at(entity.elements[elm].elementTypeHD).nSF ; ++j)
                 {
-                    field.Iu[unk][entity.elements[elm].offsetInU + j] = partialField.partialIu[unk][j];
+                    field.Iu[unk][entity.elements[elm].offsetInU + j - domainDiv.nodePrec[rank]] = partialField.partialIu[unk][j];
                 }
             }
 		}

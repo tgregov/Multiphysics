@@ -4,6 +4,7 @@
 #include "../mesh/Mesh.hpp"
 #include "../params/Params.hpp"
 #include "../solver/field.hpp"
+#include "../utils/utils.hpp"
 
 
 /**
@@ -14,7 +15,8 @@
  * \param t Current time of the simulation
  * \param solverParams Structure containing the solver's parameters
  */
-void buildFlux(const Mesh& mesh, Field& field, double factor, double t,
-               const SolverParams& solverParams);
+void buildFlux(const Mesh& mesh, Field& field, const CompleteField& compField,
+               double factor, double t, const SolverParams& solverParams,
+               const DomainDiv& domainDiv, unsigned int rank);
 
 #endif /* buildFlux_hpp */

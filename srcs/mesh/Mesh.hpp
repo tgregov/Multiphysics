@@ -143,7 +143,8 @@ std::vector<int> getTags(const Mesh& mesh);
  * \param basisFuncType The type of basis function you will use.
  */
 bool readMesh(Mesh& mesh, const std::string& fileName,
-              const std::string& intScheme, const std::string& basisFuncType);
+              const std::string& intScheme, const std::string& basisFuncType,
+              int rank);
 
 #endif // Mesh2D_hpp_included
 

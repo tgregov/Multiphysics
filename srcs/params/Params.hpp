@@ -44,9 +44,9 @@ struct SolverParams
                                       (mean, Lax-Friedirichs, Roe, ...)*/
 
     std::function<void(const Edge& edge, Field& field, PartialField& partialField,
-                       unsigned int j, double factor, bool boundary,
-                       unsigned int indexJ, unsigned int indexFrontJ,
-                       const SolverParams& solverParams)> phiPsi; /**< Pointer to the
+               const CompleteField& compField, unsigned int j, double factor,
+               bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
+               const SolverParams& solverParams, unsigned int nodePrec)> phiPsi; /**< Pointer to the
                        rhs function (phi or psi depending of the type of scheme)*/
 
     bool IsSourceTerms;
@@ -64,6 +64,6 @@ struct SolverParams
  * \param solverParams The structure in which the parameters are loaded.
  * \return true if the loading succeeds, false otherwise.
  */
-bool loadSolverParams(const std::string& fileName, SolverParams& solverParams);
+bool loadSolverParams(const std::string& fileName, SolverParams& solverParams, int rank);
 
 #endif // Params_hpp_included

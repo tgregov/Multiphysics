@@ -4,7 +4,8 @@
 
 // see .hpp for description
 void buildS(const Mesh& mesh, Eigen::SparseMatrix<double>& Sx,
-			Eigen::SparseMatrix<double>& Sy)
+			Eigen::SparseMatrix<double>& Sy,
+			const DomainDiv& domainDiv, unsigned int rank)
 {
 
 	// * indexx/indexy: vectors of triplets that contains the coordinates in the
@@ -22,9 +23,9 @@ void buildS(const Mesh& mesh, Eigen::SparseMatrix<double>& Sx,
         Entity entity = mesh.entities[ent];
 
         // loop over the elements
-        for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
+        for(size_t elm = domainDiv.elementPrec[rank]
+            ; elm < domainDiv.elementPrec[rank]+domainDiv.element[rank] ; ++elm)
         {
-
         	// current element
             Element element = entity.elements[elm];
 

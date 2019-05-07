@@ -458,7 +458,8 @@ static void addElement(Entity& entity, int elementTag, int eleTypeHD,
  * \return true if then entity was added flawlessly, false otherwise.
  */
 static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
-                      const std::string& intScheme, const std::string& basisFuncType)
+                      const std::string& intScheme, const std::string& basisFuncType,
+                      int rank)
 {
     //Fill an entity structure
     Entity entity;
@@ -551,7 +552,7 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
 
             // display progress
             ratio = int(100*double(i)/double(elementTags.size()));
-            if(ratio >= currentDecade)
+            if(ratio >= currentDecade && rank == 0)
             {
                 std::cout   << "\r" << "Entity [" << entity.entityTagHD << "]: "
                             << ratio << "% of the elements computed"
@@ -605,8 +606,11 @@ static bool addEntity(Mesh& mesh, int entityTag, unsigned int& currentOffset,
             currentOffset += elementOffset;
         }
 
-         std::cout  << "\r" << "Entity [" << entity.entityTagHD << "]: "
-                    << "100% of the elements computed" << std::flush << std::endl;
+        if(rank == 0)
+        {
+            std::cout  << "\r" << "Entity [" << entity.entityTagHD << "]: "
+                       << "100% of the elements computed" << std::flush << std::endl;
+        }
     }
 
     //Add the entity to the mesh.entities field
@@ -672,10 +676,14 @@ std::vector<int> getTags(const Mesh& mesh)
 
 // documentation in .hpp file
 bool readMesh(Mesh& mesh, const std::string& fileName,
-                const std::string& intScheme, const std::string& basisFuncType)
+              const std::string& intScheme, const std::string& basisFuncType,
+              int rank)
 {
     gmsh::initialize();
-    gmsh::option::setNumber("General.Terminal", 1);
+    if(rank == 0)
+    {
+        gmsh::option::setNumber("General.Terminal", 1);
+    }
     std::ifstream file(fileName);
     if(file.is_open())
         file.close();
@@ -734,7 +742,7 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
     //We add each identified entity to the mesh.
     for(auto entityTag : entitiesTag)
     {
-        if(!addEntity(mesh, entityTag, currentOffset, intScheme, basisFuncType))
+        if(!addEntity(mesh, entityTag, currentOffset, intScheme, basisFuncType, rank))
             return false;
     }
 

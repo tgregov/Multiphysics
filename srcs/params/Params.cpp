@@ -54,7 +54,7 @@ static void getLine(std::ifstream& file, std::string& line)
  * \return true if the loading succeeds, false otherwise.
  */
 static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solverParams,
-                                    const std::string& fileName)
+                                    const std::string& fileName, int rank)
 {
     unsigned int nBC = 0;
     bool foundInitCond = false;
@@ -69,7 +69,8 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
 
         if(paramFile.eof())
         {
-            std::cout << "End of file reached." << std::endl;
+            if(rank == 0)
+                std::cout << "End of file reached." << std::endl;
             break;
         }
         getLine(paramFile, bcName);
@@ -213,15 +214,18 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         return false;
     }
 
-    std::cout << "Initial condition present and " << nBC
+    if(rank == 0)
+    {
+        std::cout << "Initial condition present and " << nBC
               << " boundary conditions present in "<< std::endl
               << "file " << fileName << std::endl;
+    }
 
     return true;
 }
 
 //Documentation in .hpp
-bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
+bool loadSolverParams(const std::string& fileName, SolverParams& solverParams, int rank)
 {
     std::ifstream paramFile(fileName);
 
@@ -551,7 +555,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         return false;
     }
 
-    if(!handleBoundaryCondition(paramFile, solverParams, fileName))
+    if(!handleBoundaryCondition(paramFile, solverParams, fileName, rank))
     {
         paramFile.close();
         return false;
@@ -560,26 +564,29 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     paramFile.close();
 
     // display the parameters
-    std::cout   << "Number of Gauss points: " << solverParams.spaceIntType
-                << std::endl
-                << "Type of basis function: " << solverParams.basisFuncType
-                << std::endl
-                << "Time intgeration scheme: " << solverParams.timeIntType
-                << std::endl
-                << "Formulation type: " << solverParams.solverType
-                << std::endl
-                << "Simulation time duration: " << solverParams.simTime << "s"
-                << std::endl
-                << "Time step: " << solverParams.timeStep << "s"
-                << std::endl
-                << "Time between data writing: " << solverParams.simTimeDtWrite << "s"
-                << std::endl
-                << "Problem type: " << solverParams.problemType
-                << std::endl
-                << "Source terms: " << solverParams.sourceType
-                << std::endl
-                << "Numerical Flux: " << solverParams.fluxType
-                << std::endl;
+    if(rank == 0)
+    {
+        std::cout   << "Number of Gauss points: " << solverParams.spaceIntType
+                    << std::endl
+                    << "Type of basis function: " << solverParams.basisFuncType
+                    << std::endl
+                    << "Time intgeration scheme: " << solverParams.timeIntType
+                    << std::endl
+                    << "Formulation type: " << solverParams.solverType
+                    << std::endl
+                    << "Simulation time duration: " << solverParams.simTime << "s"
+                    << std::endl
+                    << "Time step: " << solverParams.timeStep << "s"
+                    << std::endl
+                    << "Time between data writing: " << solverParams.simTimeDtWrite << "s"
+                    << std::endl
+                    << "Problem type: " << solverParams.problemType
+                    << std::endl
+                    << "Source terms: " << solverParams.sourceType
+                    << std::endl
+                    << "Numerical Flux: " << solverParams.fluxType
+                    << std::endl;
+    }
 
     return true;
 }

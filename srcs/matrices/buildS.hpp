@@ -1,8 +1,10 @@
-#ifndef buildS_hpp
-#define buildS_hpp
+#ifndef buildS_hpp_included
+#define buildS_hpp_included
 
 #include <Eigen/Sparse>
 #include "../mesh/Mesh.hpp"
+#include "../utils/utils.hpp"
+
 
 
 /**
@@ -23,6 +25,7 @@
  * stored.
  */
 void buildS(const Mesh& mesh, Eigen::SparseMatrix<double>& Sx,
-	Eigen::SparseMatrix<double>& Sy);
+	Eigen::SparseMatrix<double>& Sy,
+	const DomainDiv& domainDiv, unsigned int rank);
 
-#endif /* buildS_hpp */
+#endif /* buildS_hpp_included */

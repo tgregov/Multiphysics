@@ -1,9 +1,9 @@
-#include <iostream>
 #include "buildM.hpp"
 
 
 // see .hpp file for description
-void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM)
+void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM,
+            const DomainDiv& domainDiv, unsigned int rank)
 {
 
     // * index: vector of triplets that contains the coordinates in the [M] matrix
@@ -16,14 +16,13 @@ void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM)
     // loop over the entites
     for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
     {
-
         // current entity
         Entity entity = mesh.entities[ent];
 
         // loop over the elements
-        for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
+        for(size_t elm = domainDiv.elementPrec[rank]
+            ; elm < domainDiv.elementPrec[rank]+domainDiv.element[rank] ; ++elm)
         {
-
             // current element
             Element element = entity.elements[elm];
 
@@ -87,7 +86,6 @@ void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM)
             offsetMatrix += elmProp.nSF;
         }
     }
-
     // add the triplets in the sparse matrix
     invM.setFromTriplets(index.begin(), index.end());
 }

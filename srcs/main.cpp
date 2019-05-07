@@ -1,4 +1,3 @@
-#include <chrono>
 #include <iostream>
 #include <string>
 #if defined(_OPENMP)
@@ -6,6 +5,7 @@
     #include <omp.h>
 #endif
 #include <Eigen/Core>
+#include <mpi.h>
 #include "mesh/Mesh.hpp"
 #include "mesh/displayMesh.hpp"
 #include "solver/timeInteg.hpp"
@@ -15,6 +15,11 @@ int main(int argc, char **argv)
 {
 
     // check that the file format is valid
+    int numberProc, rank;
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &numberProc);
+
     if (argc < 3)
     {
         std::cerr   << "Usage: " << argv[0] << " file.msh " << " param.dat "
@@ -23,68 +28,98 @@ int main(int argc, char **argv)
     }
 
     // load the solver parameters
-    std::cout   << "================================================================"
-                << std::endl
-                << "                   LOADING THE SOLVER PARAMETERS                "
-                << std::endl
-                << "================================================================"
-                << std::endl;
+    if(rank == 0)
+    {
+        std::cout   << "================================================================"
+                    << std::endl
+                    << "                   LOADING THE SOLVER PARAMETERS                "
+                    << std::endl
+                    << "================================================================"
+                    << std::endl;
+    }
+
 
     SolverParams solverParams;
-    if(!loadSolverParams(std::string(argv[2]), solverParams))
+    if(!loadSolverParams(std::string(argv[2]), solverParams, rank))
+    {
+        MPI_Finalize();
         return -1;
+    }
 
     #if defined(_OPENMP)
         unsigned int n = std::atoi(std::getenv("OMP_NUM_THREADS"));
         omp_set_num_threads(n);
         Eigen::setNbThreads(1);
-        std::cout << "Number of threads: " << n << std::endl;;
+        if(rank == 0)
+            std::cout << "Number of threads: " << n << std::endl;;
     #endif
 
+    MPI_Barrier(MPI_COMM_WORLD);
+
     // load the mesh
-    std::cout   << "================================================================"
-                << std::endl
-                << "                       LOADING THE MESH                         "
-                << std::endl
-                << "================================================================"
-                << std::endl;
+    if(rank == 0)
+    {
+        std::cout   << "================================================================"
+                    << std::endl
+                    << "                       LOADING THE MESH                         "
+                    << std::endl
+                    << "================================================================"
+                    << std::endl;
+    }
 
     Mesh mesh;
-    auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto startTime = MPI_Wtime();
     if(!readMesh(mesh, std::string(argv[1]), solverParams.spaceIntType,
-        solverParams.basisFuncType))
+        solverParams.basisFuncType, rank))
     {
         std::cerr   << "Something went wrong when reading mesh file: "
                     << argv[1] << std::endl;
+
+        MPI_Finalize();
         return -1;
     }
-    auto endTime = std::chrono::high_resolution_clock::now();
-    auto ellapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    auto endTime =  MPI_Wtime();
+    auto ellapsedTime = endTime - startTime;
 
-    std::cout << "Ellapsed time for mesh reading: "
-              << static_cast<double>(ellapsedTime.count())/1000.0
-              << " s" << std::endl;
+    if(rank == 0)
+    {
+        std::cout << "Ellapsed time for mesh reading: "
+                  << ellapsedTime
+                  << " s" << std::endl;
+    }
 
-   // displayMesh(mesh);
-    std::cout   << "================================================================"
-                << std::endl
-                << "                     EXECUTING THE SOLVER                       "
-                << std::endl
-                << "================================================================"
-                << std::endl;
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    startTime = std::chrono::high_resolution_clock::now();
-    if(!timeInteg(mesh, solverParams, std::string(argv[1])))
+    // displayMesh(mesh);
+    if(rank == 0)
+    {
+        std::cout   << "================================================================"
+                    << std::endl
+                    << "                     EXECUTING THE SOLVER                       "
+                    << std::endl
+                    << "================================================================"
+                    << std::endl;
+    }
+
+    startTime =  MPI_Wtime();
+    if(!timeInteg(mesh, solverParams, std::string(argv[1]), rank, numberProc))
     {
         std::cerr   << "Something went wrong when time integrating" << std::endl;
+        MPI_Finalize();
         return -1;
     }
-    endTime = std::chrono::high_resolution_clock::now();
-    ellapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    endTime =  MPI_Wtime();
+    ellapsedTime = endTime - startTime;
 
-    std::cout << "Ellapsed time for time integration: "
-              << static_cast<double>(ellapsedTime.count())/1000.0
-              << " s" << std::endl;
+    if(rank == 0)
+    {
+        std::cout << "Ellapsed time for time integration: "
+                  << ellapsedTime
+                  << " s" << std::endl;
+    }
+
+    MPI_Finalize();
 
     return 0;
 }

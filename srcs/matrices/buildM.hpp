@@ -1,9 +1,10 @@
-#ifndef buildM_hpp
-#define buildM_hpp
+#ifndef buildM_hpp_included
+#define buildM_hpp_included
 
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include "../mesh/Mesh.hpp"
+#include "../utils/utils.hpp"
 
 
 /**
@@ -15,6 +16,7 @@
  * \param mesh The structure that contains the mesh.
  * \param invM The Eigen::SparseMatrix in which the matrix components will be stored.
  */
-void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM);
+void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM,
+            const DomainDiv& domainDiv, unsigned int rank);
 
-#endif /* buildM_hpp */
+#endif /* buildM_hpp_included */

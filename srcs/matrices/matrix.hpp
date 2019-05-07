@@ -15,4 +15,4 @@ struct Matrix
 	Eigen::SparseMatrix<double> Sy;     /**< Y-stiffness matrix */
 };
 
-#endif
+#endif /* matrix_hpp_included */

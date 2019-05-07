@@ -1,28 +1,41 @@
 #include "RungeKutta.hpp"
+#include "../mpi/sendReceive.hpp"
+#include <iostream>
+#include <mpi.h>
 
-void RK1(double t, Field& field, PartialField& partialField, const Matrix& matrix,
-         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+void RK1(double t, Field& field, PartialField& partialField,
+         CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
+         unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
+         Field& temp, UsedF usedF)
 {
-    usedF(t, field, partialField, matrix, mesh, solverParams);
+    usedF(t, field, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
         field.u[unk] += field.DeltaU[unk]*solverParams.timeStep;
+
+    solverParams.flux(field, partialField, solverParams, false);
+    MPI_Barrier(MPI_COMM_WORLD);
+    exchangeFlux(field, compField, domainDiv, rank, solverParams, mesh);
+    exchangeUnk(field, compField, domainDiv, rank, solverParams);
+    MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
-void RK2(double t, Field& field, PartialField& partialField, const Matrix& matrix,
-         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+void RK2(double t, Field& field, PartialField& partialField,
+         CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
+         unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
+         Field& temp, UsedF usedF)
 {
 
     double h = solverParams.timeStep;
 
-    usedF(t, temp, partialField, matrix, mesh, solverParams);
+    usedF(t, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k1[unk] = temp.DeltaU[unk]*h;
         temp.u[unk] = field.u[unk] + field.k1[unk]/2;
     }
 
-    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    usedF(t + h/2, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k2[unk] = temp.DeltaU[unk]*h;
@@ -31,26 +44,28 @@ void RK2(double t, Field& field, PartialField& partialField, const Matrix& matri
 }
 
 
-void RK3(double t, Field& field, PartialField& partialField, const Matrix& matrix,
-         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+void RK3(double t, Field& field, PartialField& partialField,
+         CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
+         unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
+         Field& temp, UsedF usedF)
 {
     double h = solverParams.timeStep;
 
-    usedF(t, temp, partialField, matrix, mesh, solverParams);
+    usedF(t, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k1[unk] = temp.DeltaU[unk]*h;
         temp.u[unk] = field.u[unk] + field.k1[unk]/2;
     }
 
-    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    usedF(t + h/2, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k2[unk] = temp.DeltaU[unk]*h;
         temp.u[unk] = field.u[unk] - field.k1[unk] + 2*field.k2[unk];
     }
 
-    usedF(t + h, temp, partialField, matrix, mesh, solverParams);
+    usedF(t + h, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < 3 ; ++unk)
     {
         field.k3[unk] = temp.DeltaU[unk]*h;
@@ -59,33 +74,35 @@ void RK3(double t, Field& field, PartialField& partialField, const Matrix& matri
 }
 
 
-void RK4(double t, Field& field, PartialField& partialField, const Matrix& matrix,
-         const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
+void RK4(double t, Field& field, PartialField& partialField,
+         CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
+         unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
+         Field& temp, UsedF usedF)
 {
     double h = solverParams.timeStep;
 
-    usedF(t, temp, partialField, matrix, mesh, solverParams);
+    usedF(t, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k1[unk] = temp.DeltaU[unk]*h;
         temp.u[unk] = field.u[unk] + field.k1[unk]/2;
     }
 
-    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    usedF(t + h/2, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k2[unk] = temp.DeltaU[unk]*h;
         temp.u[unk] = field.u[unk] + field.k2[unk]/2;
     }
 
-    usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
+    usedF(t + h/2, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k3[unk] = temp.DeltaU[unk]*h;
         temp.u[unk] = field.u[unk] + field.k3[unk];
     }
 
-    usedF(t + h, temp, partialField, matrix, mesh, solverParams);
+    usedF(t + h, temp, compField, matrix, mesh, solverParams, domainDiv, rank);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k4[unk] = temp.DeltaU[unk]*h;

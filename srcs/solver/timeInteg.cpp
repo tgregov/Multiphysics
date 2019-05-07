@@ -1,12 +1,15 @@
 #include <iostream>
 #include <cassert>
 #include <gmsh.h>
+#include <mpi.h>
+#include "../mpi/sendReceive.hpp"
 #include "../matrices/buildMatrix.hpp"
 #include "../matrices/matrix.hpp"
 #include "../flux/buildFlux.hpp"
 #include "timeInteg.hpp"
 #include "field.hpp"
 #include "RungeKutta.hpp"
+#include "../utils/utils.hpp"
 
 
 /**
@@ -18,17 +21,15 @@
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
  */
-static void Fweak(double t, Field& field, PartialField& partialField, const Matrix& matrix, const Mesh& mesh,
-                  const SolverParams& solverParams)
+static void Fweak(double t, Field& field, CompleteField& compField,
+                    const Matrix& matrix, const Mesh& mesh,
+                    const SolverParams& solverParams, const DomainDiv& domainDiv, unsigned int rank)
 {
- 	// compute the nodal physical fluxes
- 	solverParams.flux(field, partialField, solverParams, false);
-
  	if(solverParams.IsSourceTerms)
         solverParams.sourceTerm(field, solverParams);
 
 	// compute the right-hand side of the master equation (phi or psi)
- 	buildFlux(mesh, field, 1, t, solverParams);
+ 	buildFlux(mesh, field, compField, 1, t, solverParams, domainDiv, rank);
 
  	// compute the increment
  	for(unsigned short unk = 0 ; unk < field.DeltaU.size() ; ++unk)
@@ -39,7 +40,6 @@ static void Fweak(double t, Field& field, PartialField& partialField, const Matr
 
         if(solverParams.IsSourceTerms)
             field.DeltaU[unk]+=field.s[unk];
-
     }
 }
 
@@ -53,17 +53,15 @@ static void Fweak(double t, Field& field, PartialField& partialField, const Matr
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
  */
-static void Fstrong(double t, Field& field, PartialField& partialField, const Matrix& matrix, const Mesh& mesh,
-                    const SolverParams& solverParams)
+static void Fstrong(double t, Field& field, CompleteField& compField,
+                    const Matrix& matrix, const Mesh& mesh,
+                    const SolverParams& solverParams, const DomainDiv& domainDiv, unsigned int rank)
 {
- 	// compute the nodal physical fluxes
- 	solverParams.flux(field, partialField, solverParams, false);
-
  	if(solverParams.IsSourceTerms)
         solverParams.sourceTerm(field, solverParams);
 
 	// compute the right-hand side of the master equation (phi or psi)
- 	buildFlux(mesh, field, -1, t, solverParams);
+ 	buildFlux(mesh, field, compField, -1, t, solverParams, domainDiv, rank);
 
  	// compute the increment
     for(unsigned short unk = 0 ; unk < field.DeltaU.size() ; ++unk)
@@ -80,8 +78,19 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
 
 // see .hpp file for description
 bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
-				const std::string& fileName)
+               const std::string& fileName, int rank, int numberProc)
 {
+    // Get MPI parameters
+    MPI_Status status;
+
+    if(numberProc >  mesh.nodeData.elementTags.size())
+    {
+        std::cerr << "How did you manage to end up with some processor unused ?" <<std::endl;
+        return false;
+    }
+
+    DomainDiv domainDiv(numberProc);
+    divideDomain(domainDiv, numberProc, mesh);
 
 	/*******************************************************************************
 	 *						            TIME STEPS 								   *
@@ -96,7 +105,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 *						            MATRICES 								   *
 	 *******************************************************************************/
 	Matrix matrix;
-	buildMatrix(mesh, matrix);
+	buildMatrix(mesh, matrix, domainDiv, rank);
 
 
 	/*******************************************************************************
@@ -117,9 +126,9 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
   	}
 
   	//Initialization of the field of unknowns
-  	Field field(mesh.nodeData.numNodes, solverParams.nUnknowns, mesh.dim);
+  	Field field(domainDiv.node[rank], solverParams.nUnknowns, mesh.dim);
+  	CompleteField compField(mesh.nodeData.numNodes, solverParams.nUnknowns, mesh.dim);
   	PartialField partialField(solverParams.nUnknowns, mesh.dim);
-
 
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
@@ -136,48 +145,71 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 					solverParams.initCondition.coefficients, solverParams.fluxCoeffs);
 
                 for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-                    field.u[unk](element.offsetInU + n) = uIC[unk];
+                    compField.u[unk](element.offsetInU + n) = uIC[unk];
             }
         }
     }
 
+    //Each MPI Thread initialize its unknown vector from the complete one
+    for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+    {
+        for(unsigned int n = domainDiv.nodePrec[rank] ;
+            n < domainDiv.nodePrec[rank] + domainDiv.node[rank] ; ++n)
+        {
+            field.u[unk][n - domainDiv.nodePrec[rank]]= compField.u[unk][n];
+        }
+    }
+    //And the flux too
+    solverParams.flux(field, partialField, solverParams, false);
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    exchangeFlux(field, compField, domainDiv, rank, solverParams, mesh);
+    MPI_Barrier(MPI_COMM_WORLD);
 
 	/*******************************************************************************
 	 *						       LAUNCH GMSH  	      						   *
 	 *******************************************************************************/
-	gmsh::initialize();
-	gmsh::option::setNumber("General.Terminal", 1);
-	gmsh::open(fileName);
-	int viewTag = gmsh::view::add("results");
-	std::vector<std::string> names;
-	gmsh::model::list(names);
-	std::string modelName = names[0];
-	std::string dataType = "ElementNodeData";
-	std::vector<int> elementTags = mesh.nodeData.elementTags;
-	std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
+    std::vector<std::string> names;
+    int viewTag;
+    std::string modelName;
+    std::string dataType = "ElementNodeData";
+    std::vector<int> elementTags = mesh.nodeData.elementTags;
+    std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
     std::vector<std::vector<double>> uDisplay(elementNumNodes.size());
+    if(rank == 0)
+    {
+        gmsh::initialize();
+        gmsh::option::setNumber("General.Terminal", 1);
+        gmsh::open(fileName);
+        viewTag = gmsh::view::add("results");
+        gmsh::model::list(names);
+        modelName = names[0];
+    }
 
 	double t = 0.0;
 
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
-	unsigned int index = 0;
+    if(rank == 0)
+    {
+        unsigned int index = 0;
 
-	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-	{
-		std::vector<double> temp(elementNumNodes[count]);
-		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
-		{
-			temp[node]=field.u[0][index];
-			++index;
-		}
+        for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
+        {
+            std::vector<double> temp(elementNumNodes[count]);
+            for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
+            {
+                temp[node]=compField.u[0][index];
+                ++index;
+            }
 
-		uDisplay[count] = std::move(temp);
-	}
+            uDisplay[count] = std::move(temp);
+        }
 
-	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-	                         uDisplay, t, 1);
+        gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
+                                 uDisplay, t, 1);
+    }
 
 
 	/*******************************************************************************
@@ -214,15 +246,20 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 		nbrStep++)
 	{
   		// display progress
-		ratio = int(100*double(nbrStep - 1)/double(nTimeSteps));
-        if(ratio >= currentDecade)
+  		if(rank == 0)
         {
-            std::cout  	<< "\r" << "Integrating: " << ratio << "%"
-            			<< " of the time steps done" << std::flush;
-            currentDecade = ratio + 1;
+            ratio = int(100*double(nbrStep - 1)/double(nTimeSteps));
+            if(ratio >= currentDecade)
+            {
+                std::cout  	<< "\r" << "Integrating: " << ratio << "%"
+                            << " of the time steps done" << std::flush;
+                currentDecade = ratio + 1;
+            }
         }
 
-        integScheme(t, field, partialField, matrix, mesh, solverParams, temp, usedF);
+        integScheme(t, field, partialField, compField, matrix, domainDiv, rank,
+                    mesh, solverParams, temp, usedF);
+
 
 		// check that it does not diverge
 		// assert(field.u[0].maxCoeff() <= 1E5);
@@ -231,7 +268,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 		t += solverParams.timeStep;
 
         // store the results every Dt only.
-		if((nbrStep % nTimeStepsDtWrite) == 0)
+		if((nbrStep % nTimeStepsDtWrite) == 0 && rank == 0)
         {
             unsigned int offset = 0;
             for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
@@ -240,7 +277,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
                 for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
                     ++countLocal)
                 {
-                    temp[countLocal] = field.u[0][countLocal+offset];
+                    temp[countLocal] = compField.u[0][countLocal+offset];
                 }
                 offset += elementNumNodes[count];
                 uDisplay[count] = std::move(temp);
@@ -251,13 +288,15 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         }
 	}
 
-	std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush
+	if(rank == 0)
+    {
+        std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush
 	 			<< std::endl;
 
-	// write the results & finalize
-    gmsh::view::write(viewTag, std::string("results.msh"));
-    gmsh::finalize();
-
+        // write the results & finalize
+        gmsh::view::write(viewTag, std::string("results.msh"));
+        gmsh::finalize();
+    }
 
 	return true;
 }
