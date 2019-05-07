@@ -290,7 +290,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
 
-    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
+    if(!(temp.find_first_not_of("-e.0123456789") == std::string::npos)) //To improve
     {
         std::cerr << "Unexpected simulation time duration " << temp
                   << " in parameter file " << fileName << std::endl;
@@ -304,7 +304,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
 
-    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
+    if(!(temp.find_first_not_of("-e.0123456789") == std::string::npos)) //To improve
     {
         std::cerr << "Unexpected time step " << temp
                   << " in parameter file " << fileName << std::endl;
@@ -318,7 +318,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
 
-    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
+    if(!(temp.find_first_not_of("-e.0123456789") == std::string::npos)) //To improve
     {
         std::cerr << "Unexpected time between data writing " << temp
                   << " in parameter file " << fileName << std::endl;
