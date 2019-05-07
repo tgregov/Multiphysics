@@ -7,6 +7,7 @@
 #include "ibvFunction.hpp"
 #include "../solver/field.hpp"
 #include "../mesh/Mesh.hpp"
+#include "../write/write.hpp"
 
 /**
  * \struct SolverParams
@@ -50,12 +51,20 @@ struct SolverParams
                        rhs function (phi or psi depending of the type of scheme)*/
 
     bool IsSourceTerms;
-
     std::string sourceType;
-
     std::vector<double> sourceCoeffs;
-
     std::function<void(Field& field, const SolverParams& solverParams)> sourceTerm;
+
+
+    std::vector<bool> whatToWrite;
+    std::vector<int> viewTags;
+
+    std::function<void(std::vector<std::vector<double>>& uDisplay,
+                  const std::vector<unsigned int>& elementNumNodes,
+                  const std::vector<int>& elementTags, const std::string& modelName,
+                  unsigned int nbreStep, double t, const Field& field,
+                  const std::vector<bool>& whatToWrite,
+                  std::vector<int>& viewTags)> write;
 };
 
 /**

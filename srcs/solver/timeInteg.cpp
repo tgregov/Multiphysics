@@ -4,6 +4,7 @@
 #include "../matrices/buildMatrix.hpp"
 #include "../matrices/matrix.hpp"
 #include "../flux/buildFlux.hpp"
+#include "../write/write.hpp"
 #include "timeInteg.hpp"
 #include "field.hpp"
 #include "RungeKutta.hpp"
@@ -79,7 +80,7 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
 
 
 // see .hpp file for description
-bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
+bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 				const std::string& fileName)
 {
 
@@ -148,7 +149,6 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	gmsh::initialize();
 	gmsh::option::setNumber("General.Terminal", 1);
 	gmsh::open(fileName);
-	int viewTag = gmsh::view::add("results");
 	std::vector<std::string> names;
 	gmsh::model::list(names);
 	std::string modelName = names[0];
@@ -162,22 +162,8 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
-	unsigned int index = 0;
-
-	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-	{
-		std::vector<double> temp(elementNumNodes[count]);
-		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
-		{
-			temp[node]=field.u[0][index];
-			++index;
-		}
-
-		uDisplay[count] = std::move(temp);
-	}
-
-	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-	                         uDisplay, t, 1);
+    writeShallow(uDisplay, elementNumNodes, elementTags, modelName,
+                 0, 0, field, solverParams.whatToWrite, solverParams.viewTags);
 
 
 	/*******************************************************************************
@@ -233,21 +219,9 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         // store the results every Dt only.
 		if((nbrStep % nTimeStepsDtWrite) == 0)
         {
-            unsigned int offset = 0;
-            for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-            {
-                std::vector<double> temp(elementNumNodes[count]);
-                for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
-                    ++countLocal)
-                {
-                    temp[countLocal] = field.u[0][countLocal+offset];
-                }
-                offset += elementNumNodes[count];
-                uDisplay[count] = std::move(temp);
-            }
-
-            gmsh::view::addModelData(viewTag, nbrStep, modelName, dataType, elementTags,
-                uDisplay, t, 1);
+            solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,
+                         nbrStep, t, field, solverParams.whatToWrite,
+                         solverParams.viewTags);
         }
 	}
 
@@ -255,9 +229,8 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 			<< std::endl;
 
 	// write the results & finalize
-    gmsh::view::write(viewTag, std::string("results.msh"));
+    writeEnd(solverParams.viewTags, solverParams.whatToWrite);
     gmsh::finalize();
-
 
 	return true;
 }
