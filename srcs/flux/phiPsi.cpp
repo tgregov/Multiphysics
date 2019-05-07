@@ -5,17 +5,17 @@
 void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec)
+               const SolverParams& solverParams)
 {
     // gravity parameter
     double g = solverParams.fluxCoeffs[0];
 
     // computation of the absolute value of the eigenvalue lambda inside the element
-    double lambdaIn =   (field.u[1][indexJ - nodePrec]*edge.normal[0]
-                    +   field.u[2][indexJ - nodePrec]*edge.normal[1])/field.u[0][indexJ - nodePrec];
+    double lambdaIn =   (field.u[1][indexJ]*edge.normal[0]
+                    +   field.u[2][indexJ]*edge.normal[1])/field.u[0][indexJ];
 
-    lambdaIn = (lambdaIn >= 0) ? lambdaIn + sqrt(g*field.u[0][indexJ - nodePrec]) :
-                -lambdaIn + sqrt(g*field.u[0][indexJ - nodePrec]);
+    lambdaIn = (lambdaIn >= 0) ? lambdaIn + sqrt(g*field.u[0][indexJ]) :
+                -lambdaIn + sqrt(g*field.u[0][indexJ]);
 
     double lambdaOut;
 
@@ -37,9 +37,9 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
-                    -(factor*field.flux[dim][unk][indexJ-nodePrec]
+                    -(factor*field.flux[dim][unk][indexJ]
                         + partialField.FluxAtBC[dim][unk]
-                    + C*edge.normal[dim]*(field.u[unk][indexJ-nodePrec]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
                         - partialField.uAtBC[unk]))/2;
             }
         }
@@ -47,12 +47,12 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
     else
     {
         // computation of the absolute value of the eigenvalue lambda outside the element
-        lambdaOut = (field.u[1][indexFrontJ]*edge.normal[0]
-                        + field.u[2][indexFrontJ]*edge.normal[1])
-                    /field.u[0][indexFrontJ];
+        lambdaOut = (compField.u[1][indexFrontJ]*edge.normal[0]
+                        + compField.u[2][indexFrontJ]*edge.normal[1])
+                    /compField.u[0][indexFrontJ];
 
-        lambdaOut = (lambdaOut >= 0) ? lambdaOut + sqrt(g*field.u[0][indexFrontJ]) :
-            -lambdaOut + sqrt(g*field.u[0][indexFrontJ]);
+        lambdaOut = (lambdaOut >= 0) ? lambdaOut + sqrt(g*compField.u[0][indexFrontJ]) :
+            -lambdaOut + sqrt(g*compField.u[0][indexFrontJ]);
 
         // computation of the value of C in the LF scheme
         double C = (lambdaIn > lambdaOut ? lambdaIn : lambdaOut);
@@ -62,9 +62,9 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
-                    -(factor*field.flux[dim][unk][indexJ-nodePrec]
+                    -(factor*field.flux[dim][unk][indexJ]
                         + compField.flux[dim][unk][indexFrontJ]
-                    + C*edge.normal[dim]*(field.u[unk][indexJ-nodePrec]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
                         - compField.u[unk][indexFrontJ]))/2;
             }
         }
@@ -76,7 +76,7 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
 void Roe(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec)
+               const SolverParams& solverParams)
 {
     // gravity parameter
     double g = solverParams.fluxCoeffs[0];
@@ -169,7 +169,7 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField,
 void LFTransport(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec)
+               const SolverParams& solverParams)
 {
 
     // compute the value of the C of a pure transport LF scheme
@@ -184,9 +184,9 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField,
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
-                    -(factor*field.flux[dim][unk][indexJ - nodePrec]
+                    -(factor*field.flux[dim][unk][indexJ]
                         + partialField.FluxAtBC[dim][unk]
-                    + C*edge.normal[dim]*(field.u[unk][indexJ - nodePrec]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
                         - partialField.uAtBC[unk]))/2;
             }
         }
@@ -198,9 +198,9 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField,
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
-                    -(factor*field.flux[dim][unk][indexJ - nodePrec]
+                    -(factor*field.flux[dim][unk][indexJ]
                         + field.flux[dim][unk][indexFrontJ]
-                    + C*edge.normal[dim]*(field.u[unk][indexJ - nodePrec]
+                    + C*edge.normal[dim]*(field.u[unk][indexJ]
                         - field.u[unk][indexFrontJ]))/2;
             }
         }
@@ -212,7 +212,7 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField,
 void mean(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec)
+               const SolverParams& solverParams)
 {
 
     // compute the numerical flux
@@ -223,7 +223,7 @@ void mean(const Edge& edge, Field& field, PartialField& partialField,
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
-                    -(factor*field.flux[dim][unk][indexJ - nodePrec]
+                    -(factor*field.flux[dim][unk][indexJ]
                         + partialField.FluxAtBC[dim][unk])/2;
             }
         }
@@ -235,7 +235,7 @@ void mean(const Edge& edge, Field& field, PartialField& partialField,
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
-                    -(factor*field.flux[dim][unk][indexJ - nodePrec]
+                    -(factor*field.flux[dim][unk][indexJ]
                         + field.flux[dim][unk][indexFrontJ])/2;
             }
         }

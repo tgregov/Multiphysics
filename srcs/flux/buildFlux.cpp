@@ -59,8 +59,10 @@ void buildFlux(const Mesh& mesh, Field& field, const CompleteField& compField,
 
                         // compute the numerical flux
                         // (the weak/strong form is stored in "factor")
-                        solverParams.phiPsi(entity.elements[elm].edges[s], field, partialField, compField, j, factor, true, indexJ, 0,
-                        					solverParams, domainDiv.nodePrec[rank]);
+                        solverParams.phiPsi(entity.elements[elm].edges[s], field,
+                                            partialField, compField, j, factor, true,
+                                            indexJ-domainDiv.nodePrec[rank], 0,
+                        					solverParams);
 
 					}
 					else // general case
@@ -78,8 +80,10 @@ void buildFlux(const Mesh& mesh, Field& field, const CompleteField& compField,
 
                         // compute the numerical flux
                         // (the weak/strong form is stored in "factor")
-                        solverParams.phiPsi(entity.elements[elm].edges[s], field, partialField, compField, j, factor, false, indexJ, 0,
-                        					solverParams,  domainDiv.nodePrec[rank]);
+                        solverParams.phiPsi(entity.elements[elm].edges[s], field,
+                                            partialField, compField, j, factor, false,
+                                            indexJ-domainDiv.nodePrec[rank], indexFrontJ,
+                        					solverParams);
 					}
 				}
 

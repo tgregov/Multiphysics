@@ -23,7 +23,7 @@ void exchangeFlux(const Field& field, CompleteField& compField,
     {
         for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
         {
-            MPI_Bcast(&compField.flux[dim][unk][0], solverParams.nUnknowns, MPI_DOUBLE,
+            MPI_Bcast(&compField.flux[dim][unk][0],  mesh.nodeData.numNodes, MPI_DOUBLE,
                       0, MPI_COMM_WORLD);
         }
     }
@@ -31,7 +31,7 @@ void exchangeFlux(const Field& field, CompleteField& compField,
 
 void exchangeUnk(const Field& field, CompleteField& compField,
                   const DomainDiv& domainDiv, unsigned int rank,
-                  const SolverParams& solverParams)
+                  const SolverParams& solverParams, const Mesh& mesh)
 {
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
@@ -44,7 +44,7 @@ void exchangeUnk(const Field& field, CompleteField& compField,
     //Master Thread send compField.flux to everyone
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
-        MPI_Bcast(&compField.u[unk][0], solverParams.nUnknowns, MPI_DOUBLE,
+        MPI_Bcast(&compField.u[unk][0], mesh.nodeData.numNodes, MPI_DOUBLE,
                   0, MPI_COMM_WORLD);
     }
 }

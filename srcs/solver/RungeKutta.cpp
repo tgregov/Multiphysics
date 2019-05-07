@@ -15,7 +15,7 @@ void RK1(double t, Field& field, PartialField& partialField,
     solverParams.flux(field, partialField, solverParams, false);
     MPI_Barrier(MPI_COMM_WORLD);
     exchangeFlux(field, compField, domainDiv, rank, solverParams, mesh);
-    exchangeUnk(field, compField, domainDiv, rank, solverParams);
+    exchangeUnk(field, compField, domainDiv, rank, solverParams, mesh);
     MPI_Barrier(MPI_COMM_WORLD);
 }
 

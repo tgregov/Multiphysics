@@ -21,7 +21,7 @@
 void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec);
+               const SolverParams& solverParams);
 
 
 /**
@@ -39,7 +39,7 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField,
 void Roe(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec);
+               const SolverParams& solverParams);
 
 
 /**
@@ -57,7 +57,7 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField,
 void mean(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec);
+               const SolverParams& solverParams);
 
 
 /**
@@ -75,6 +75,6 @@ void mean(const Edge& edge, Field& field, PartialField& partialField,
 void LFTransport(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec);
+               const SolverParams& solverParams);
 
 #endif // phiPsi_hpp_included

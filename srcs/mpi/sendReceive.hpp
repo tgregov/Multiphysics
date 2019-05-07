@@ -13,6 +13,6 @@ void exchangeFlux(const Field& field, CompleteField& compField,
 
 void exchangeUnk(const Field& field, CompleteField& compField,
                   const DomainDiv& domainDiv, unsigned int rank,
-                  const SolverParams& solverParams);
+                  const SolverParams& solverParams, const Mesh& mesh);
 
 #endif /* sendReceive_hpp_included */

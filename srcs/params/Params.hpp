@@ -46,7 +46,7 @@ struct SolverParams
     std::function<void(const Edge& edge, Field& field, PartialField& partialField,
                const CompleteField& compField, unsigned int j, double factor,
                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-               const SolverParams& solverParams, unsigned int nodePrec)> phiPsi; /**< Pointer to the
+               const SolverParams& solverParams)> phiPsi; /**< Pointer to the
                        rhs function (phi or psi depending of the type of scheme)*/
 
     bool IsSourceTerms;
