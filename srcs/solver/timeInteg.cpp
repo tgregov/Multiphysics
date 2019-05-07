@@ -14,7 +14,7 @@
  * \brief Compute the increment vector of the unknown fields, for the weak form.
  * \param t Current time.
  * \param u Current solution.
- * \param field Field that contains all the main variables.
+ * \param field Structure that contains all the main variables.
  * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
@@ -49,7 +49,7 @@ static void Fweak(double t, Field& field, PartialField& partialField, const Matr
  * \brief Compute the increment vector of the unknown fields, for the strong form.
  * \param t Current time.
  * \param u Current solution.
- * \param field Field that contains all the main variables.
+ * \param field Structure that contains all the main variables.
  * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
@@ -162,8 +162,9 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
-    writeShallow(uDisplay, elementNumNodes, elementTags, modelName,
-                 0, 0, field, solverParams.whatToWrite, solverParams.viewTags);
+    writeShallow(uDisplay, elementNumNodes, elementTags, modelName,0, 0, field,
+                 solverParams.fluxCoeffs, solverParams.whatToWrite,
+                 solverParams.viewTags);
 
 
 	/*******************************************************************************
@@ -220,8 +221,8 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 		if((nbrStep % nTimeStepsDtWrite) == 0)
         {
             solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,
-                         nbrStep, t, field, solverParams.whatToWrite,
-                         solverParams.viewTags);
+                         nbrStep, t, field, solverParams.fluxCoeffs,
+                         solverParams.whatToWrite, solverParams.viewTags);
         }
 	}
 
