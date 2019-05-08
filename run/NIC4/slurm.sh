@@ -10,7 +10,7 @@
 #SBATCH --output=out.txt
 
 module load gcc/4.9.2
-module load openmpi/1.6.4/gcc-4.9.2
+module load openmpi/1.8.4/gcc-4.9.2
 export CC=gcc
 export CXX=g++
 export FC=gfortran
@@ -19,4 +19,4 @@ export OMP_CANCELLATION=true
 export MPI_NUM_THREADS=4
 
 cd $HOME/Multiphysics
-mpirun -np $MPI_NUM_THREADS ./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh ./Params/param.dat
+mpirun --bind-to none  -np $MPI_NUM_THREADS ./build/bin/main ./Geometry/2D\ Rectangle/rectangle.msh ./Params/param.dat
