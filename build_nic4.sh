@@ -13,6 +13,7 @@ fi
 
 module load cmake/3.11.1
 module load gcc/4.9.2
+module load openmpi/1.6.4/gcc-4.9.2
 export CC=gcc
 export CXX=g++
 

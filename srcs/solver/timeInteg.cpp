@@ -78,7 +78,7 @@ static void Fstrong(double t, Field& field, CompleteField& compField,
 
 
 // see .hpp file for description
-bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
+bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
                const std::string& fileName, int rank, int numberProc)
 {
     // Get MPI parameters
@@ -195,9 +195,9 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 *******************************************************************************/
     if(rank == 0)
     {
-		solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,0, 0, field,
-						   solverParams.fluxCoeffs, solverParams.whatToWrite,
-						   solverParams.viewTags);
+		solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,
+                           0, 0, field, solverParams.fluxCoeffs,
+                           solverParams.whatToWrite, solverParams.viewTags);
 	}
 
 	/*******************************************************************************

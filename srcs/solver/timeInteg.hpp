@@ -17,7 +17,7 @@
  * \param numberProc Total number of MPI threads.
  * \return true if time integration happened without problems, false otherwise.
  */
-bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
+bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
                const std::string& fileName, int rank, int numberProc);
 
 #endif /* timeInteg_hpp_included */
