@@ -13,7 +13,7 @@ typedef std::function<void(double t, Field& field, CompleteField& compField,
 typedef std::function<void(double t, Field& field, PartialField& partialField,
          CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
          unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
-         Field& temp, CompleteField& tempCompField, UsedF usedF)> IntegScheme;
+         Field& temp, UsedF usedF)> IntegScheme;
 
 
 /**
@@ -36,7 +36,7 @@ typedef std::function<void(double t, Field& field, PartialField& partialField,
 void RK1(double t, Field& field, PartialField& partialField,
          CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
          unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
-         Field& temp, CompleteField& tempCompField, UsedF usedF);
+         Field& temp, UsedF usedF);
 
 
 /**
@@ -59,7 +59,7 @@ void RK1(double t, Field& field, PartialField& partialField,
 void RK2(double t, Field& field, PartialField& partialField,
          CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
          unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
-         Field& temp, CompleteField& tempCompField, UsedF usedF);
+         Field& temp, UsedF usedF);
 
 
 /**
@@ -82,7 +82,7 @@ void RK2(double t, Field& field, PartialField& partialField,
 void RK3(double t, Field& field, PartialField& partialField,
          CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
          unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
-         Field& temp, CompleteField& tempCompField, UsedF usedF);
+         Field& temp, UsedF usedF);
 
 
 /**
@@ -105,4 +105,4 @@ void RK3(double t, Field& field, PartialField& partialField,
 void RK4(double t, Field& field, PartialField& partialField,
          CompleteField& compField, const Matrix& matrix, const DomainDiv& domainDiv,
          unsigned int rank, const Mesh& mesh, const SolverParams& solverParams,
-         Field& temp, CompleteField& tempCompField, UsedF usedF);
+         Field& temp, UsedF usedF);
