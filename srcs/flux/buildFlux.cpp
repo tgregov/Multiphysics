@@ -13,7 +13,7 @@ void buildFlux(const Mesh& mesh, Field& field, const CompleteField& compField,
 	{
 	    Entity entity = mesh.entities[ent];
 		// loop over the elements
-		//#pragma omp parallel for default(none) shared(field, compField, mesh, entity, solverParams, factor, t, nodePrec)
+		#pragma omp parallel for default(none) shared(field, compField, mesh, entity, solverParams, factor, t, rank, domainDiv)
 		for(size_t elm = domainDiv.elementPrec[rank] ; elm < domainDiv.elementPrec[rank] + domainDiv.element[rank] ; elm++)
 		{
 			PartialField partialField(solverParams.nUnknowns, mesh.dim);
