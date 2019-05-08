@@ -23,6 +23,9 @@
  * stored.
  * \param Sy The Eigen::SparseMatrix in which the matrix [Sx] components will be
  * stored.
+ * \param domainDiv Structure representing how the nodes
+ * are split into the MPI threads.
+ * \param rank Rank of the MPI thread.
  */
 void buildS(const Mesh& mesh, Eigen::SparseMatrix<double>& Sx,
 	Eigen::SparseMatrix<double>& Sy,

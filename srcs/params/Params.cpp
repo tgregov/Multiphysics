@@ -13,7 +13,11 @@
 #include "../flux/flux.hpp"
 #include "../source/source.hpp"
 
-
+/**
+ * \brief Wrapper of std::getline to have comments in file with //
+ * \param file The file which has been previously opened.
+ * \param line The computed line (without comments)
+ */
 static void getLine(std::ifstream& file, std::string& line)
 {
     std::string tempLine;
@@ -51,6 +55,7 @@ static void getLine(std::ifstream& file, std::string& line)
  * \param paramFile The file which has been previously opened.
  * \param solverParams The structure in which the parameters are loaded.
  * \param fileName The name of the parameters file which has been opened (for debug output).
+ * \param rank Rank of the MPI thread.
  * \return true if the loading succeeds, false otherwise.
  */
 static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solverParams,

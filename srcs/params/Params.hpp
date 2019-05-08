@@ -63,6 +63,7 @@ struct SolverParams
  * \param fileName The name of the parameters file to load.
  * \param solverParams The structure in which the parameters are loaded.
  * \return true if the loading succeeds, false otherwise.
+ * \param rank Rank of the MPI thread.
  */
 bool loadSolverParams(const std::string& fileName, SolverParams& solverParams, int rank);
 

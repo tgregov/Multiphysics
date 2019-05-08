@@ -3,6 +3,7 @@
 :: -> https://sourceforge.net/projects/mingw-w64/files/latest/download
 :: How to create a new compile profile in Code::Blocks
 :: -> https://medium.com/@yzhong.cs/code-blocks-compile-64-bit-under-windows-with-mingw-w64-79101f5bbc02
+:: -> https://www.symscape.com/configure-msmpi-v8-1-for-mingw-w64
 :: Do not forget to change the CB project compiler when you launch the .cbp !
 
 @ECHO OFF

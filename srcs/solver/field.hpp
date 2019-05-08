@@ -4,12 +4,23 @@
 #include <vector>
 #include <Eigen/Dense>
 
+/**
+ * \struct Field
+ * \brief Structure that contains the full unknowns & fluxes for the DG method.
+ */
 struct CompleteField
 {
-    std::vector<Eigen::VectorXd> u;
+    std::vector<Eigen::VectorXd> u; /**< Solution fields (of size equal to the number of scalar unknowns) */
 
-	std::vector<std::vector<Eigen::VectorXd>> flux;
+	std::vector<std::vector<Eigen::VectorXd>> flux; /**< Physical flux fields (of size equal to the number of dimension, with each
+                                                         dimension as a size equal to the number of scalar unknowns) */
 
+    	/**
+     * \brief Constructor
+     * \param numNodes The number of nodes in the mesh.
+     * \param numUnknown The number of unknowns of the problem.
+     * \param dim The dimension of the mesh.
+     */
 	CompleteField(unsigned int numNodes, unsigned short numUnknown, unsigned short dim)
 	{
         // resize each field
@@ -55,7 +66,7 @@ struct Field
 
 	/**
      * \brief Constructor
-     * \param numNodes The number of nodes in the mesh.
+     * \param numNodes The number of nodes in the MPI thread.
      * \param numUnknown The number of unknowns of the problem.
      * \param dim The dimension of the mesh.
      */

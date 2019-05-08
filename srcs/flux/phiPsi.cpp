@@ -127,17 +127,17 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField,
     {
         // compute the Roe averages
         hJSqrt = sqrt(field.u[0][indexJ]);
-        hFrontJSqrt = sqrt(field.u[0][indexFrontJ]);
+        hFrontJSqrt = sqrt(compField.u[0][indexFrontJ]);
 
         uRoe = ((field.u[1][indexJ]/field.u[0][indexJ])*hJSqrt
-                        + (field.u[1][indexFrontJ]/field.u[0][indexFrontJ])*hFrontJSqrt)
+                        + (compField.u[1][indexFrontJ]/compField.u[0][indexFrontJ])*hFrontJSqrt)
                         /(hJSqrt + hFrontJSqrt);
 
         vRoe =   ((field.u[2][indexJ]/field.u[0][indexJ])*hJSqrt
-                        + (field.u[2][indexFrontJ]/field.u[0][indexFrontJ])*hFrontJSqrt)
+                        + (compField.u[2][indexFrontJ]/compField.u[0][indexFrontJ])*hFrontJSqrt)
                         /(hJSqrt + hFrontJSqrt);
 
-        cRoe = sqrt(g*(field.u[0][indexJ] + field.u[0][indexFrontJ])/2);
+        cRoe = sqrt(g*(field.u[0][indexJ] + compField.u[0][indexFrontJ])/2);
 
         // compute the (limited) Froude number
         double Fr = (uRoe*edge.normal[0] + vRoe*edge.normal[1])/cRoe;
@@ -156,9 +156,9 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField,
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -((Fr + factor)*field.flux[dim][unk][indexJ]+
-                        (1 - Fr)*field.flux[dim][unk][indexFrontJ]
+                        (1 - Fr)*compField.flux[dim][unk][indexFrontJ]
                     + cRoe*(1-Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
-                        - field.u[unk][indexFrontJ]))/2;
+                        - compField.u[unk][indexFrontJ]))/2;
             }
         }
     }
@@ -199,9 +199,9 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField,
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -(factor*field.flux[dim][unk][indexJ]
-                        + field.flux[dim][unk][indexFrontJ]
+                        + compField.flux[dim][unk][indexFrontJ]
                     + C*edge.normal[dim]*(field.u[unk][indexJ]
-                        - field.u[unk][indexFrontJ]))/2;
+                        - compField.u[unk][indexFrontJ]))/2;
             }
         }
     }
@@ -236,7 +236,7 @@ void mean(const Edge& edge, Field& field, PartialField& partialField,
             {
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -(factor*field.flux[dim][unk][indexJ]
-                        + field.flux[dim][unk][indexFrontJ])/2;
+                        + compField.flux[dim][unk][indexFrontJ])/2;
             }
         }
     }

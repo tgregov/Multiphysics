@@ -9,6 +9,9 @@
  * \brief Builds the matrices required for the DG-FEM
  * \param mesh The structure that contains the mesh.
  * \param matrix The structure that will contain the matrices.
+ * \param domainDiv Structure representing how the nodes
+ * are split into the MPI threads.
+ * \param rank Rank of the MPI thread.
  */
 void buildMatrix(const Mesh& mesh, Matrix& matrix,
                  const DomainDiv& domainDiv, unsigned int rank);

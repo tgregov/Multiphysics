@@ -141,6 +141,7 @@ std::vector<int> getTags(const Mesh& mesh);
  * \param fileName The name of the file to load.
  * \param intScheme Integration scheme for the basis functions evaluation.
  * \param basisFuncType The type of basis function you will use.
+ * \param rank Rank of the MPI thread.
  */
 bool readMesh(Mesh& mesh, const std::string& fileName,
               const std::string& intScheme, const std::string& basisFuncType,

@@ -15,6 +15,9 @@
  * calculate this sum, and store the result in a sparse matrix.
  * \param mesh The structure that contains the mesh.
  * \param invM The Eigen::SparseMatrix in which the matrix components will be stored.
+ * \param domainDiv Structure representing how the nodes
+ * are split into the MPI threads.
+ * \param rank Rank of the MPI thread.
  */
 void buildM(const Mesh& mesh, Eigen::SparseMatrix<double>& invM,
             const DomainDiv& domainDiv, unsigned int rank);

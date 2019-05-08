@@ -218,6 +218,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	// temporary vectors (only for RK4, but I don't want to define them at each time
 	// iteration)
 	Field temp = field;
+    CompleteField tempComp = compField ;
 
     //Function pointer to the used integration scheme
     IntegScheme integScheme;
@@ -258,7 +259,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         }
 
         integScheme(t, field, partialField, compField, matrix, domainDiv, rank,
-                    mesh, solverParams, temp, usedF);
+                    mesh, solverParams, temp, tempComp, usedF);
 
 
 		// check that it does not diverge
