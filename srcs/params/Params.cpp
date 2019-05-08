@@ -374,7 +374,58 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams, i
 
     temp.clear();
     getLine(paramFile, temp);
+    unsigned int precComaPos = -1;
+    for(unsigned int i = 0 ; i < temp.size() ; ++i)
+    {
+        if(temp[i] == ',')
+        {
+            solverParams.whatToWrite.push_back(
+                (temp.substr(precComaPos + 1, i - precComaPos - 1))
+                 == "1" ? true : false);
+            precComaPos = i;
+        }
+    }
+    //At the end, still one push_back to do
+    solverParams.whatToWrite.push_back(
+        (temp.substr(precComaPos+1, temp.size() - precComaPos - 1))
+        == "1" ? true : false);
+
     bool error = false;
+    if(solverParams.problemType == "shallow"
+        || solverParams.problemType == "shallowLin")
+    {
+        if(solverParams.whatToWrite.size() !=5)
+            error = true;
+        else
+        {
+            solverParams.write = writeShallow;
+        }
+    }
+    else if(solverParams.problemType == "transport")
+    {
+        if(solverParams.whatToWrite.size() !=1)
+            error = true;
+        else
+        {
+            solverParams.write = writeTransport;
+        }
+    }
+    if(error)
+    {
+        std::cerr << "Unexpected number of writing parameters ("
+                  << solverParams.whatToWrite.size() << ") for problem type "
+                  << solverParams.problemType << std::endl;
+
+        paramFile.close();
+
+        return false;
+    }
+
+    solverParams.viewTags.resize(solverParams.whatToWrite.size());
+
+    temp.clear();
+    getLine(paramFile, temp);
+    error = false;
     if(solverParams.problemType == "shallow"
         || solverParams.problemType == "shallowLin")
     {
@@ -422,11 +473,9 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams, i
     }
 
 
-
-
     temp.clear();
     getLine(paramFile, temp);
-    unsigned int precComaPos = -1;
+    precComaPos = -1;
     for(unsigned int i = 0 ; i < temp.size() ; ++i)
     {
         if(temp[i] == ',')

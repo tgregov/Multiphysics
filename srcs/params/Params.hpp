@@ -7,6 +7,7 @@
 #include "ibvFunction.hpp"
 #include "../solver/field.hpp"
 #include "../mesh/Mesh.hpp"
+#include "../write/write.hpp"
 
 /**
  * \struct SolverParams
@@ -49,13 +50,24 @@ struct SolverParams
                const SolverParams& solverParams)> phiPsi; /**< Pointer to the
                        rhs function (phi or psi depending of the type of scheme)*/
 
-    bool IsSourceTerms;
+    bool IsSourceTerms;                 /**< (De)activate source terms computation*/
+    std::string sourceType;             /**< Denotes the type of source terms*/
+    std::vector<double> sourceCoeffs;   /**< Coefficient of the source terms*/
+    std::function<void(Field& field, const SolverParams& solverParams)> sourceTerm;/**< Pointer to the source terms function*/
 
-    std::string sourceType;
 
-    std::vector<double> sourceCoeffs;
+    std::vector<bool> whatToWrite; /**< Vector of boolean denoting
+                                        what will be written (problem dependent)*/
+    std::vector<int> viewTags;  /**< Store the view tag of what will be written*/
 
-    std::function<void(Field& field, const SolverParams& solverParams)> sourceTerm;
+    std::function<void(std::vector<std::vector<double>>& uDisplay,
+                  const std::vector<unsigned int>& elementNumNodes,
+                  const std::vector<int>& elementTags, const std::string& modelName,
+                  unsigned int nbreStep, double t, const Field& field,
+                  const std::vector<double>& fluxCoeffs,
+                  const std::vector<bool>& whatToWrite,
+                  std::vector<int>& viewTags)> write; /**< Pointer to the function
+                                                           which will write*/
 };
 
 /**

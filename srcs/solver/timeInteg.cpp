@@ -6,6 +6,7 @@
 #include "../matrices/buildMatrix.hpp"
 #include "../matrices/matrix.hpp"
 #include "../flux/buildFlux.hpp"
+#include "../write/write.hpp"
 #include "timeInteg.hpp"
 #include "field.hpp"
 #include "RungeKutta.hpp"
@@ -16,7 +17,7 @@
  * \brief Compute the increment vector of the unknown fields, for the weak form.
  * \param t Current time.
  * \param u Current solution.
- * \param field Field that contains all the main variables.
+ * \param field Structure that contains all the main variables.
  * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
@@ -48,7 +49,7 @@ static void Fweak(double t, Field& field, CompleteField& compField,
  * \brief Compute the increment vector of the unknown fields, for the strong form.
  * \param t Current time.
  * \param u Current solution.
- * \param field Field that contains all the main variables.
+ * \param field Structure that contains all the main variables.
  * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
@@ -175,6 +176,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
     std::string dataType = "ElementNodeData";
     std::vector<int> elementTags = mesh.nodeData.elementTags;
     std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
+
     std::vector<std::vector<double>> uDisplay(elementNumNodes.size());
     if(rank == 0)
     {
@@ -193,24 +195,10 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 *******************************************************************************/
     if(rank == 0)
     {
-        unsigned int index = 0;
-
-        for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-        {
-            std::vector<double> temp(elementNumNodes[count]);
-            for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
-            {
-                temp[node]=compField.u[0][index];
-                ++index;
-            }
-
-            uDisplay[count] = std::move(temp);
-        }
-
-        gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-                                 uDisplay, t, 1);
-    }
-
+		solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,0, 0, field,
+						   solverParams.fluxCoeffs, solverParams.whatToWrite,
+						   solverParams.viewTags);
+	}
 
 	/*******************************************************************************
 	 *						       TIME INTEGRATION      						   *
@@ -269,21 +257,9 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         // store the results every Dt only.
 		if((nbrStep % nTimeStepsDtWrite) == 0 && rank == 0)
         {
-            unsigned int offset = 0;
-            for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-            {
-                std::vector<double> temp(elementNumNodes[count]);
-                for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
-                    ++countLocal)
-                {
-                    temp[countLocal] = compField.u[0][countLocal+offset];
-                }
-                offset += elementNumNodes[count];
-                uDisplay[count] = std::move(temp);
-            }
-
-            gmsh::view::addModelData(viewTag, nbrStep, modelName, dataType, elementTags,
-                uDisplay, t, 1);
+            solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,
+                         nbrStep, t, field, solverParams.fluxCoeffs,
+                         solverParams.whatToWrite, solverParams.viewTags);
         }
 	}
 
@@ -292,10 +268,10 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush
 	 			<< std::endl;
 
-        // write the results & finalize
-        gmsh::view::write(viewTag, std::string("results.msh"));
-        gmsh::finalize();
-    }
+		// write the results & finalize
+		writeEnd(solverParams.viewTags, solverParams.whatToWrite);
+		gmsh::finalize();
+	}
 
 	return true;
 }
