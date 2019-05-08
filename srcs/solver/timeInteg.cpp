@@ -196,7 +196,7 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
     if(rank == 0)
     {
 		solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,
-                           0, 0, field, solverParams.fluxCoeffs,
+                           0, 0, compField, solverParams.fluxCoeffs,
                            solverParams.whatToWrite, solverParams.viewTags);
 	}
 
@@ -258,7 +258,7 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 		if((nbrStep % nTimeStepsDtWrite) == 0 && rank == 0)
         {
             solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,
-                         nbrStep, t, field, solverParams.fluxCoeffs,
+                         nbrStep, t, compField, solverParams.fluxCoeffs,
                          solverParams.whatToWrite, solverParams.viewTags);
         }
 	}

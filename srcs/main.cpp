@@ -51,8 +51,13 @@ int main(int argc, char **argv)
         omp_set_num_threads(n);
         Eigen::setNbThreads(1);
         if(rank == 0)
-            std::cout << "Number of threads: " << n << std::endl;;
+            std::cout << "Number of threads: " << n << std::endl;
     #endif
+
+    if(rank == 0)
+    {
+        std::cout << "Number of MPI threads: " << numberProc << std::endl;
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
 
