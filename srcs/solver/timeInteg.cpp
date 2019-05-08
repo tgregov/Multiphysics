@@ -162,9 +162,9 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
-    writeShallow(uDisplay, elementNumNodes, elementTags, modelName,0, 0, field,
-                 solverParams.fluxCoeffs, solverParams.whatToWrite,
-                 solverParams.viewTags);
+    solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,0, 0, field,
+                         solverParams.fluxCoeffs, solverParams.whatToWrite,
+                         solverParams.viewTags);
 
 
 	/*******************************************************************************
