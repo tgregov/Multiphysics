@@ -3,12 +3,12 @@
 #include <gmsh.h>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
-#include "computeL2Norm.hpp"
+#include "computeNorm.hpp"
 #include "computeError.hpp"
 
 
 bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std::string& meshName,
-                     const std::string& resultsName, double& error)
+                     const std::string& resultsName, double& errorL2, double& errorLinf)
 {
 	gmsh::initialize();
 	gmsh::option::setNumber("General.Terminal", 1);
@@ -49,10 +49,10 @@ gmsh::finalize();
 gmsh::initialize();
 gmsh::option::setNumber("General.Terminal", 1);
 gmsh::open(meshName);
-error = computeL2Norm(mesh, solverParams, t, u);
+computeNorm(mesh, solverParams, t, u, errorL2, errorLinf);
 gmsh::finalize();
 
-std::cout << "Error value:" << error << std::endl;
+std::cout << "Error value:" << errorL2  << "\t" << errorLinf << std::endl;
         
 
     return true;

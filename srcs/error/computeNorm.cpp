@@ -1,5 +1,6 @@
 #include <gmsh.h>
-#include "computeL2Norm.hpp"
+#include <cmath>
+#include "computeNorm.hpp"
 
 double func(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
 
@@ -9,10 +10,9 @@ return coeffs[3] + 0.5*(coeffs[0]*exp(-(x-coeffs[1]+v*t)*(x-coeffs[1]+v*t)/(2*co
     coeffs[0]*exp(-(x-coeffs[1]-v*t)*(x-coeffs[1]-v*t)/(2*coeffs[2])));}
 
 
-double computeL2Norm(const Mesh& mesh, const SolverParams& solverParams, double t, Eigen::VectorXd u)
+void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, Eigen::VectorXd u, double& errorL2, double& errorLinf)
 {
     double sum = 0;
-
     std::vector<double> coeffs = solverParams.initCondition.coefficients;
     std::vector<double> fluxCoeffs = solverParams.fluxCoeffs;
 
@@ -22,6 +22,8 @@ double computeL2Norm(const Mesh& mesh, const SolverParams& solverParams, double 
         // current entity
         Entity entity = mesh.entities[ent];
 
+        //Vector containing the maximum error among all gauss points, for each element
+        Eigen::VectorXd maxGauss(entity.elements.size());
         // loop over the elements
         for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
         {
@@ -65,6 +67,8 @@ double computeL2Norm(const Mesh& mesh, const SolverParams& solverParams, double 
                     determinantHD[i] = DeterminantHD[elm*elmProp.nGP + i];
             }
 
+            //Vector containing the error at each Gauss point, for the element elm
+            Eigen::VectorXd temp(elmProp.nGP);
 
             //  loop over the Gauss points
             for(unsigned int k = 0 ; k < elmProp.nGP ; ++k)
@@ -80,9 +84,17 @@ double computeL2Norm(const Mesh& mesh, const SolverParams& solverParams, double 
                 sum += determinantHD[k]*elmProp.intPoints[4*k+3]
                     *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx)
                     *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
+
+                // error  = abs(u(x_k)-u_approx(x_k))
+                temp[k] = abs(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
+
             }
+            // Maximum over the Gauss points, for the element elm
+            maxGauss[elm] = temp.maxCoeff();
         }
+        // Maximum over all elements
+        errorLinf = maxGauss.maxCoeff();
+        errorL2 = sqrt(sum);
     }
 
-    return sum;
 }
