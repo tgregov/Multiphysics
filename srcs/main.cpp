@@ -53,66 +53,54 @@ int main(int argc, char **argv)
     }else
             std::cerr << "Impossible d'ouvrir le fichier !" << std::endl;
 
-    unsigned int order;
+    int order = solverParams.order;
     double errorL2 = 0;
     double errorLinf = 0;
-    for (order = 1 ; order <= 1 ; order ++)
+    generateMesh(argv[1], argv[2], order);  
+
+    // load the mesh
+    std::cout   << "================================================================"
+                << std::endl
+                << "                       LOADING THE MESH                         "
+                << std::endl
+                << "================================================================"
+                << std::endl;
+    Mesh mesh;
+    if(!readMesh(mesh, std::string(argv[2]), solverParams.spaceIntType,
+        solverParams.basisFuncType))
     {
-        generateMesh(argv[1], argv[2], order);  
-
-        std::cout   << "================================================================"
-                    << std::endl
-                    << "                       ORDER:                                   "
-                    << std::endl
-                    << "                            "
-                    << order
-                    << std::endl
-                    << "================================================================"
-                    << std::endl; 
-        // load the mesh
-        std::cout   << "================================================================"
-                    << std::endl
-                    << "                       LOADING THE MESH                         "
-                    << std::endl
-                    << "================================================================"
-                    << std::endl;
-        Mesh mesh;
-        if(!readMesh(mesh, std::string(argv[2]), solverParams.spaceIntType,
-            solverParams.basisFuncType))
-        {
-            std::cerr   << "Something went wrong when reading mesh file: "
-                        << argv[2] << std::endl;
-            return -1;
-        }
-
-       displayMesh(mesh);
-       std::cout   << "================================================================"
-                    << std::endl
-                    << "                     EXECUTING THE SOLVER                       "
-                    << std::endl
-                    << "================================================================"
-                    << std::endl;
-        if(!timeInteg(mesh, solverParams, std::string(argv[2]), std::string(argv[4])))
-        {
-            std::cerr   << "Something went wrong when time integrating" << std::endl;
-            return -1;
-        }
-
-  std::cout   << "================================================================"
-            << std::endl
-            << "                       ERROR COMPUTATION                           "
-            << std::endl
-            << "==================================================================="
-            << std::endl;
-        if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]),
-                         errorL2, errorLinf))
-        {
-            std::cerr << "Something went wrong when computing the error" << std::endl;
-            return -1;
-        }
-            file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl;
-    
+        std::cerr   << "Something went wrong when reading mesh file: "
+                    << argv[2] << std::endl;
+        return -1;
     }
+
+   displayMesh(mesh);
+   std::cout   << "================================================================"
+                << std::endl
+                << "                     EXECUTING THE SOLVER                       "
+                << std::endl
+                << "================================================================"
+                << std::endl;
+    if(!timeInteg(mesh, solverParams, std::string(argv[2]), std::string(argv[4])))
+    {
+        std::cerr   << "Something went wrong when time integrating" << std::endl;
+        return -1;
+    }
+
+    std::cout   << "================================================================"
+        << std::endl
+        << "                       ERROR COMPUTATION                           "
+        << std::endl
+        << "==================================================================="
+        << std::endl;
+    if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]),
+                     errorL2, errorLinf))
+    {
+        std::cerr << "Something went wrong when computing the error" << std::endl;
+        return -1;
+    }
+        file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl;
+    
 
 
     file1.close();

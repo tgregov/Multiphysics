@@ -16,6 +16,7 @@ struct SolverParams
 {
     std::string spaceIntType;   /**< Number of points for Gauss integration
                                    (format Gaussx, x the number of points) */
+    int order;               /**< Order of shape function for the mesh*/
     std::string basisFuncType;  /**< Type of basis functions (Lagrange or Isoparametric */
     std::string timeIntType;    /**< Runge-Kutta time integration type (RK1 or RK4) */
     std::string solverType;     /**< Solver form (strong or weak) */

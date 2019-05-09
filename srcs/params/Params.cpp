@@ -248,6 +248,20 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
 
+    if(!(temp.find_first_not_of("123456789") == std::string::npos)) 
+    {
+        std::cerr << "Unexpected order " << temp
+                  << " in parameter file " << fileName << std::endl;
+
+        paramFile.close();
+        return false;
+    }
+
+    solverParams.order = std::stoi(temp);
+
+    temp.clear();
+    getLine(paramFile, temp);
+
     if(!(temp == "Lagrange" || temp == "Isoparametric"))
     {
         std::cerr << "Unexpected basis function type " << temp
