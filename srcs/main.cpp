@@ -99,8 +99,8 @@ int main(int argc, char **argv)
         std::cerr << "Something went wrong when computing the error" << std::endl;
         return -1;
     }
-        file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl;
+        file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl << std::endl;
         file1.close();
-        
+
     return 0;
 }

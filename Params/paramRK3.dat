@@ -1,10 +1,11 @@
 Gauss5
+1
 Lagrange
 RK3
 weak
-0.03
-5e-6
-0.001
+0.4
+1e-4
+0.1
 shallowLin
 LF
 9.81,10
