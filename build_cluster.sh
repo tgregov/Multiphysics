@@ -10,10 +10,14 @@ if [ ! -d "eigen-eigen-323c052e1731" ]; then
   tar -xf 3.3.7.tar.gz
   rm -rf 3.3.7.tar.gz
 fi
-
-module load cmake/3.11.1
-module load gcc/4.9.2
-module load openmpi/1.8.4/gcc-4.9.2
+if [ $1 == "vega" ]; then
+  module load GCC/4.9.2
+  module load OpenMPI/1.8.4-GCC-4.9.2
+elif [ $1 == "nic4" ]; then
+  module load cmake/3.11.1
+  module load gcc/4.9.2
+  module load openmpi/1.8.4/gcc-4.9.2
+fi
 export CC=gcc
 export CXX=g++
 
