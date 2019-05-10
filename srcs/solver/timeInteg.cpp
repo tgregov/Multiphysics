@@ -83,6 +83,7 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
 bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 				const std::string& fileName)
 {
+        std::cout << "Number of nodes: " << mesh.nodeData.numNodes << std::endl;
 
 	/*******************************************************************************
 	 *						            TIME STEPS 								   *
