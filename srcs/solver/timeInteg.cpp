@@ -83,6 +83,9 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 {
     // Get MPI parameters
     MPI_Status status;
+	
+    if(rank == 0)
+        std::cout << "Number of nodes: " << mesh.nodeData.numNodes << std::endl;
 
     if(numberProc >  mesh.nodeData.elementTags.size())
     {
