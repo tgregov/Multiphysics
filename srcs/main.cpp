@@ -74,7 +74,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-   displayMesh(mesh);
+   //displayMesh(mesh);
    std::cout   << "================================================================"
                 << std::endl
                 << "                     EXECUTING THE SOLVER                       "
@@ -100,9 +100,7 @@ int main(int argc, char **argv)
         return -1;
     }
         file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl;
-    
-
-
-    file1.close();
+        file1.close();
+        
     return 0;
 }

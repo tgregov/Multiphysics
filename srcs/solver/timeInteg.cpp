@@ -172,14 +172,14 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 
 	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 	{
-		std::vector<double> temp(elementNumNodes[count]);
+		std::vector<double> tempWrite(elementNumNodes[count]);
 		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
-			temp[node]=field.u[0][index];
+			tempWrite[node]=field.u[0][index];
 			++index;
 		}
 
-		uDisplay[count] = std::move(temp);
+		uDisplay[count] = std::move(tempWrite);
 	}
 
 	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
@@ -229,9 +229,11 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
             currentDecade = ratio + 1;
         }
 
-
+        //Call to RK
         integScheme(t, field, partialField, matrix, mesh, solverParams, temp, usedF);
-
+        
+        //Update of temporary field
+        temp = field;
 
 		// check that it does not diverge
 		// assert(field.u[0].maxCoeff() <= 1E5);
@@ -245,14 +247,14 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
             unsigned int offset = 0;
             for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
             {
-                std::vector<double> temp(elementNumNodes[count]);
+                std::vector<double> tempWrite(elementNumNodes[count]);
                 for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
                     ++countLocal)
                 {
-                    temp[countLocal] = field.u[0][countLocal+offset];
+                    tempWrite[countLocal] = field.u[0][countLocal+offset];
                 }
                 offset += elementNumNodes[count];
-                uDisplay[count] = std::move(temp);
+                uDisplay[count] = std::move(tempWrite);
             }
 
             gmsh::view::addModelData(viewTag, nbrStep, modelName, dataType, elementTags,
