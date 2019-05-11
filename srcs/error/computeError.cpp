@@ -22,13 +22,22 @@ bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std:
 	std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
     std::vector<std::vector<double>> data(elementNumNodes.size());
 
-	double t = 0.4;
-	int step = t/solverParams.timeStep;
+	double t1 = solverParams.simTime;
+    double t2;
+	int step = t1/solverParams.timeStep;
+
 
     //get the results computed by the solver
     gmsh::view::getModelData(tags[0], step, dataType, elementTags,
-                data, t, numComponents);
+                data, t2, numComponents);
 
+    std::cout << "t1,t2,step:" << std::endl << t1 << std::endl << t2 << std::endl << step << std::endl;
+    // if (t1 != t2)
+    // {
+    //     std::cerr << ("ERROR: timestep mismatching") << std::endl;
+    //     return false;
+    // }
+    
     int totalSize = data.size()*data[0].size();
 
     //put the field in a vector
@@ -49,7 +58,7 @@ gmsh::finalize();
 gmsh::initialize();
 gmsh::option::setNumber("General.Terminal", 1);
 gmsh::open(meshName);
-computeNorm(mesh, solverParams, t, u, errorL2, errorLinf);
+computeNorm(mesh, solverParams, t2, u, errorL2, errorLinf);
 gmsh::finalize();
 
 std::cout << "Error value:" << errorL2  << "\t" << errorLinf << std::endl;

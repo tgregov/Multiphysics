@@ -22,7 +22,7 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
         // current entity
         Entity entity = mesh.entities[ent];
 
-        //Vector containing the maximum error among all gauss points, for each element
+        //Linf: Vector containing the maximum error among all gauss points, for each element
         Eigen::VectorXd maxGauss(entity.elements.size());
         // loop over the elements
         for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
@@ -32,14 +32,13 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
 
             ElementProperty elmProp;
 
-            //get the integration points and basis functions for the samemesh but with a given number
+            //get the integration points and basis functions for the same mesh but with a larger number
             //of Gauss points
            gmsh::model::mesh::getBasisFunctions(element.elementTypeHD, "Gauss30",
                                         "Lagrange",
                                         elmProp.intPoints,
                                         elmProp.numComp,
                                         elmProp.basisFunc);
-           //std::cout << elmProp.intPoints.size() << std::endl;
 
            elmProp.nGP = elmProp.intPoints.size()/4;
            elmProp.nSF = elmProp.basisFunc.size()/elmProp.nGP;
@@ -53,21 +52,21 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
             gmsh::model::mesh::getJacobians(element.elementTypeHD, "Gauss30", JacobiansHD,
                                         DeterminantHD, PhysIntPointsHD, -1);
 
-            //get the coordinates of the current element
+            //get the coordinates of the current element, for each GP
             std::vector<double> physIntPointsHD(3*elmProp.nGP);
             for (int i = 0; i < 3*elmProp.nGP; ++i)
             {
                     physIntPointsHD[i] = PhysIntPointsHD[3*elmProp.nGP*elm + i];
             }
 
-            //get the determinant of the current element
+            //get the determinant of the current element, for each GP
             std::vector<double> determinantHD(elmProp.nGP);
             for (int i = 0; i < elmProp.nGP; ++i)
             {
                     determinantHD[i] = DeterminantHD[elm*elmProp.nGP + i];
             }
 
-            //Vector containing the error at each Gauss point, for the element elm
+            //Linf: Vector containing the error at each Gauss point, for the element elm
             Eigen::VectorXd temp(elmProp.nGP);
 
             //  loop over the Gauss points
@@ -80,20 +79,21 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
                     // sum_i{u_i*l_i(x_k)}
                     u_approx += u[element.offsetInU + l]*elmProp.basisFunc[k*elmProp.nSF + l];
                 }
-                // error = sum_k{w_k*(u(x_k)-u_approx(x_k))^2*det[J](x_k)}
+                // L2: error = sum_k{w_k*(u(x_k)-u_approx(x_k))^2*det[J](x_k)}
                 sum += determinantHD[k]*elmProp.intPoints[4*k+3]
                     *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx)
                     *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
 
-                // error  = abs(u(x_k)-u_approx(x_k))
-                temp[k] = abs(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
+                // L_inf: error  = abs(u(x_k)-u_approx(x_k))
+                temp[k] = fabs(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
 
             }
-            // Maximum over the Gauss points, for the element elm
+            // Linf: Maximum over the Gauss points, for the element elm
             maxGauss[elm] = temp.maxCoeff();
         }
-        // Maximum over all elements
+        // Linf: Maximum over all elements
         errorLinf = maxGauss.maxCoeff();
+        //L2
         errorL2 = sqrt(sum);
     }
 
