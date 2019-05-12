@@ -182,6 +182,33 @@ void gaussian1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& 
     uAtIBC[2] = 0;
 }
 
+// see .hpp file for description
+void parabola1DShallowX(std::vector<double>& uAtIBC, const std::vector<double>& pos,
+                        double t, const Field& field, unsigned int indexJ,
+                        const std::vector<double>& edgeNormal,
+                        const std::vector<double>& coeffs,
+                        const std::vector<double>& fluxCoeffs)
+{
+
+    // check that there is enough coefficients
+    assert(coeffs.size() == 4);
+    assert(pos.size() == 3);
+    double x = pos[0];
+    double x_0 = coeffs[0];
+    double span = coeffs[1];
+    double B = coeffs[2];
+    double C = coeffs[3];
+    double A = B/(span*span);
+
+    if(x > x_0 - span && x < x_0 + span)
+        uAtIBC[0] = C + B - A*(x - x_0)*(x - x_0);
+    else
+        uAtIBC[0] = C;
+    
+    uAtIBC[1] = 0;
+    uAtIBC[2] = 0;
+}
+
 
 // see .hpp file for description
 void gaussian1DShallowY(std::vector<double>& uAtIBC, const std::vector<double>& pos,

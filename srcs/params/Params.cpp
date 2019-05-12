@@ -119,6 +119,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             else if(bcType == "gaussian1DShallowX")
                 tempCondition.ibcFunc = gaussian1DShallowX;
 
+            else if(bcType == "parabola1DShallowX")
+                tempCondition.ibcFunc = parabola1DShallowX;
+
             else if(bcType == "gaussian1DShallowY")
                 tempCondition.ibcFunc = gaussian1DShallowY;
 
@@ -142,6 +145,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
 
             else if(bcType == "gaussian1DShallowX")
                 tempCondition.ibcFunc = gaussian1DShallowX;
+
+            else if(bcType == "parabola1DShallowX")
+                tempCondition.ibcFunc = parabola1DShallowX;
 
             else if(bcType == "gaussian1DShallowY")
                 tempCondition.ibcFunc = gaussian1DShallowY;

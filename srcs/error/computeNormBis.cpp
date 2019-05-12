@@ -1,45 +1,11 @@
 #include <gmsh.h>
 #include <cmath>
+#include "computeNormBis.hpp"
 #include "computeNorm.hpp"
 
-double func(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
-
-    double v = sqrt(fluxCoeffs[0]*fluxCoeffs[1]);
-
-return coeffs[3] + 0.5*(coeffs[0]*exp(-(x-coeffs[1]+v*t)*(x-coeffs[1]+v*t)/(2*coeffs[2]))+ 
-    coeffs[0]*exp(-(x-coeffs[1]-v*t)*(x-coeffs[1]-v*t)/(2*coeffs[2])));}
-
-double func2(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
-
-    double v = sqrt(fluxCoeffs[0]*fluxCoeffs[1]);
-
-    double x_0 = coeffs[0];
-    double span = coeffs[1];
-    double B = coeffs[2];
-    double C = coeffs[3];
-    double A = B/(span*span);
-
-    double x1 = x - v*t;
-    double x2 = x + v*t;
-    double f1;
-    double f2;
-
-    if(x1 > x_0 - span && x1 < x_0 + span)
-        f1 = C + B - A*(x1 - x_0)*(x1 - x_0);
-    else
-        f1 = C;
-
-    if(x2 > x_0 - span && x2 < x_0 + span)
-        f2 = C + B - A*(x2 - x_0)*(x2 - x_0);
-    else
-        f2 = C;
 
 
-return 0.5*(f1+f2);
-}
-
-
-void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, Eigen::VectorXd u, double& errorL2, double& errorLinf)
+void computeNormBis(const Mesh& mesh, const SolverParams& solverParams, double t, Eigen::VectorXd u, double& errorL2, double& errorLinf)
 {
     double sum = 0;
     std::vector<double> coeffs = solverParams.initCondition.coefficients;
@@ -102,19 +68,19 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
             for(unsigned int k = 0 ; k < elmProp.nGP ; ++k)
             {
                 double u_approx = 0;
+                double u_exact = 0;
                 // loop over the shape functions
                 for(unsigned int l = 0 ; l < elmProp.nSF ; ++l)
                 {
                     // sum_i{u_i*l_i(x_k)}
                     u_approx += u[element.offsetInU + l]*elmProp.basisFunc[k*elmProp.nSF + l];
+                    u_exact += func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)*elmProp.basisFunc[k*elmProp.nSF + l];
                 }
                 // L2: error = sum_k{w_k*(u(x_k)-u_approx(x_k))^2*det[J](x_k)}
-                sum += determinantHD[k]*elmProp.intPoints[4*k+3]
-                    *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx)
-                    *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
+                sum += determinantHD[k]*elmProp.intPoints[4*k+3]*(u_exact-u_approx)*(u_exact-u_approx);
 
                 // L_inf: error  = abs(u(x_k)-u_approx(x_k))
-                temp[k] = fabs(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
+                temp[k] = fabs(u_exact-u_approx);
 
             }
             // Linf: Maximum over the Gauss points, for the element elm
