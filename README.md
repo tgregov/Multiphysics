@@ -14,8 +14,8 @@ Current status: [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?
 * The elements edges are straight (constant normal vector over it)
 
 ## Compilation procedure
-### On NIC4
-Connect to NIC4 (using SSH for instance). Then, clone the repositoy: 
+### On NIC4/VEGA
+Connect to NIC4/VEGA (using SSH for instance). Then, clone the repositoy: 
 ```bash
 git clone https://github.com/tgregov/Multiphysics
 ```
@@ -25,7 +25,7 @@ cd ./Multiphysics
 ```
 Automatically build the code:
 ```bash
-. ./build_nic4.sh 
+. ./build_cluster.sh <cluster> (vega or nic4) 
 ```
 Submit a batch file:
 ```bash
