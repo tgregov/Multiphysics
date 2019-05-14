@@ -3,25 +3,25 @@ Gauss5
 Lagrange
 RK2
 weak
-2
-1e-3
-0.1
-shallowLin
+0.03
+1e-4
+0.01
+transport
 LF
-9.81,10
+5,0
 0
 BC_Left
-	openShallowLin
+	freeTransport
 	10
 BC_Right
-	openShallowLin
+	freeTransport
 	10
 BC_Up
-	reflectShallow
+	freeTransport
 	10
 BC_Down
-	reflectShallow
+	freeTransport
 	10
 Init_Cond
-	gaussian1DShallowX
-	0.3,25,0.015,10
+	gaussian2DTransport
+	1,0.5,0.001,0.5,0.001,10

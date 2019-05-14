@@ -1,11 +1,11 @@
 Gauss5
 1
 Lagrange
-RK1
+RK4
 weak
 0.03
 1e-4
-0.001
+0.01
 transport
 LF
 5,0
