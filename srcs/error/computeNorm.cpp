@@ -2,14 +2,14 @@
 #include <cmath>
 #include "computeNorm.hpp"
 
-double func(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
+double funcGaussian(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
 
     double v = sqrt(fluxCoeffs[0]*fluxCoeffs[1]);
 
 return coeffs[3] + 0.5*(coeffs[0]*exp(-(x-coeffs[1]+v*t)*(x-coeffs[1]+v*t)/(2*coeffs[2]))+ 
     coeffs[0]*exp(-(x-coeffs[1]-v*t)*(x-coeffs[1]-v*t)/(2*coeffs[2])));}
 
-double func2(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
+double funcParabola(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
 
     double v = sqrt(fluxCoeffs[0]*fluxCoeffs[1]);
 
@@ -38,6 +38,16 @@ double func2(double x, double t, const std::vector<double>& coeffs, const std::v
 return 0.5*(f1+f2);
 }
 
+double funcTransportGaussian(double x, double y, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs)
+{
+    double v_x = fluxCoeffs[0];
+    double v_y = fluxCoeffs[1];
+    double argX = (x-v_x*t-coeffs[1])*(x-v_x*t-coeffs[1])/(2*coeffs[2]);
+    double argY = (y-v_y*t-coeffs[3])*(y-v_y*t-coeffs[3])/(2*coeffs[4]);
+
+    return coeffs[0]*exp(-(argX + argY))+coeffs[5];
+}
+
 
 void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, Eigen::VectorXd u, double& errorL2, double& errorLinf)
 {
@@ -63,7 +73,7 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
 
             //get the integration points and basis functions for the same mesh but with a larger number
             //of Gauss points
-           gmsh::model::mesh::getBasisFunctions(element.elementTypeHD, "Gauss5",
+           gmsh::model::mesh::getBasisFunctions(element.elementTypeHD, "Gauss30",
                                         "Lagrange",
                                         elmProp.intPoints,
                                         elmProp.numComp,
@@ -78,7 +88,7 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
 
             //Get the integration points in the physical frame and the determinant of the change of variable
             //(x,y,z) => (eta, xi, zeta)
-            gmsh::model::mesh::getJacobians(element.elementTypeHD, "Gauss5", JacobiansHD,
+            gmsh::model::mesh::getJacobians(element.elementTypeHD, "Gauss30", JacobiansHD,
                                         DeterminantHD, PhysIntPointsHD, -1);
 
             //get the coordinates of the current element, for each GP
@@ -110,11 +120,11 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
                 }
                 // L2: error = sum_k{w_k*(u(x_k)-u_approx(x_k))^2*det[J](x_k)}
                 sum += determinantHD[k]*elmProp.intPoints[4*k+3]
-                    *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx)
-                    *(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
+                    *(funcTransportGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx)
+                    *(funcTransportGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx);
 
                 // L_inf: error  = abs(u(x_k)-u_approx(x_k))
-                temp[k] = fabs(func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)-u_approx);
+                temp[k] = fabs(funcTransportGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx);
 
             }
             // Linf: Maximum over the Gauss points, for the element elm
@@ -122,8 +132,8 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
         }
         // Linf: Maximum over all elements
         errorLinf = maxGauss.maxCoeff();
+        
         //L2
         errorL2 = sqrt(sum);
     }
-
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <gmsh.h>
+#include <string>
 #include "../matrices/buildMatrix.hpp"
 #include "../matrices/matrix.hpp"
 #include "../flux/buildFlux.hpp"
@@ -126,7 +127,6 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
   	Field field(mesh.nodeData.numNodes, solverParams.nUnknowns, mesh.dim);
   	PartialField partialField(solverParams.nUnknowns, mesh.dim);
 
-
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
@@ -148,43 +148,57 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
     }
 
 
+
 	/*******************************************************************************
 	 *						       LAUNCH GMSH  	      						   *
 	 *******************************************************************************/
 	gmsh::initialize();
 	gmsh::option::setNumber("General.Terminal", 1);
 	gmsh::open(fileName);
-	int viewTag = gmsh::view::add("results");
+	int viewTag1 = gmsh::view::add("Height");
+    int viewTag2 = gmsh::view::add("Velocity Field");
 	std::vector<std::string> names;
 	gmsh::model::list(names);
 	std::string modelName = names[0];
 	std::string dataType = "ElementNodeData";
 	std::vector<int> elementTags = mesh.nodeData.elementTags;
 	std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
-    std::vector<std::vector<double>> uDisplay(elementNumNodes.size());
+    std::vector<std::vector<double>> uDisplay1(elementNumNodes.size());
+    std::vector<std::vector<double>> uDisplay2(elementNumNodes.size());
 
 	double t = 0.0;
 
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
-	unsigned int index = 0;
+	std::cout << "coucou1" << std::endl;
+    unsigned int index = 0;
 
 	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
 	{
-		std::vector<double> tempWrite(elementNumNodes[count]);
+		std::vector<double> tempWrite1(elementNumNodes[count]);
+        std::vector<double> tempWrite2(3*elementNumNodes[count]);
 		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
 		{
-			tempWrite[node]=field.u[0][index];
+			//Height
+            tempWrite1[node]=field.u[0][index];
+            
+            //Speed 
+            // tempWrite2[3*node]=field.u[1][index]/field.u[0][index];
+            // tempWrite2[3*node+1]=field.u[2][index]/field.u[0][index];
+            // tempWrite2[3*node+2]=0;
+
 			++index;
 		}
 
-		uDisplay[count] = std::move(tempWrite);
+		uDisplay1[count] = std::move(tempWrite1);
+        //uDisplay2[count] = std::move(tempWrite2);
 	}
 
-	gmsh::view::addModelData(viewTag, 0, modelName, dataType, elementTags,
-	                         uDisplay, t, 1);
-
+	gmsh::view::addModelData(viewTag1, 0, modelName, dataType, elementTags,
+	                         uDisplay1, t, 1);
+    //gmsh::view::addModelData(viewTag2, 0, modelName, dataType, elementTags,
+    //                         uDisplay2, t, 3);
 
 	/*******************************************************************************
 	 *						       TIME INTEGRATION      						   *
@@ -212,7 +226,6 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
     {
         integScheme = RK4;
     }
-
 
 	// numerical integration
 	unsigned int ratio, currentDecade = 0;
@@ -247,26 +260,39 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
             unsigned int offset = 0;
             for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
             {
-                std::vector<double> tempWrite(elementNumNodes[count]);
+                std::vector<double> tempWrite1(elementNumNodes[count]);
+                std::vector<double> tempWrite2(3*elementNumNodes[count]);
                 for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
                     ++countLocal)
                 {
-                    tempWrite[countLocal] = field.u[0][countLocal+offset];
+                    //Height
+                    tempWrite1[countLocal] = field.u[0][countLocal+offset];
+
+                    //Velocity (vector of 2 components)
+                    // tempWrite2[3*countLocal] = field.u[1][countLocal+offset]/field.u[0][countLocal+offset];
+                    // tempWrite2[3*countLocal+1] = field.u[2][countLocal+offset]/field.u[0][countLocal+offset];
+                    // tempWrite2[3*countLocal+2] = 0;
                 }
+
                 offset += elementNumNodes[count];
-                uDisplay[count] = std::move(tempWrite);
+                uDisplay1[count] = std::move(tempWrite1);
+                //uDisplay2[count] = std::move(tempWrite2);
             }
 
-            gmsh::view::addModelData(viewTag, nbrStep, modelName, dataType, elementTags,
-                uDisplay, t, 1);
+            gmsh::view::addModelData(viewTag1, nbrStep, modelName, dataType, elementTags,
+                uDisplay1, t, 1);
+
+            // gmsh::view::addModelData(viewTag2, nbrStep, modelName, dataType, elementTags,
+            //     uDisplay2, t, 3);
         }
 	}
 
 	std::cout 	<< "\r" << "Integrating: 100% of the time steps done" << std::flush
 	 			<< std::endl;
 
-	// write the results & finalize
-    gmsh::view::write(viewTag, resultsName);
+
+    gmsh::view::write(viewTag1, resultsName);
+    //gmsh::view::write(viewTag2, "./results/Velocity.msh");
     gmsh::finalize();
 
 

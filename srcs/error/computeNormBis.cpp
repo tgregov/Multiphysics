@@ -74,7 +74,7 @@ void computeNormBis(const Mesh& mesh, const SolverParams& solverParams, double t
                 {
                     // sum_i{u_i*l_i(x_k)}
                     u_approx += u[element.offsetInU + l]*elmProp.basisFunc[k*elmProp.nSF + l];
-                    u_exact += func(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)*elmProp.basisFunc[k*elmProp.nSF + l];
+                    u_exact += funcGaussian(physIntPointsHD[3*k],t,coeffs,fluxCoeffs)*elmProp.basisFunc[k*elmProp.nSF + l];
                 }
                 // L2: error = sum_k{w_k*(u(x_k)-u_approx(x_k))^2*det[J](x_k)}
                 sum += determinantHD[k]*elmProp.intPoints[4*k+3]*(u_exact-u_approx)*(u_exact-u_approx);
@@ -93,3 +93,5 @@ void computeNormBis(const Mesh& mesh, const SolverParams& solverParams, double t
     }
 
 }
+
+

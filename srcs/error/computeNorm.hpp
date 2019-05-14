@@ -6,12 +6,17 @@
 #include "../params/Params.hpp"
 
 
-double func(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs);
+double funcGaussian(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs);
 /**
  * brief compute the analytical solution for a 1D gaussian wave, at position x and time t, for a Gaussian
  */
 
-double func2(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs);
+double funcParabola(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs);
+/**
+ * brief compute the analytical solution for a 1D gaussian wave, at position x and time t, for a parabola
+ */
+
+double funcTransportGaussian(double x, double y, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs);
 /**
  * brief compute the analytical solution for a 1D gaussian wave, at position x and time t, for a parabola
  */
