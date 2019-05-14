@@ -212,6 +212,8 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 
         integScheme(t, field, partialField, matrix, mesh, solverParams, temp, usedF);
 
+        temp = field;
+
 		// check that it does not diverge
 		// assert(field.u[0].maxCoeff() <= 1E5);
 
