@@ -83,7 +83,7 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 {
     // Get MPI parameters
     MPI_Status status;
-	
+
     if(rank == 0)
         std::cout << "Number of nodes: " << mesh.nodeData.numNodes << std::endl;
 
@@ -250,6 +250,8 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 
         integScheme(t, field, partialField, compField, matrix, domainDiv, rank,
                     mesh, solverParams, temp, usedF);
+
+        temp = field;
 
 		// check that it does not diverge
 		// assert(field.u[0].maxCoeff() <= 1E5);
