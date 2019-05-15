@@ -23,7 +23,7 @@ Move to the code repository:
 ```bash
 cd ./Multiphysics
 ```
-Automatically build the code (`<cluster>` is either vega or nic4):
+Automatically build the code (`<cluster>` is either `vega` or `nic4`):
 ```bash
 . ./build_cluster.sh <cluster>
 ```
