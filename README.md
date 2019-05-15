@@ -23,12 +23,12 @@ Move to the code repository:
 ```bash
 cd ./Multiphysics
 ```
-Automatically build the code:
+Automatically build the code (`<cluster>` is either vega or nic4):
 ```bash
-. ./build_cluster.sh <cluster> (vega or nic4) 
+. ./build_cluster.sh <cluster>
 ```
-Submit a batch file:
+Submit a batch file for one of the simulations
 ```bash
-cd ./run/NIC4
-sbatch slurm.sh
+cd ./simulations
+sbatch runObstacleSquare.sh
 ```
