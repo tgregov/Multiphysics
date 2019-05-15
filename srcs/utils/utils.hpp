@@ -1,5 +1,5 @@
-#ifndef permutation_hpp_included
-#define permutation_hpp_included
+#ifndef utils_hpp_included
+#define utils_hpp_included
 
 #include <vector>
 
@@ -8,4 +8,4 @@ bool isPermutation(const std::vector<int>& vec1,
 	               std::vector<unsigned int>& permutation1,
 	               std::vector<unsigned int>& permutation2);
 
-#endif /* permutation_hpp_included */
+#endif /* utils_hpp_included */

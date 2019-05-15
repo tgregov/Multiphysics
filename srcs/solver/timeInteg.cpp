@@ -5,9 +5,10 @@
 #include "../matrices/buildMatrix.hpp"
 #include "../matrices/matrix.hpp"
 #include "../flux/buildFlux.hpp"
+#include "../write/write.hpp"
 #include "timeInteg.hpp"
 #include "field.hpp"
-#include "rungeKutta.hpp"
+#include "RungeKutta.hpp"
 
 
 //typedef to lighten the notations
@@ -20,7 +21,7 @@ typedef std::function<void(double, Field&, PartialField&, const Matrix&,
  * \brief Compute the increment vector of the unknown fields, for the weak form.
  * \param t Current time.
  * \param u Current solution.
- * \param field Field that contains all the main variables.
+ * \param field Structure that contains all the main variables.
  * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
@@ -55,7 +56,7 @@ static void Fweak(double t, Field& field, PartialField& partialField, const Matr
  * \brief Compute the increment vector of the unknown fields, for the strong form.
  * \param t Current time.
  * \param u Current solution.
- * \param field Field that contains all the main variables.
+ * \param field Structure that contains all the main variables.
  * \param matrix Structure that contains the matrices of the DG method.
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
@@ -89,6 +90,7 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
 bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 				const std::string& fileName, const std::string& resultsName)
 {
+        std::cout << "Number of nodes: " << mesh.nodeData.numNodes << std::endl;
 
 	/*******************************************************************************
 	 *						            TIME STEPS 								   *
@@ -111,6 +113,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 *******************************************************************************/
   	//Function pointer to the used function (weak vs strong form)
     UsedF usedF;
+
 
   	if(solverParams.solverType == "weak")
   	{
@@ -155,8 +158,6 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	gmsh::initialize();
 	gmsh::option::setNumber("General.Terminal", 1);
 	gmsh::open(fileName);
-	int viewTag1 = gmsh::view::add("Height");
-    int viewTag2 = gmsh::view::add("Velocity Field");
 	std::vector<std::string> names;
 	gmsh::model::list(names);
 	std::string modelName = names[0];
@@ -171,34 +172,12 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
-	std::cout << "coucou1" << std::endl;
-    unsigned int index = 0;
 
-	for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-	{
-		std::vector<double> tempWrite1(elementNumNodes[count]);
-        std::vector<double> tempWrite2(3*elementNumNodes[count]);
-		for(unsigned int node = 0 ; node < elementNumNodes[count] ; ++node)
-		{
-			//Height
-            tempWrite1[node]=field.u[0][index];
-            
-            //Speed 
-            // tempWrite2[3*node]=field.u[1][index]/field.u[0][index];
-            // tempWrite2[3*node+1]=field.u[2][index]/field.u[0][index];
-            // tempWrite2[3*node+2]=0;
+    solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,0, 0, field,
+                         solverParams.fluxCoeffs, solverParams.whatToWrite,
+                         solverParams.viewTags);
 
-			++index;
-		}
 
-		uDisplay1[count] = std::move(tempWrite1);
-        //uDisplay2[count] = std::move(tempWrite2);
-	}
-
-	gmsh::view::addModelData(viewTag1, 0, modelName, dataType, elementTags,
-	                         uDisplay1, t, 1);
-    //gmsh::view::addModelData(viewTag2, 0, modelName, dataType, elementTags,
-    //                         uDisplay2, t, 3);
 
 	/*******************************************************************************
 	 *						       TIME INTEGRATION      						   *
@@ -232,7 +211,6 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	for(unsigned int nbrStep = 1 ; nbrStep < nTimeSteps + 1 ;
 		nbrStep++)
 	{
-
   		// display progress
 		ratio = int(100*double(nbrStep - 1)/double(nTimeSteps));
         if(ratio >= currentDecade)
@@ -257,33 +235,9 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
         // store the results every Dt only.
 		if((nbrStep % nTimeStepsDtWrite) == 0)
         {
-            unsigned int offset = 0;
-            for(size_t count = 0 ; count < elementNumNodes.size() ; ++count)
-            {
-                std::vector<double> tempWrite1(elementNumNodes[count]);
-                std::vector<double> tempWrite2(3*elementNumNodes[count]);
-                for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
-                    ++countLocal)
-                {
-                    //Height
-                    tempWrite1[countLocal] = field.u[0][countLocal+offset];
-
-                    //Velocity (vector of 2 components)
-                    // tempWrite2[3*countLocal] = field.u[1][countLocal+offset]/field.u[0][countLocal+offset];
-                    // tempWrite2[3*countLocal+1] = field.u[2][countLocal+offset]/field.u[0][countLocal+offset];
-                    // tempWrite2[3*countLocal+2] = 0;
-                }
-
-                offset += elementNumNodes[count];
-                uDisplay1[count] = std::move(tempWrite1);
-                //uDisplay2[count] = std::move(tempWrite2);
-            }
-
-            gmsh::view::addModelData(viewTag1, nbrStep, modelName, dataType, elementTags,
-                uDisplay1, t, 1);
-
-            // gmsh::view::addModelData(viewTag2, nbrStep, modelName, dataType, elementTags,
-            //     uDisplay2, t, 3);
+            solverParams.write(uDisplay, elementNumNodes, elementTags, modelName,
+                         nbrStep, t, field, solverParams.fluxCoeffs,
+                         solverParams.whatToWrite, solverParams.viewTags);
         }
 	}
 
@@ -291,10 +245,9 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	 			<< std::endl;
 
 
-    gmsh::view::write(viewTag1, resultsName);
-    //gmsh::view::write(viewTag2, "./results/Velocity.msh");
+	// write the results & finalize
+    writeEnd(solverParams.viewTags, solverParams.whatToWrite);
     gmsh::finalize();
-
 
 	return true;
 }

@@ -1,11 +1,5 @@
 #include <cassert>
-#include <vector>
-#include <iostream>
-
-bool isPermutation(const std::vector<int>& vec1,
-	               const std::vector<int>& vec2,
-	               std::vector<unsigned int>& permutation1,
-	               std::vector<unsigned int>& permutation2);
+#include "utils.hpp"
 
 bool isPermutation(const std::vector<int>& vec1,
 	               const std::vector<int>& vec2,

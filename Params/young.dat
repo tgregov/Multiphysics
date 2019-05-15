@@ -1,0 +1,42 @@
+Gauss10
+Lagrange
+RK4
+strong
+0.4
+0.00001
+0.001
+shallowLin
+LF
+9.81,10
+no
+0
+BC_Up_1
+	reflectShallow
+	1,0,0
+BC_Up_2
+	reflectShallow
+	1,0,0
+BC_Down_1
+	reflectShallow
+	1,0,0
+BC_Down_2
+	reflectShallow
+	1,0,0
+BC_Left
+	sinusShallowLin
+	0.1,12.4,0,10
+BC_Right
+	openShallowLin
+	10
+BC_Obstacle_Up
+	reflectShallow
+	1,0,0
+BC_Obstacle
+	reflectShallow
+	1,0,0
+BC_Obstacle_Down
+	reflectShallow
+	1,0,0
+Init_Cond
+	constant
+	10,0,0

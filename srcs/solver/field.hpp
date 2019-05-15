@@ -11,12 +11,14 @@
  */
 struct Field
 {
-	std::vector<Eigen::VectorXd> u; /**< Solution fields (of size equal to the number of scalar unknowns) */
+	std::vector<Eigen::VectorXd> u; /**< Solution fields (of size equal
+                                         to the number of scalar unknowns) */
 
 	std::vector<std::vector<Eigen::VectorXd>> flux; /**< Physical flux fields (of size equal to the number of dimension, with each
                                                          dimension as a size equal to the number of scalar unknowns) */
 
-    std::vector<Eigen::VectorXd> s;
+    std::vector<Eigen::VectorXd> s; /**< Source terms (of size equal
+                                         to the number of scalar unknowns) */
 
 	std::vector<Eigen::VectorXd> DeltaU; /**< Time-integration increment */
 

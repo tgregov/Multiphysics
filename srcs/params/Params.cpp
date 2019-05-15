@@ -110,6 +110,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             if(bcType == "constant")
                 tempCondition.ibcFunc = constant;
 
+            else if(bcType == "sinusShallow")
+                tempCondition.ibcFunc = sinusShallow;
+
             else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
 
@@ -136,6 +139,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         {
             if(bcType == "constant")
                 tempCondition.ibcFunc = constant;
+
+            else if(bcType == "sinusShallowLin")
+                tempCondition.ibcFunc = sinusShallowLin;
 
             else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
@@ -379,7 +385,58 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
 
     temp.clear();
     getLine(paramFile, temp);
+    unsigned int precComaPos = -1;
+    for(unsigned int i = 0 ; i < temp.size() ; ++i)
+    {
+        if(temp[i] == ',')
+        {
+            solverParams.whatToWrite.push_back(
+                (temp.substr(precComaPos + 1, i - precComaPos - 1))
+                 == "1" ? true : false);
+            precComaPos = i;
+        }
+    }
+    //At the end, still one push_back to do
+    solverParams.whatToWrite.push_back(
+        (temp.substr(precComaPos+1, temp.size() - precComaPos - 1))
+        == "1" ? true : false);
+
     bool error = false;
+    if(solverParams.problemType == "shallow"
+        || solverParams.problemType == "shallowLin")
+    {
+        if(solverParams.whatToWrite.size() !=5)
+            error = true;
+        else
+        {
+            solverParams.write = writeShallow;
+        }
+    }
+    else if(solverParams.problemType == "transport")
+    {
+        if(solverParams.whatToWrite.size() !=1)
+            error = true;
+        else
+        {
+            solverParams.write = writeTransport;
+        }
+    }
+    if(error)
+    {
+        std::cerr << "Unexpected number of writing parameters ("
+                  << solverParams.whatToWrite.size() << ") for problem type "
+                  << solverParams.problemType << std::endl;
+
+        paramFile.close();
+
+        return false;
+    }
+
+    solverParams.viewTags.resize(solverParams.whatToWrite.size());
+
+    temp.clear();
+    getLine(paramFile, temp);
+    error = false;
     if(solverParams.problemType == "shallow"
         || solverParams.problemType == "shallowLin")
     {
@@ -427,11 +484,9 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     }
 
 
-
-
     temp.clear();
     getLine(paramFile, temp);
-    unsigned int precComaPos = -1;
+    precComaPos = -1;
     for(unsigned int i = 0 ; i < temp.size() ; ++i)
     {
         if(temp[i] == ',')
@@ -479,54 +534,79 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     if(temp == "no")
     {
         solverParams.IsSourceTerms = false;
+        solverParams.sourceType = temp;
+    }
+    else if(temp == "sourceShallowCstGradCstFrict"
+            && solverParams.problemType == "shallow")
+    {
+        solverParams.IsSourceTerms = true;
+        solverParams.sourceType = temp;
+        solverParams.sourceTerm = sourceShallowCstGradCstFrict;
+    }
+    else if(temp == "sourceShallowCstGradQuadFrict"
+            && solverParams.problemType == "shallow")
+    {
+        solverParams.IsSourceTerms = true;
+        solverParams.sourceType = temp;
+        solverParams.sourceTerm = sourceShallowCstGradQuadFrict;
+    }
+    else if(temp == "shallowLinCst" && solverParams.problemType == "shallowLin")
+    {
+        solverParams.IsSourceTerms = true;
+        solverParams.sourceType = temp;
+        solverParams.sourceTerm = sourceShallowLinCst;
     }
     else
     {
-        unsigned int precComaPos = -1;
-        for(unsigned int i = 0 ; i < temp.size() ; ++i)
-        {
-            if(temp[i] == ',')
-            {
-                solverParams.sourceCoeffs.push_back(
-                    std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
-                precComaPos = i;
-            }
-        }
-        //At the end, still one push_back to do
-        solverParams.sourceCoeffs.push_back(
-            std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
+        std::cerr << "Unexpected source function ("
+                  << solverParams.sourceType << ") for problem type "
+                  << solverParams.problemType << std::endl;
 
-        solverParams.IsSourceTerms = true;
+        paramFile.close();
+        return false;
     }
+
+    temp.clear();
+    getLine(paramFile, temp);
+    precComaPos = -1;
+    for(unsigned int i = 0 ; i < temp.size() ; ++i)
+    {
+        if(temp[i] == ',')
+        {
+            solverParams.sourceCoeffs.push_back(
+                std::stod(temp.substr(precComaPos + 1, i - precComaPos - 1)));
+            precComaPos = i;
+        }
+    }
+    //At the end, still one push_back to do
+    solverParams.sourceCoeffs.push_back(
+        std::stod(temp.substr(precComaPos+1, temp.size() - precComaPos - 1)));
+
 
     error = false;
-    if(solverParams.problemType == "shallow")
+    if(solverParams.sourceType == "sourceShallowCstGradCstFrict")
+    {
+        if(solverParams.IsSourceTerms)
+        {
+            if(solverParams.sourceCoeffs.size() != 5)
+                error = true;
+        }
+    }
+    if(solverParams.sourceType == "sourceShallowCstGradQuadFrict")
+    {
+        if(solverParams.IsSourceTerms)
+        {
+            if(solverParams.sourceCoeffs.size() != 5)
+                error = true;
+        }
+    }
+    else if(solverParams.sourceType == "shallowLinCst")
     {
         if(solverParams.IsSourceTerms)
         {
             if(solverParams.sourceCoeffs.size() != 1)
-            {
                 error = true;
-            }
-            else
-                solverParams.sourceTerm = sourceShallow;
         }
-    }
-    else if(solverParams.problemType == "shallowLin")
-    {
-        if(solverParams.IsSourceTerms)
-        {
-            if(solverParams.sourceCoeffs.size() != 1)
-            {
-                error = true;
-            }
-            else
-                solverParams.sourceTerm = sourceShallowLin;
-        }
-    }
-    else
-    {
-        solverParams.IsSourceTerms = false;
     }
 
     if(error)
@@ -565,7 +645,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << std::endl
                 << "Problem type: " << solverParams.problemType
                 << std::endl
-                << "Source terms: " << (solverParams.IsSourceTerms ? "yes" : "no")
+                << "Source terms: " << solverParams.sourceType
                 << std::endl
                 << "Numerical Flux: " << solverParams.fluxType
                 << std::endl;
