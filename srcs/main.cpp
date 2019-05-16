@@ -14,6 +14,16 @@
 #include "error/computeError.hpp"
 #include "generateMesh.hpp"
 
+/**
+ * [main description]
+ * @param  argv[0] program
+ * @param  argv[1] Geometry in a .geo file
+ * @param  argv[2] name of the .msh file that will be generated for the mesh
+ * @param  argv[3] Parameters in a .dat file
+ * @param  argv[4] Name of the .msh file that will be generated, containing the results
+ * @param  argv[5] name of the .txt file to write the error value
+ * @return      0
+ */
 int main(int argc, char **argv)
 {
 
@@ -54,10 +64,10 @@ int main(int argc, char **argv)
     }else
             std::cerr << "Impossible d'ouvrir le fichier !" << std::endl;
 
-    int order = solverParams.order;
-    double errorL2 = 0;
-    double errorLinf = 0;
-    generateMesh(argv[1], argv[2], order);  
+    // int order = solverParams.order;
+    // double errorL2 = 0;
+    // double errorLinf = 0;
+    // generateMesh(argv[1], argv[2], order);  
 
     // load the mesh
     std::cout   << "================================================================"
@@ -110,20 +120,20 @@ int main(int argc, char **argv)
               << static_cast<double>(ellapsedTime.count())/1000.0
               << " s" << std::endl;
 
-    std::cout   << "================================================================"
-        << std::endl
-        << "                       ERROR COMPUTATION                           "
-        << std::endl
-        << "==================================================================="
-        << std::endl;
-    if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]),
-                     errorL2, errorLinf))
-    {
-        std::cerr << "Something went wrong when computing the error" << std::endl;
-        return -1;
-    }
-        file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl << std::endl;
-        file1.close();
+    // std::cout   << "================================================================"
+    //     << std::endl
+    //     << "                       ERROR COMPUTATION                           "
+    //     << std::endl
+    //     << "==================================================================="
+    //     << std::endl;
+    // if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]),
+    //                  errorL2, errorLinf))
+    // {
+    //     std::cerr << "Something went wrong when computing the error" << std::endl;
+    //     return -1;
+    // }
+    //     file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl << std::endl;
+    //     file1.close();
 
     return 0;
 }

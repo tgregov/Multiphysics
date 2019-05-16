@@ -1,0 +1,22 @@
+Gauss10
+Lagrange
+RK1
+strong
+10
+0.00001
+0.05
+shallowLin
+1,0,0,0,0
+LF
+9.81,1//0.0000014448,0.38377
+no
+0//0.0076754,500,300,600,300,0.38377
+Ice
+	reflectShallow
+	1
+Infinity
+	openShallowLin
+	1
+Init_Cond
+	gaussian2DShallow
+	0.01,1200,3000,1200,3000,1
