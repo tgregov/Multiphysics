@@ -13,7 +13,11 @@
 #include "../flux/flux.hpp"
 #include "../source/source.hpp"
 
-
+/**
+ * \brief Wrapper of std::getline to have comments in file with //
+ * \param file The file which has been previously opened.
+ * \param line The computed line (without comments)
+ */
 static void getLine(std::ifstream& file, std::string& line)
 {
     std::string tempLine;
@@ -110,8 +114,14 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             if(bcType == "constant")
                 tempCondition.ibcFunc = constant;
 
+            else if(bcType == "affineShallow")
+                tempCondition.ibcFunc = affineShallow;
+
             else if(bcType == "sinusShallow")
                 tempCondition.ibcFunc = sinusShallow;
+
+            else if(bcType == "sinusAffShallow")
+                tempCondition.ibcFunc = sinusAffShallow;
 
             else if(bcType == "reflectShallow")
                 tempCondition.ibcFunc = reflectShallow;
@@ -127,6 +137,9 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
 
             else if(bcType == "openShallow")
                 tempCondition.ibcFunc = openShallow;
+
+            else if(bcType == "openAffShallow")
+                tempCondition.ibcFunc = openAffShallow;
 
             else
                 error = true;
