@@ -74,6 +74,6 @@ void writeTransport(std::vector<std::vector<double>>& uDisplay,
  * \param viewTags Vector containing the rag of the different writing data's.
  * \param whatToWrite Vector containing boolean describing which unknown to write.
  */
-void writeEnd(const std::vector<int>& viewTags, const std::vector<bool>& whatToWrite);
+void writeEnd(const std::vector<int>& viewTags, const std::vector<bool>& whatToWrite, const std::string& resultsName);
 
 #endif /* write_hpp_included */

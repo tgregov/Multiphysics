@@ -61,13 +61,13 @@ struct SolverParams
                                         what will be written (problem dependent)*/
     std::vector<int> viewTags;  /**< Store the view tag of what will be written*/
 
-    std::function<void(std::vector<std::vector<double>>& uDisplay,
+    void (*write)(std::vector<std::vector<double>>& uDisplay,
                   const std::vector<unsigned int>& elementNumNodes,
                   const std::vector<int>& elementTags, const std::string& modelName,
                   unsigned int nbreStep, double t, const Field& field,
                   const std::vector<double>& fluxCoeffs,
                   const std::vector<bool>& whatToWrite,
-                  std::vector<int>& viewTags)> write; /**< Pointer to the function
+                  std::vector<int>& viewTags); /**< Pointer to the function
                                                            which will write*/
 };
 

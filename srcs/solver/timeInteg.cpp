@@ -87,7 +87,7 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
 
 
 // see .hpp file for description
-bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
+bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 				const std::string& fileName, const std::string& resultsName)
 {
         std::cout << "Number of nodes: " << mesh.nodeData.numNodes << std::endl;
@@ -164,8 +164,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 	std::string dataType = "ElementNodeData";
 	std::vector<int> elementTags = mesh.nodeData.elementTags;
 	std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
-    std::vector<std::vector<double>> uDisplay1(elementNumNodes.size());
-    std::vector<std::vector<double>> uDisplay2(elementNumNodes.size());
+  std::vector<std::vector<double>> uDisplay(elementNumNodes.size());
 
 	double t = 0.0;
 
@@ -246,7 +245,7 @@ bool timeInteg(const Mesh& mesh, const SolverParams& solverParams,
 
 
 	// write the results & finalize
-    writeEnd(solverParams.viewTags, solverParams.whatToWrite);
+    writeEnd(solverParams.viewTags, solverParams.whatToWrite, resultsName);
     gmsh::finalize();
 
 	return true;

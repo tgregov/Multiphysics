@@ -1,14 +1,15 @@
-#ifndef rungeKutta_hpp_included
-#define rungeKutta_hpp_included
-
-#include <string>
-#include "../mesh/Mesh.hpp"
-#include "../params/Params.hpp"
+#include <functional>
+#include "field.hpp"
 #include "../matrices/matrix.hpp"
+#include "../params/Params.hpp"
+#include "../mesh/Mesh.hpp"
 
 //typedef to lighten the notations
 typedef std::function<void (double, Field &, PartialField &, const Matrix &,
       const Mesh &, const SolverParams &)> UsedF;
+
+typedef std::function<void(double, Field&, PartialField&, const Matrix&,
+         const Mesh&, const SolverParams&, Field&, UsedF)> IntegScheme;
 
 
 /**
@@ -26,6 +27,7 @@ typedef std::function<void (double, Field &, PartialField &, const Matrix &,
 void RK1(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);
 
+
 /**
  * \brief Compute the numerical time integration using the method of Runge-Kutta order 2
     i.e. explicit Euler
@@ -40,6 +42,7 @@ void RK1(double t, Field& field, PartialField& partialField, const Matrix& matri
  */
 void RK2(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);
+
 
 /**
  * \brief Compute the numerical time integration using the method of Runge-Kutta order 3
@@ -56,6 +59,7 @@ void RK2(double t, Field& field, PartialField& partialField, const Matrix& matri
 void RK3(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);
 
+
 /**
  * \brief Compute the numerical time integration using the method of Runge-Kutta order 4
     i.e. explicit Euler
@@ -70,5 +74,3 @@ void RK3(double t, Field& field, PartialField& partialField, const Matrix& matri
  */
 void RK4(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);
-
-#endif /* rungeKutta_hpp */

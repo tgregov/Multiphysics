@@ -24,7 +24,6 @@ bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std:
     std::vector<std::vector<double>> data(elementNumNodes.size());
 
 	double t1 = solverParams.simTime;
-    //double t1 = 0;
     double t2;
 	int step = t1/solverParams.timeStep;
 
@@ -34,11 +33,6 @@ bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std:
                 data, t2, numComponents);
 
     std::cout << "t1,t2,step:" << std::endl << t1 << std::endl << t2 << std::endl << step << std::endl;
-    // if (t1 != t2)
-    // {
-    //     std::cerr << ("ERROR: timestep mismatching") << std::endl;
-    //     return false;
-    // }
     
     int totalSize = data.size()*data[0].size();
 

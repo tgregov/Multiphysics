@@ -2,14 +2,14 @@
 #include <cmath>
 #include "computeNorm.hpp"
 
-double funcGaussian(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
+double funcGaussian(double x, double y, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
 
     double v = sqrt(fluxCoeffs[0]*fluxCoeffs[1]);
 
 return coeffs[3] + 0.5*(coeffs[0]*exp(-(x-coeffs[1]+v*t)*(x-coeffs[1]+v*t)/(2*coeffs[2]))+ 
     coeffs[0]*exp(-(x-coeffs[1]-v*t)*(x-coeffs[1]-v*t)/(2*coeffs[2])));}
 
-double funcParabola(double x, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
+double funcParabola(double x, double y, double t, const std::vector<double>& coeffs, const std::vector<double>& fluxCoeffs){
 
     double v = sqrt(fluxCoeffs[0]*fluxCoeffs[1]);
 
@@ -120,11 +120,11 @@ void computeNorm(const Mesh& mesh, const SolverParams& solverParams, double t, E
                 }
                 // L2: error = sum_k{w_k*(u(x_k)-u_approx(x_k))^2*det[J](x_k)}
                 sum += determinantHD[k]*elmProp.intPoints[4*k+3]
-                    *(funcTransportGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx)
-                    *(funcTransportGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx);
+                    *(funcGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx)
+                    *(funcGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx);
 
                 // L_inf: error  = abs(u(x_k)-u_approx(x_k))
-                temp[k] = fabs(funcTransportGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx);
+                temp[k] = fabs(funcGaussian(physIntPointsHD[3*k],physIntPointsHD[3*k+1],t,coeffs,fluxCoeffs)-u_approx);
 
             }
             // Linf: Maximum over the Gauss points, for the element elm

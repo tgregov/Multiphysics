@@ -1,4 +1,4 @@
-#include "rungeKutta.hpp"
+#include "RungeKutta.hpp"
 
 void RK1(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
@@ -19,16 +19,13 @@ void RK2(double t, Field& field, PartialField& partialField, const Matrix& matri
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k1[unk] = temp.DeltaU[unk]*h;
-        //temp.u[unk] = field.u[unk] + field.k1[unk];
         temp.u[unk] = field.u[unk] + field.k1[unk]/2;
     }
 
-    //usedF(t + h, temp, partialField, matrix, mesh, solverParams);
     usedF(t + h/2, temp, partialField, matrix, mesh, solverParams);
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k2[unk] = temp.DeltaU[unk]*h;
-        //field.u[unk] += (field.k1[unk] + field.k2[unk])/2;
         field.u[unk] += field.k2[unk];
     }
 }
@@ -60,7 +57,6 @@ void RK3(double t, Field& field, PartialField& partialField, const Matrix& matri
         field.u[unk] += (field.k1[unk] + 4*field.k2[unk] + field.k3[unk])/6;
     }
 }
-
 
 
 void RK4(double t, Field& field, PartialField& partialField, const Matrix& matrix,
