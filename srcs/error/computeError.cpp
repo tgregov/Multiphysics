@@ -4,7 +4,6 @@
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
 #include "computeNorm.hpp"
-#include "computeNormBis.hpp"
 #include "computeError.hpp"
 
 
