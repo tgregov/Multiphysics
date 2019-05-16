@@ -1,0 +1,28 @@
+Gauss10
+Lagrange
+RK1
+weak
+0.3
+0.00001
+0.001
+shallow
+0,0,0,1,0
+LF
+9.81 
+sourceShallowCstGradCstFrict
+1000,0,-10,0,0
+BC_Left
+	reflectShallow
+	-10,0,30
+BC_Right
+	openAffShallow
+	-10,0,30
+BC_Up
+	openAffShallow
+	-10,0,30
+BC_Down
+	sinusAffShallow
+	0.1,12,0,30,-10,0
+Init_Cond
+	affineShallow
+	-10,0,30
