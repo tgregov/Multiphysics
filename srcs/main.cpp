@@ -54,15 +54,15 @@ int main(int argc, char **argv)
         std::cout << "Number of threads: " << n << std::endl;;
     #endif
 
-    std::ofstream file1(std::string(argv[5]), std::ios::out | std::ios::app); 
-    if (file1)
-    {
-            file1 << "mesh:" << "\t" << argv[1] << std::endl;
-            file1 << "param:" << "\t" << argv[3] << std::endl;
-            file1 << "ORDER:" << "\t" << "ERROR (L2):" << "\t\t" << "ERROR(Linf):" << std::endl;
+    // std::ofstream file1(std::string(argv[5]), std::ios::out | std::ios::app); 
+    // if (file1)
+    // {
+    //         file1 << "mesh:" << "\t" << argv[1] << std::endl;
+    //         file1 << "param:" << "\t" << argv[3] << std::endl;
+    //         file1 << "ORDER:" << "\t" << "ERROR (L2):" << "\t\t" << "ERROR(Linf):" << std::endl;
 
-    }else
-            std::cerr << "Impossible d'ouvrir le fichier !" << std::endl;
+    // }else
+    //         std::cerr << "Impossible d'ouvrir le fichier !" << std::endl;
 
     // int order = solverParams.order;
     // double errorL2 = 0;

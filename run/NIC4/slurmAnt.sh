@@ -10,6 +10,9 @@
 #
 #SBATCH --comment=Multiphysics 
 #SBATCH --output=outAnt.txt
+#
+#SBATCH --mail-user=joachim.marichal@student.uliege.be
+#SBATCH --mail-type=ALL
 
 module load gcc/4.9.2
 export CC=gcc
