@@ -3,6 +3,7 @@
 
 #include <vector>
 
+
 bool isPermutation(const std::vector<int>& vec1,
 	               const std::vector<int>& vec2,
 	               std::vector<unsigned int>& permutation1,

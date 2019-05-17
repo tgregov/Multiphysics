@@ -116,7 +116,8 @@ void openShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
     // compute a physical reflection
     double g = fluxCoeffs[0];
     double H = coeffs[0];
-    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] 
+                    + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
                     - sqrt(g/H)*(field.u[0][indexJ] - H);
 
     uAtIBC[0] = H;
@@ -137,8 +138,9 @@ void openAffShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
     // compute a physical reflection
     double g = fluxCoeffs[0];
     double H = coeffs[0]*pos[0] + coeffs[1]*pos[1] + coeffs[2];;
-    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
-                    - sqrt(g/H)*(field.u[0][indexJ] - H);
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] 
+                        + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
+                        - sqrt(g/H)*(field.u[0][indexJ] - H);
 
     uAtIBC[0] = H;
     uAtIBC[1] = alpha*edgeNormal[0];
@@ -159,7 +161,8 @@ void sinusShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos,
     // compute a physical reflection
     double g = fluxCoeffs[0];
     double H = coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2]) + coeffs[3];
-    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] 
+                    + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
                     - sqrt(g/H)*(field.u[0][indexJ] - H);
 
     uAtIBC[0] = H;
@@ -182,7 +185,8 @@ void sinusAffShallow(std::vector<double>& uAtIBC, const std::vector<double>& pos
     double g = fluxCoeffs[0];
     double H = coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2]) + coeffs[3]
                 + coeffs[4]*pos[0] +  coeffs[5]*pos[1];
-    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] 
+                    + edgeNormal[1]*field.u[2][indexJ])/field.u[0][indexJ]
                     - sqrt(g/H)*(field.u[0][indexJ] - H);
 
     uAtIBC[0] = H;
@@ -205,7 +209,8 @@ void sinusShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos
     double g = fluxCoeffs[0];
     double h0 = fluxCoeffs[1];
     double H = coeffs[0]*sin(2*M_PI*coeffs[1]*t + coeffs[2])+coeffs[3];
-    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/h0
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] 
+                    + edgeNormal[1]*field.u[2][indexJ])/h0
                     - sqrt(g/H)*(field.u[0][indexJ] - H);
 
     uAtIBC[0] = H;
@@ -228,7 +233,8 @@ void openShallowLin(std::vector<double>& uAtIBC, const std::vector<double>& pos,
     double g = fluxCoeffs[0];
     double h0 = fluxCoeffs[1];
     double H = coeffs[0];
-    double alpha = (edgeNormal[0]*field.u[1][indexJ] + edgeNormal[1]*field.u[2][indexJ])/h0
+    double alpha = (edgeNormal[0]*field.u[1][indexJ] 
+                    + edgeNormal[1]*field.u[2][indexJ])/h0
                     - sqrt(g/H)*(field.u[0][indexJ] - H);
 
     uAtIBC[0] = H;

@@ -197,12 +197,14 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
         {
             if(tempBcCoeff[i] == ',')
             {
-                bcCoeff.push_back(std::stod(tempBcCoeff.substr(precComaPos + 1, i - precComaPos - 1)));
+                bcCoeff.push_back(std::stod(tempBcCoeff
+                            .substr(precComaPos + 1, i - precComaPos - 1)));
                 precComaPos = i;
             }
         }
         //At the end, still one push_back to do
-        bcCoeff.push_back(std::stod(tempBcCoeff.substr(precComaPos+1, tempBcCoeff.size() - precComaPos - 1)));
+        bcCoeff.push_back(std::stod(tempBcCoeff
+                    .substr(precComaPos+1, tempBcCoeff.size() - precComaPos - 1)));
 
         tempCondition.coefficients = bcCoeff;
 
@@ -220,8 +222,8 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
 
     if(!foundInitCond)
     {
-        std::cerr << "No initial condition (Init_Cond field) found in parameter file "
-                  << fileName << std::endl;
+        std::cerr << "No initial condition (Init_Cond field) found in parameter file"
+                  << " " << fileName << std::endl;
 
         return false;
     }
@@ -309,7 +311,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
 
-    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
+    if(!(temp.find_first_not_of(".0123456789") == std::string::npos))
     {
         std::cerr << "Unexpected simulation time duration " << temp
                   << " in parameter file " << fileName << std::endl;
@@ -323,7 +325,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
 
-    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
+    if(!(temp.find_first_not_of(".0123456789") == std::string::npos))
     {
         std::cerr << "Unexpected time step " << temp
                   << " in parameter file " << fileName << std::endl;
@@ -337,7 +339,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
 
-    if(!(temp.find_first_not_of(".0123456789") == std::string::npos)) //To improve
+    if(!(temp.find_first_not_of(".0123456789") == std::string::npos))
     {
         std::cerr << "Unexpected time between data writing " << temp
                   << " in parameter file " << fileName << std::endl;
@@ -634,7 +636,8 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << std::endl
                 << "Time step: " << solverParams.timeStep << "s"
                 << std::endl
-                << "Time between data writing: " << solverParams.simTimeDtWrite << "s"
+                << "Time between data writing: " << solverParams.simTimeDtWrite 
+                << "s"
                 << std::endl
                 << "Problem type: " << solverParams.problemType
                 << std::endl
