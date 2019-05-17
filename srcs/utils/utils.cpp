@@ -1,6 +1,8 @@
 #include <cassert>
 #include "utils.hpp"
 
+
+// see .hpp file for description
 bool isPermutation(const std::vector<int>& vec1,
 	               const std::vector<int>& vec2,
 	               std::vector<unsigned int>& permutation1,
@@ -19,7 +21,6 @@ bool isPermutation(const std::vector<int>& vec1,
         {
             if(vec2[j] == vec1[i])
             {
-                //Improve to do not try to check already founded value in vec2.
                 permutation1[i] = j;
                 permutation2[j] = i;
 
