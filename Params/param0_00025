@@ -1,13 +1,12 @@
-Gauss5
-1
+Gauss20
 Lagrange
 RK1
 weak
-0.4
-1e-4
-0.4
+0.1
+0.01
+0.00025
 shallowLin
-Roe
+LF
 9.81,10
 0
 BC_Left
@@ -17,10 +16,10 @@ BC_Right
 	openShallowLin
 	10
 BC_Up
-	reflectShallow
+	openShallowLin
 	10
 BC_Down
-	reflectShallow
+	openShallowLin
 	10
 Init_Cond
 	gaussian1DShallowX

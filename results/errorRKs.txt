@@ -1,0 +1,272 @@
+
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.233179		1.02494
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0104415		0.0647726
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.010289		0.0645229
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.010275		0.0644457
+
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0548582		0.0809479
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0549458		0.0807261
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0549404		0.0808368
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0549405		0.0808347
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0281302		0.077272
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.025769		0.0901729
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0257661		0.0901631
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0257661		0.0901627
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0268529		0.0829026
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0262989		0.0958063
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0262944		0.0957965
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0262944		0.0957962
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0154762		0.419486
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.024019		0.500023
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.024019		0.500023
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.024019		0.500023
+
+mesh:	./Geometry/2D Rectangle/rectangle0_05.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_05.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_05.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0104546		0.256869
+
+mesh:	./Geometry/2D Rectangle/rectangle0_05.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_05.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_05.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0126144		0.292371
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0458422		0.582877
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		10		10
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		2.76885e-14		3.73035e-14
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0458422		0.582877
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK1.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0458422		0.582877
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK2.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		9.56897		9.56897
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK3.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRK4.dat
+ORDER:	ERROR (L2):		ERROR(Linf):

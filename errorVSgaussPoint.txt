@@ -1,0 +1,22 @@
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+3	0.000860683
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+3	0.000817314
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+3	0.000128158
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+5	0.000975013
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/param.dat
+ORDER:	ERROR:

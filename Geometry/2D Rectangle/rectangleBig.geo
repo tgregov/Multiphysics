@@ -1,8 +1,8 @@
 // 2D Rectangle
 // List of points
-d = 0.1;
-x = 10;
-y = 1;
+d = 5e5;
+x = 1e7;
+y = 1e7;
 Point(1) = {0, 0, 0, d};
 Point(2) = {x, 0, 0, d};
 Point(3) = {0, y, 0, d};
@@ -25,4 +25,4 @@ Physical Curve("BC_Up") = {2};
 Physical Curve("BC_Down") = {4};
 Physical Curve("BC_Right") = {3};
 
-Transfinite Surface{1};
+//Transfinite Surface{1};

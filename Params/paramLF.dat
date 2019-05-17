@@ -1,10 +1,11 @@
-Gauss20
+Gauss5
+1
 Lagrange
 RK1
 weak
-0.1
-0.0001
-0.001
+0.4
+1e-4
+0.4
 shallowLin
 LF
 9.81,10

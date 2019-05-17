@@ -1,0 +1,81 @@
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0584493		0.0762556
+
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.132146		0.173769
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_4.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0429221		0.122755
+
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_4.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0580224		0.124897
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_3.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0419579		0.119992
+
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_3.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0653014		0.13429
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_2.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0368086		0.108651
+
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_2.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.059192		0.120056
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0215681		0.0625045
+
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		29.2565		133.815
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.058434		0.0762865
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_4.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0429202		0.122754
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_3.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0419589		0.119994
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_2.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0368086		0.108652
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0215686		0.0625063
+

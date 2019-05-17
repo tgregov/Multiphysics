@@ -1,0 +1,29 @@
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	7.51473
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	620.497
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	63673.7
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	89175.5
+mesh:	./Geometry/2D Rectangle/rectangleBig.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	77061.8

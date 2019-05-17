@@ -1,0 +1,308 @@
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0275717		0.070303
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0275741		0.0703124
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0275717		0.070303
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.028146		0.0816833
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0561288		0.0904383
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0561362		0.0904103
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.062585		0.163636
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+2		0.0270066		0.0668872
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+2		0.0270068		0.0668977
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+2		0.0364243		0.162356
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+2		0.0270066		0.0668872
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+2		0.00316717		0.00795617
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+2		0.0364243		0.162356
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000103644		0.000217811
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000103475		0.000217008
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.068245		0.189704
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000103644		0.000217811
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000103475		0.000217008
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.068245		0.189704
+
+mesh:	./Geometry/2D Rectangle/rectangle0_4.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.00231383		0.00605021
+
+mesh:	./Geometry/2D Rectangle/rectangle0_4.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.00231769		0.0060592
+
+mesh:	./Geometry/2D Rectangle/rectangle0_4.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0733972		0.247615
+
+mesh:	./Geometry/2D Rectangle/rectangle0_3.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000249891		0.000875233
+
+mesh:	./Geometry/2D Rectangle/rectangle0_3.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000249021		0.000876544
+
+mesh:	./Geometry/2D Rectangle/rectangle0_3.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.130098		0.484696
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000733058		0.0022439
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000733522		0.00224472
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0859204		0.361073
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000422484		0.00114676
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.000422264		0.00114519
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.53983		7.96284
+
+
+
+
+
+
+
+
+
+NEW:
+
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0561411		0.0904651
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0561484		0.0904379
+
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0624486		0.162314
+
+mesh:	./Geometry/2D Rectangle/rectangle0_4.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0358277		0.0723484
+
+mesh:	./Geometry/2D Rectangle/rectangle0_4.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0358228		0.0723506
+
+mesh:	./Geometry/2D Rectangle/rectangle0_4.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.038784		0.150148
+
+mesh:	./Geometry/2D Rectangle/rectangle0_3.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0307708		0.0599627
+
+mesh:	./Geometry/2D Rectangle/rectangle0_3.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0307705		0.0599671
+
+mesh:	./Geometry/2D Rectangle/rectangle0_3.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0302088		0.0956851
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0277458		0.0705068
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0277435		0.0704977
+
+mesh:	./Geometry/2D Rectangle/rectangle0_2.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.027818		0.080382
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.01182		0.0337927
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0118166		0.0337743
+
+mesh:	./Geometry/2D Rectangle/rectangle0_1.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.01167		0.064706
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_5.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0183539		0.0734381
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_5.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_5.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0458936		0.177616
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_4.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.01371		0.122525
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_4.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_4.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0194957		0.123293
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_3.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0132586		0.118329
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_3.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_3.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0269943		0.161571
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_2.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0116803		0.106525
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_2.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_2.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0359133		0.348082
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramLF.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0183539		0.0734381
+
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramRoe.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+mesh:	./Geometry/2D Rectangle/rectangleLong0_1.geo
+param:	./Params/paramMean.dat
+ORDER:	ERROR (L2):		ERROR(Linf):
+1		0.0458936		0.177616
+
+
+

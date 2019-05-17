@@ -16,10 +16,10 @@ BC_Right
 	openShallowLin
 	10
 BC_Up
-	openShallowLin
+	reflectShallow
 	10
 BC_Down
-	openShallowLin
+	reflectShallow
 	10
 Init_Cond
 	gaussian1DShallowX

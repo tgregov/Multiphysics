@@ -1,17 +1,15 @@
 Gauss5
-2
+1
 Lagrange
 RK1
 weak
-40000
+10000
 10
 10
 shallow
-0,0,0,0,1
 LF
 9.81
-sourceShallowCstGradCstFrict
-1000,0.00013,0,0,0
+0.00013
 BC_Left
 	openShallow
 	4000
@@ -25,5 +23,5 @@ BC_Down
 	openShallow
 	4000
 Init_Cond
-	constant
-	4000,1,0
+	gaussian2DShallow
+	20,5e6,1e2,5e6,1e2,4000

@@ -1,0 +1,31 @@
+TRIANGLE:
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	0.00224069
+2	0.00150374
+3	0.00104677
+4	0.000885241
+5	0.000851833
+
+QUAD:
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	0.00149532
+2	0.00132485
+3	0.000913512
+4	0.000825221
+5	0.000830818
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+1	0.00224069
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+4	0.000885241
+mesh:	./Geometry/2D Rectangle/rectangle0_5.geo
+param:	./Params/param.dat
+ORDER:	ERROR:
+4	0.000885241
