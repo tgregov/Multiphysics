@@ -1,0 +1,29 @@
+Gauss10
+1
+Lagrange
+RK1
+weak
+0.3
+0.00001
+0.3
+shallowLin
+1,0,0,0,0
+LF
+9.81,10 
+no
+0
+BC_Left
+	openShallowLin
+	10
+BC_Right
+	openShallowLin
+	10
+BC_Up
+	reflectShallow
+	10
+BC_Down
+	reflectShallow
+	10
+Init_Cond
+	gaussian1DShallowX
+	0.3,6,0.72,10
