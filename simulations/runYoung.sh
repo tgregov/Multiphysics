@@ -25,7 +25,7 @@ cd ../../
 
 # Run the simulation
 clear
-srun ./build/bin/main ./geometry/young/young.msh ./params/young.dat
+srun ./build/bin/main ./geometry/young/young.msh ./params/young.dat ./simulations/resultsYoung.msh
 
 # Get back to the initial repository
 cd ./simulations

@@ -25,7 +25,7 @@ cd ../../
 
 # Run the simulation
 clear
-srun ./build/bin/main ./geometry/obstacle/circle.msh ./params/obstacleCircle.dat
+srun ./build/bin/main ./geometry/obstacle/circle.msh ./params/obstacleCircle.dat ./simulations/resultsObstacleCircle.msh
 
 # Get back to the initial repository
 cd ./simulations

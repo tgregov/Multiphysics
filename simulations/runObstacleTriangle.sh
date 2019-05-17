@@ -25,7 +25,7 @@ cd ../../
 
 # Run the simulation
 clear
-srun ./build/bin/main ./geometry/obstacle/triangle.msh ./params/obstacleTriangle.dat
+srun ./build/bin/main ./geometry/obstacle/triangle.msh ./params/obstacleTriangle.dat ./simulations/resultsObstacleTriangle.msh
 
 # Get back to the initial repository
 cd ./simulations

@@ -25,7 +25,7 @@ cd ../../
 
 # Run the simulation
 clear
-srun ./build/bin/main ./geometry/dispersion/dispersion.msh ./params/dispersion.dat
+srun ./build/bin/main ./geometry/dispersion/dispersion.msh ./params/dispersion.dat ./simulations/resultsDispersion.msh
 
 # Get back to the initial repository
 cd ./simulations

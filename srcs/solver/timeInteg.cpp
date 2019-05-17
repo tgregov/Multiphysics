@@ -19,7 +19,8 @@
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
  */
-static void Fweak(double t, Field& field, PartialField& partialField, const Matrix& matrix, const Mesh& mesh,
+static void Fweak(double t, Field& field, PartialField& partialField, 
+                  const Matrix& matrix, const Mesh& mesh,
                   const SolverParams& solverParams)
 {
  	// compute the nodal physical fluxes
@@ -81,7 +82,7 @@ static void Fstrong(double t, Field& field, PartialField& partialField, const Ma
 
 // see .hpp file for description
 bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
-				const std::string& fileName)
+				const std::string& fileName, const std::string& resultsName)
 {
         std::cout << "Number of nodes: " << mesh.nodeData.numNodes << std::endl;
 
@@ -233,7 +234,7 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 	 			<< std::endl;
 
 	// write the results & finalize
-    writeEnd(solverParams.viewTags, solverParams.whatToWrite);
+    writeEnd(solverParams.viewTags, solverParams.whatToWrite, resultsName);
     gmsh::finalize();
 
 	return true;

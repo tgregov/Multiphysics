@@ -1,5 +1,6 @@
 #include "RungeKutta.hpp"
 
+// see .hpp file for prototype
 void RK1(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
 {
@@ -9,6 +10,7 @@ void RK1(double t, Field& field, PartialField& partialField, const Matrix& matri
 }
 
 
+// see .hpp file for prototype
 void RK2(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
 {
@@ -31,6 +33,7 @@ void RK2(double t, Field& field, PartialField& partialField, const Matrix& matri
 }
 
 
+// see .hpp file for prototype
 void RK3(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
 {
@@ -59,6 +62,7 @@ void RK3(double t, Field& field, PartialField& partialField, const Matrix& matri
 }
 
 
+// see .hpp file for prototype
 void RK4(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)
 {
@@ -89,6 +93,7 @@ void RK4(double t, Field& field, PartialField& partialField, const Matrix& matri
     for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
     {
         field.k4[unk] = temp.DeltaU[unk]*h;
-        field.u[unk] += (field.k1[unk] + 2*field.k2[unk] + 2*field.k3[unk] + field.k4[unk])/6;
+        field.u[unk] += (field.k1[unk] + 2*field.k2[unk] + 2*field.k3[unk] 
+                        + field.k4[unk])/6;
     }
 }

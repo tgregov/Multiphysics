@@ -1,8 +1,10 @@
 #ifndef write_hpp_included
 #define write_hpp_included
 
+#include <string>
 #include "../solver/field.hpp"
 #include "../params/Params.hpp"
+
 
 /**
  * \brief Write data for shallow waters. You can write H, u, v, 0.*(u²+v²)
@@ -73,7 +75,9 @@ void writeTransport(std::vector<std::vector<double>>& uDisplay,
  * \brief Actually write the results file.
  * \param viewTags Vector containing the rag of the different writing data's.
  * \param whatToWrite Vector containing boolean describing which unknown to write.
+ * \param resultsName the name of the .msh file that will contain the results
  */
-void writeEnd(const std::vector<int>& viewTags, const std::vector<bool>& whatToWrite);
+void writeEnd(const std::vector<int>& viewTags, const std::vector<bool>& whatToWrite,
+                  const std::string& resultsName);
 
 #endif /* write_hpp_included */

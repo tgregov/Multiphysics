@@ -35,11 +35,11 @@ void displayMesh(const Mesh& mesh)
 
 		// general information about the current entity
 		std::cout 	<< "[Entity (" << i << ")]:\n"
-					<< "\t- Tag of the " << mesh.dim <<"D entity: "
+					<< "\t- Tag of the " << mesh.dim << "D entity: "
 					<< entitity.entityTagHD << "\n"
-					<< "\t- Tag of the " << mesh.dim-1 <<"D entity: "
+					<< "\t- Tag of the " << mesh.dim-1 << "D entity: "
 					<< entitity.entityTagLD << "\n"
-					<< "\t- Number of " << mesh.dim <<"D elements: "
+					<< "\t- Number of " << mesh.dim << "D elements: "
 					<<  entitity.elements.size() << "\n";
 
 		// display the information about each element
@@ -50,8 +50,10 @@ void displayMesh(const Mesh& mesh)
 			Element element = mesh.entities[i].elements[j];
 			std::cout 	<< "\t[Element (" << j << ")]:\n"
 						<< "\t\t- Tag: " << element.elementTag << "\n"
-			 			<< "\t\t- " << mesh.dim <<"D type: " << element.elementTypeHD << "\n"
-						<< "\t\t- " << mesh.dim-1 <<"D type: " << element.elementTypeLD << "\n"
+			 			<< "\t\t- " << mesh.dim << "D type: " 
+			 			<< element.elementTypeHD << "\n"
+						<< "\t\t- " << mesh.dim-1 << "D type: " 
+						<< element.elementTypeLD << "\n"
 						<< "\t\t- Offset in u: " << element.offsetInU << "\n"
 						<< "\t\t- Nodes tags: " << std::endl;
 
@@ -132,8 +134,8 @@ void displayMesh(const Mesh& mesh)
                    	for(unsigned int v = 0 ; v < edges[k].normal.size() ; ++v)
                     {
                         if(edges[k].normal[v] != -entitity
-                    	.elements[edges[k].edgeInFront.first]
-                    	.edges[edges[k].edgeInFront.second].normal[v])
+                    		.elements[edges[k].edgeInFront.first]
+                    		.edges[edges[k].edgeInFront.second].normal[v])
                         {
                             std::cerr 	<< "Bug in the normal of that edge !"
                                         << std::endl;

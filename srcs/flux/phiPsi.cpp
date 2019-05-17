@@ -2,9 +2,9 @@
 
 
 // see .hpp file for description
-void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
-                bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-                const SolverParams& solverParams)
+void LFShallow(const Edge& edge, Field& field, PartialField& partialField, 
+                unsigned int j, double factor, bool boundary, unsigned int indexJ, 
+                unsigned int indexFrontJ, const SolverParams& solverParams)
 {
     // gravity parameter
     double g = solverParams.fluxCoeffs[0];
@@ -21,9 +21,9 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
     // compute the numerical flux
     if(boundary)
     {
-        // computation of the absolute value of the eigenvalue lambda outside the element
+        // computation of the absolute value of the eigenvalue outside the element
         lambdaOut = (partialField.uAtBC[1]*edge.normal[0]
-                        + partialField.uAtBC[2]*edge.normal[1])/partialField.uAtBC[0];
+                    + partialField.uAtBC[2]*edge.normal[1])/partialField.uAtBC[0];
 
         lambdaOut = (lambdaOut >= 0) ? lambdaOut + sqrt(g*partialField.uAtBC[0]) :
                     -lambdaOut + sqrt(g*partialField.uAtBC[0]);
@@ -31,6 +31,7 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
         // computation of the value of C in the LF scheme
         double C = (lambdaIn > lambdaOut ? lambdaIn : lambdaOut);
 
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
@@ -45,7 +46,7 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
     }
     else
     {
-        // computation of the absolute value of the eigenvalue lambda outside the element
+        // computation of the absolute value of the eigenvalue outside the element
         lambdaOut = (field.u[1][indexFrontJ]*edge.normal[0]
                         + field.u[2][indexFrontJ]*edge.normal[1])
                     /field.u[0][indexFrontJ];
@@ -56,6 +57,7 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
         // computation of the value of C in the LF scheme
         double C = (lambdaIn > lambdaOut ? lambdaIn : lambdaOut);
 
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
@@ -72,9 +74,9 @@ void LFShallow(const Edge& edge, Field& field, PartialField& partialField, unsig
 
 
 // see .hpp file for description
-void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned int j, double factor,
-            bool boundary, unsigned int indexJ, unsigned int indexFrontJ,
-            const SolverParams& solverParams)
+void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned int j,
+            double factor, bool boundary, unsigned int indexJ, 
+            unsigned int indexFrontJ, const SolverParams& solverParams)
 {
     // gravity parameter
     double g = solverParams.fluxCoeffs[0];
@@ -109,6 +111,7 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned in
             Fr = 1.0;
         }
 
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
@@ -128,12 +131,12 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned in
         hFrontJSqrt = sqrt(field.u[0][indexFrontJ]);
 
         uRoe = ((field.u[1][indexJ]/field.u[0][indexJ])*hJSqrt
-                        + (field.u[1][indexFrontJ]/field.u[0][indexFrontJ])*hFrontJSqrt)
-                        /(hJSqrt + hFrontJSqrt);
+                        + (field.u[1][indexFrontJ]/field.u[0][indexFrontJ])
+                        *hFrontJSqrt)/(hJSqrt + hFrontJSqrt);
 
         vRoe =   ((field.u[2][indexJ]/field.u[0][indexJ])*hJSqrt
-                        + (field.u[2][indexFrontJ]/field.u[0][indexFrontJ])*hFrontJSqrt)
-                        /(hJSqrt + hFrontJSqrt);
+                        + (field.u[2][indexFrontJ]/field.u[0][indexFrontJ])
+                        *hFrontJSqrt)/(hJSqrt + hFrontJSqrt);
 
         cRoe = sqrt(g*(field.u[0][indexJ] + field.u[0][indexFrontJ])/2);
 
@@ -148,6 +151,7 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned in
             Fr = 1.0;
         }
 
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
@@ -155,7 +159,7 @@ void Roe(const Edge& edge, Field& field, PartialField& partialField, unsigned in
                 partialField.g[dim][unk][edge.offsetInElm[j]] +=
                     -((Fr + factor)*field.flux[dim][unk][indexJ]+
                         (1 - Fr)*field.flux[dim][unk][indexFrontJ]
-                    + cRoe*(1-Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
+                    + cRoe*(1 - Fr*Fr)*edge.normal[dim]*(field.u[unk][indexJ]
                         - field.u[unk][indexFrontJ]))/2;
             }
         }
@@ -176,6 +180,7 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField, uns
     // compute the numerical flux
     if(boundary)
     {
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
@@ -190,6 +195,7 @@ void LFTransport(const Edge& edge, Field& field, PartialField& partialField, uns
     }
     else
     {
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
@@ -214,6 +220,7 @@ void mean(const Edge& edge, Field& field, PartialField& partialField, unsigned i
     // compute the numerical flux
     if(boundary)
     {
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)
@@ -226,6 +233,7 @@ void mean(const Edge& edge, Field& field, PartialField& partialField, unsigned i
     }
     else
     {
+        //computation of g
         for(unsigned short dim = 0 ; dim < partialField.g.size() ; ++dim)
         {
             for(unsigned short unk = 0 ; unk < partialField.g[dim].size() ; ++unk)

@@ -55,7 +55,8 @@ void writeShallow(std::vector<std::vector<double>>& uDisplay,
             for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
                 ++countLocal)
             {
-                temp[countLocal] = field.u[1][countLocal+offset]/field.u[0][countLocal+offset];
+                temp[countLocal] = field.u[1][countLocal+offset]
+                                    /field.u[0][countLocal+offset];
             }
             offset += elementNumNodes[count];
             uDisplay[count] = std::move(temp);
@@ -74,7 +75,8 @@ void writeShallow(std::vector<std::vector<double>>& uDisplay,
             for (unsigned int countLocal = 0; countLocal < elementNumNodes[count];
                 ++countLocal)
             {
-                temp[countLocal] = field.u[2][countLocal+offset]/field.u[0][countLocal+offset];
+                temp[countLocal] = field.u[2][countLocal+offset]
+                                    /field.u[0][countLocal+offset];
             }
             offset += elementNumNodes[count];
             uDisplay[count] = std::move(temp);
@@ -134,10 +136,13 @@ void writeShallow(std::vector<std::vector<double>>& uDisplay,
 
 void writeShallowLin(std::vector<std::vector<double>>& uDisplay,
                       const std::vector<unsigned int>& elementNumNodes,
-                      const std::vector<int>& elementTags, const std::string& modelName,
-                      unsigned int nbreStep, double t, const Field& field,
+                      const std::vector<int>& elementTags, 
+                      const std::string& modelName,
+                      unsigned int nbreStep, double t, 
+                      const Field& field,
                       const std::vector<double>& fluxCoeffs,
-                      const std::vector<bool>& whatToWrite, std::vector<int>& viewTags)
+                      const std::vector<bool>& whatToWrite, 
+                      std::vector<int>& viewTags)
 {
     if(nbreStep == 0)
     {
@@ -295,11 +300,12 @@ void writeTransport(std::vector<std::vector<double>>& uDisplay,
     }
 }
 
-void writeEnd(const std::vector<int>& viewTags, const std::vector<bool>& whatToWrite)
+void writeEnd(const std::vector<int>& viewTags, const std::vector<bool>& whatToWrite,
+                const std::string& resultsName)
 {
     for(unsigned int i = 0 ; i < whatToWrite.size() ; ++i)
     {
         if(whatToWrite[i] == true)
-            gmsh::view::write(viewTags[i], std::string("results.msh"), true);
+            gmsh::view::write(viewTags[i], resultsName, true);
     }
 }
