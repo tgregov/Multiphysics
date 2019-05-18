@@ -29,6 +29,6 @@ Automatically build the code (`<cluster>` is either `vega` or `nic4`):
 ```
 Submit a batch file for one of the simulations
 ```bash
-cd ./simulations
+cd ../simulations
 sbatch runObstacleSquare.sh
 ```
