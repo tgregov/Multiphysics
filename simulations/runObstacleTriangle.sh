@@ -18,8 +18,7 @@ export OMP_NUM_THREADS=16
 export OMP_CANCELLATION=true
 
 # Generate the .msh
-cd $HOME/Multiphysics
-cd ./geometry/obstacle/
+cd ../geometry/obstacle/
 gmsh -2 -order 3 triangle.geo -o triangle.msh
 cd ../../
 

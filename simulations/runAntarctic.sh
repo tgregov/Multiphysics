@@ -18,8 +18,7 @@ export OMP_NUM_THREADS=16
 export OMP_CANCELLATION=true
 
 # Generate the .msh
-cd $HOME/Multiphysics
-cd ./geometry/antarctic/
+cd ../geometry/antarctic/
 gmsh -2 -order 1 ant.geo -o ant.msh
 cd ../../
 

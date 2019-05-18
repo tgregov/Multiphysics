@@ -18,8 +18,7 @@ export OMP_NUM_THREADS=16
 export OMP_CANCELLATION=true
 
 # Generate the .msh
-cd $HOME/Multiphysics
-cd ./geometry/dispersion/
+cd ../geometry/dispersion/
 gmsh -2 -order 3 dispersion.geo -o dispersion.msh
 cd ../../
 
