@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=16                                                                                       
 #SBATCH --mem-per-cpu=1024 # megabytes                                                                           
 #SBATCH --partition=defq                                                                                         
-#SBATCH --output=outCoriolis.txt                                                                                                                                                                         
+#SBATCH --output=outCoriolisEffect.txt                                                                                                                                                                         
 # Load the modules & set the exports                                                                             
 module load gcc/4.9.2
 export CC=gcc
@@ -18,14 +18,14 @@ export OMP_CANCELLATION=true
 
 # Generate the .msh                                                                                              
 cd $HOME/Multiphysics
-cd ./geometry/coriolis/
-gmsh -2 -order 3 coriolis.geo -o coriolis.msh
+cd ./geometry/coriolisEffect/
+gmsh -2 -order 3 coriolisEffect.geo -o coriolisEffect.msh
 echo "mesh generated"
 cd ../../
 
 # Run the simulation                                                                                             
 clear
-srun ./build/bin/main ./geometry/coriolis/coriolis.msh ./params/coriolis.dat ./simulations/resultsCoriolis.msh
+srun ./build/bin/main ./geometry/coriolisEffect/coriolisEffect.msh ./params/coriolisEffect.dat ./simulations/resultsCoriolisEffect.msh
 
 # Get back to the initial repository                                                                             
 cd ./simulations
