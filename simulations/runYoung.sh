@@ -18,8 +18,7 @@ export OMP_NUM_THREADS=16
 export OMP_CANCELLATION=true
 
 # Generate the .msh
-cd $HOME/Multiphysics
-cd ./geometry/young/
+cd ../geometry/young/
 gmsh -2 -order 3 young.geo -o young.msh
 cd ../../
 
