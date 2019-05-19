@@ -8,7 +8,7 @@
 #include "../write/write.hpp"
 #include "timeInteg.hpp"
 #include "field.hpp"
-#include "RungeKutta.hpp"
+#include "rungeKutta.hpp"
 
 
 //typedef to lighten the notations

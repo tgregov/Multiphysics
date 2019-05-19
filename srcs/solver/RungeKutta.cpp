@@ -1,4 +1,4 @@
-#include "RungeKutta.hpp"
+#include "rungeKutta.hpp"
 
 void RK1(double t, Field& field, PartialField& partialField, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF)

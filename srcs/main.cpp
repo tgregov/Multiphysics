@@ -54,20 +54,20 @@ int main(int argc, char **argv)
         std::cout << "Number of threads: " << n << std::endl;;
     #endif
 
-    // std::ofstream file1(std::string(argv[5]), std::ios::out | std::ios::app); 
-    // if (file1)
-    // {
-    //         file1 << "mesh:" << "\t" << argv[1] << std::endl;
-    //         file1 << "param:" << "\t" << argv[3] << std::endl;
-    //         file1 << "ORDER:" << "\t" << "ERROR (L2):" << "\t\t" << "ERROR(Linf):" << std::endl;
+    std::ofstream file1(std::string(argv[5]), std::ios::out | std::ios::app); 
+    if (file1)
+    {
+            file1 << "mesh:" << "\t" << argv[1] << std::endl;
+            file1 << "param:" << "\t" << argv[3] << std::endl;
+            file1 << "ORDER:" << "\t" << "ERROR (L2):" << "\t\t" << "ERROR(Linf):" << std::endl;
 
-    // }else
-    //         std::cerr << "Impossible d'ouvrir le fichier !" << std::endl;
+    }else
+            std::cerr << "Impossible d'ouvrir le fichier !" << std::endl;
 
-    // int order = solverParams.order;
-    // double errorL2 = 0;
-    // double errorLinf = 0;
-    // generateMesh(argv[1], argv[2], order);  
+    int order = solverParams.order;
+    double errorL2 = 0;
+    double errorLinf = 0;
+    generateMesh(argv[1], argv[2], order);  
 
     // load the mesh
     std::cout   << "================================================================"
@@ -120,20 +120,20 @@ int main(int argc, char **argv)
               << static_cast<double>(ellapsedTime.count())/1000.0
               << " s" << std::endl;
 
-    // std::cout   << "================================================================"
-    //     << std::endl
-    //     << "                       ERROR COMPUTATION                           "
-    //     << std::endl
-    //     << "==================================================================="
-    //     << std::endl;
-    // if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]),
-    //                  errorL2, errorLinf))
-    // {
-    //     std::cerr << "Something went wrong when computing the error" << std::endl;
-    //     return -1;
-    // }
-    //     file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl << std::endl;
-    //     file1.close();
+    std::cout   << "================================================================"
+        << std::endl
+        << "                       ERROR COMPUTATION                           "
+        << std::endl
+        << "==================================================================="
+        << std::endl;
+    if(!computeError(mesh, solverParams, std::string(argv[2]), std::string(argv[4]),
+                     errorL2, errorLinf))
+    {
+        std::cerr << "Something went wrong when computing the error" << std::endl;
+        return -1;
+    }
+        file1 << order << "\t\t" << errorL2 << "\t\t" << errorLinf << std::endl << std::endl;
+        file1.close();
 
     return 0;
 }
