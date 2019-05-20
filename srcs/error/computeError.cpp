@@ -24,7 +24,7 @@ bool computeError(const Mesh& mesh, const SolverParams& solverParams, const std:
 
 	double t1 = solverParams.simTime;
     double t2;
-	int step = t1/solverParams.timeStep;
+	int step = 3000;
 
 
     //get the results computed by the solver, at timestep "step"
