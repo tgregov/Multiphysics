@@ -15,7 +15,7 @@ struct Edge
 {
     int edgeTag;                        /**< Element tag of the edge*/
 
-    std::vector<double> determinantLD;  /**< Determinant of the variable change for 
+    std::vector<double> determinantLD;  /**< Determinant of the variable change for
                                             Gauss integration,
                                             evaluated at each Gauss point*/
 
@@ -25,7 +25,7 @@ struct Edge
 
     double length;
 
-    std::pair<unsigned int, unsigned int> edgeInFront 
+    std::pair<unsigned int, unsigned int> edgeInFront
         = std::pair<unsigned int, unsigned>(-1, -1); /**< Element index and edge
                                                         index to find the
                                                         second location of this edge
@@ -48,37 +48,25 @@ struct Element
     int elementTypeHD;                  /**< Type of the element*/
     int elementTypeLD;                  /**< Type of the edges*/ //Store it only once
 
-    unsigned int offsetInU;             /**< Offset of the element in the unknowns 
+    unsigned int offsetInU;             /**< Offset of the element in the unknowns
                                             vector*/
 
     std::vector<double> determinantHD;  /**< Determinant of the variable change for
-                                             Gauss integration, evaluated at each 
+                                             Gauss integration, evaluated at each
                                              Gauss point*/
 
-    std::vector<double> jacobianHD;     /**< Jacobian of the variable change for 
-                                            Gauss integration, evaluated at each 
+    std::vector<double> jacobianHD;     /**< Jacobian of the variable change for
+                                            Gauss integration, evaluated at each
                                             Gauss point*/
 
     std::vector<Edge> edges;            /**< List of edge which compose the element */
     std::vector<int> nodeTags;          /**< List of node tags of the element */
-    std::vector<std::vector<double>> nodesCoord;    /**< Node coordinates 
+    std::vector<std::vector<double>> nodesCoord;    /**< Node coordinates
                                                         of the elemnts */
 
     std::vector<Eigen::SparseMatrix<double>> dM;    /**< Partial M matrix */
 };
 
-/**
- * \struct Entity
- * \brief Represents an entity.
- */
-struct Entity
-{
-    int entityTagHD;                    /**< Tag of the HD entity*/
-    int entityTagLD;                    /**< Tag of the LD entity linked to this 
-                                                HD entity*/
-
-    std::vector<Element> elements;      /**< List of the elements inside the entity*/
-};
 
 /**
  * \struct ElementProperty
@@ -99,14 +87,14 @@ struct ElementProperty
 
     unsigned int nGP;   /**< Number of GP */
     unsigned int nSF;   /**< Number of SF */
-    std::vector<std::vector<double>> prodFunc;  /**< Cross-product w_k*l_i*l_j 
+    std::vector<std::vector<double>> prodFunc;  /**< Cross-product w_k*l_i*l_j
                                                         evaluated at each GP */
 
-    std::vector<std::vector<double>> pondFunc;  /**< Cross-product w_k*l_i 
+    std::vector<std::vector<double>> pondFunc;  /**< Cross-product w_k*l_i
                                                         evaluated at each GP */
-    
+
     std::vector<std::pair<unsigned int, unsigned int>> IJ;  /**< Index list of
-                                                                the elements of 
+                                                                the elements of
                                                                 prodFunc */
     std::vector<std::vector<double>> lalb;
 
@@ -129,14 +117,18 @@ struct NodeData
  */
 struct Mesh
 {
-    std::map<int, ElementProperty> elementProperties; /**< Store element 
-                                                            properties for each 
+    std::map<int, ElementProperty> elementProperties; /**< Store element
+                                                            properties for each
                                                             element type */
 
-    std::map<std::string, std::vector<int>> nodesTagBoundary;/**< Tags of the nodes 
+    std::map<std::string, std::vector<int>> nodesTagBoundary;/**< Tags of the nodes
                                                                     per BC */
 
-    std::vector<Entity> entities;   /**< List of entities inside the mesh */
+    int entityTagHD;                    /**< Tag of the HD entity*/
+    int entityTagLD;                    /**< Tag of the LD entity linked to this
+                                                HD entity*/
+
+    std::vector<Element> elements;      /**< List of the elements inside the entity*/
 
     unsigned short dim;             /**< Mesh dimension (1, 2, (3)) */
 

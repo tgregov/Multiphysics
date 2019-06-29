@@ -19,11 +19,13 @@
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
  */
-static void Fweak(double t, Field& field, PartialField& partialField, 
+static void Fweak(double t, Field& field,
                   const Matrix& matrix, const Mesh& mesh,
                   const SolverParams& solverParams)
 {
  	// compute the nodal physical fluxes
+ 	PartialField partialField(solverParams.nUnknowns, mesh.dim);
+
  	solverParams.flux(field, partialField, solverParams, false);
 
  	if(solverParams.IsSourceTerms)
@@ -55,9 +57,11 @@ static void Fweak(double t, Field& field, PartialField& partialField,
  * \param mesh Mesh representing the domain.
  * \param solverParams Parameters of the solver.
  */
-static void Fstrong(double t, Field& field, PartialField& partialField, const Matrix& matrix, const Mesh& mesh,
+static void Fstrong(double t, Field& field, const Matrix& matrix, const Mesh& mesh,
                     const SolverParams& solverParams)
 {
+    PartialField partialField(solverParams.nUnknowns, mesh.dim);
+
  	// compute the nodal physical fluxes
  	solverParams.flux(field, partialField, solverParams, false);
 
@@ -121,26 +125,21 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 
   	//Initialization of the field of unknowns
   	Field field(mesh.nodeData.numNodes, solverParams.nUnknowns, mesh.dim);
-  	PartialField partialField(solverParams.nUnknowns, mesh.dim);
-
 
 	/*******************************************************************************
 	 *						       INITIAL CONDITION      						   *
 	 *******************************************************************************/
 	std::vector<double> uIC(solverParams.nUnknowns);
 
-	for(auto entity : mesh.entities)
+    for(auto element : mesh.elements)
     {
-        for(auto element : entity.elements)
+        for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
         {
-            for(unsigned int n = 0 ; n < element.nodeTags.size() ; ++n)
-            {
-                solverParams.initCondition.ibcFunc(uIC, element.nodesCoord[n], 0, field, 0, {},
-					solverParams.initCondition.coefficients, solverParams.fluxCoeffs);
+            solverParams.initCondition.ibcFunc(uIC, element.nodesCoord[n], 0, field, 0, {},
+                solverParams.initCondition.coefficients, solverParams.fluxCoeffs);
 
-                for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
-                    field.u[unk](element.offsetInU + n) = uIC[unk];
-            }
+            for(unsigned short unk = 0 ; unk < solverParams.nUnknowns ; ++unk)
+                field.u[unk](element.offsetInU + n) = uIC[unk];
         }
     }
 
@@ -211,7 +210,7 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
             currentDecade = ratio + 1;
         }
 
-        integScheme(t, field, partialField, matrix, mesh, solverParams, temp, usedF);
+        integScheme(t, field, matrix, mesh, solverParams, temp, usedF);
 
         temp = field;
 

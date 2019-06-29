@@ -5,10 +5,10 @@
 #include "../mesh/Mesh.hpp"
 
 //typedef to lighten the notations
-typedef std::function<void (double, Field &, PartialField &, const Matrix &,
+typedef std::function<void (double, Field &, const Matrix &,
       const Mesh &, const SolverParams &)> UsedF;
 
-typedef std::function<void(double, Field&, PartialField&, const Matrix&,
+typedef std::function<void(double, Field&, const Matrix&,
          const Mesh&, const SolverParams&, Field&, UsedF)> IntegScheme;
 
 
@@ -24,7 +24,7 @@ typedef std::function<void(double, Field&, PartialField&, const Matrix&,
  * \param temp temporary Field needed to compute the different k's
  * \param usedF pointer to the function Fweak or Fstrong
  */
-void RK1(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+void RK1(double t, Field& field, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);
 
 
@@ -40,7 +40,7 @@ void RK1(double t, Field& field, PartialField& partialField, const Matrix& matri
  * \param temp temporary Field needed to compute the different k's
  * \param usedF pointer to the function Fweak or Fstrong
  */
-void RK2(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+void RK2(double t, Field& field, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);
 
 
@@ -56,7 +56,7 @@ void RK2(double t, Field& field, PartialField& partialField, const Matrix& matri
  * \param temp temporary Field needed to compute the different k's
  * \param usedF pointer to the function Fweak or Fstrong
  */
-void RK3(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+void RK3(double t, Field& field, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);
 
 
@@ -72,5 +72,5 @@ void RK3(double t, Field& field, PartialField& partialField, const Matrix& matri
  * \param temp temporary Field needed to compute the different k's
  * \param usedF pointer to the function Fweak or Fstrong
  */
-void RK4(double t, Field& field, PartialField& partialField, const Matrix& matrix,
+void RK4(double t, Field& field, const Matrix& matrix,
          const Mesh& mesh, const SolverParams& solverParams, Field& temp, UsedF usedF);

@@ -9,9 +9,10 @@
 #include <cstring>
 #include <vector>
 #include "Params.hpp"
-#include "../flux/phiPsi.hpp"
-#include "../flux/flux.hpp"
-#include "../source/source.hpp"
+#include "../physics/boundaryConditions.hpp"
+#include "../physics/fluxes.hpp"
+#include "../physics/phiPsis.hpp"
+#include "../physics/sources.hpp"
 
 /**
  * \brief Wrapper of std::getline to have comments in file with //
@@ -94,11 +95,11 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             if(bcType == "constant")
                 tempCondition.ibcFunc = constant;
 
-            else if(bcType == "sinus")
-                tempCondition.ibcFunc = sinus;
+            else if(bcType == "sinusTransport")
+                tempCondition.ibcFunc = sinusTransport;
 
-            else if(bcType == "gaussian")
-                tempCondition.ibcFunc = gaussian;
+            else if(bcType == "gaussianTransport")
+                tempCondition.ibcFunc = gaussianTransport;
 
             else if(bcType == "freeTransport")
                 tempCondition.ibcFunc = freeTransport;
@@ -153,17 +154,17 @@ static bool handleBoundaryCondition(std::ifstream& paramFile, SolverParams& solv
             else if(bcType == "sinusShallowLin")
                 tempCondition.ibcFunc = sinusShallowLin;
 
-            else if(bcType == "reflectShallow")
-                tempCondition.ibcFunc = reflectShallow;
+            else if(bcType == "reflectShallowLin")
+                tempCondition.ibcFunc = reflectShallowLin;
 
-            else if(bcType == "gaussian2DShallow")
-                tempCondition.ibcFunc = gaussian2DShallow;
+            else if(bcType == "gaussian2DShallowLin")
+                tempCondition.ibcFunc = gaussian2DShallowLin;
 
-            else if(bcType == "gaussian1DShallowX")
-                tempCondition.ibcFunc = gaussian1DShallowX;
+            else if(bcType == "gaussian1DShallowXLin")
+                tempCondition.ibcFunc = gaussian1DShallowXLin;
 
-            else if(bcType == "gaussian1DShallowY")
-                tempCondition.ibcFunc = gaussian1DShallowY;
+            else if(bcType == "gaussian1DShallowYLin")
+                tempCondition.ibcFunc = gaussian1DShallowYLin;
 
             else if(bcType == "openShallowLin")
                 tempCondition.ibcFunc = openShallowLin;
@@ -432,8 +433,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
     temp.clear();
     getLine(paramFile, temp);
     error = false;
-    if(solverParams.problemType == "shallow"
-        || solverParams.problemType == "shallowLin")
+    if(solverParams.problemType == "shallow")
     {
         if(temp == "LF")
         {
@@ -444,6 +444,26 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
         {
             solverParams.fluxType = temp;
             solverParams.phiPsi = Roe;
+        }
+        else if(temp == "mean")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = mean;
+        }
+        else
+            error = true;
+    }
+    else if(solverParams.problemType == "shallowLin")
+    {
+        if(temp == "LF")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = LFShallowLin;
+        }
+        else if(temp == "Roe")
+        {
+            solverParams.fluxType = temp;
+            solverParams.phiPsi = RoeLin;
         }
         else if(temp == "mean")
         {
@@ -636,7 +656,7 @@ bool loadSolverParams(const std::string& fileName, SolverParams& solverParams)
                 << std::endl
                 << "Time step: " << solverParams.timeStep << "s"
                 << std::endl
-                << "Time between data writing: " << solverParams.simTimeDtWrite 
+                << "Time between data writing: " << solverParams.simTimeDtWrite
                 << "s"
                 << std::endl
                 << "Problem type: " << solverParams.problemType

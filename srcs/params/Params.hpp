@@ -4,11 +4,10 @@
 #include <vector>
 #include <string>
 #include <functional>
-#include "ibvFunction.hpp"
 #include "../solver/field.hpp"
 #include "../mesh/Mesh.hpp"
-#include "../write/write.hpp"
-
+#include "../physics/writers.hpp"
+#include "../physics/ibcFunction.hpp"
 /**
  * \struct SolverParams
  * \brief Parameters of the method.

@@ -22,142 +22,130 @@ void displayMesh(const Mesh& mesh)
 	/*******************************************************************************
 	 *					DISPLAY INFORMATION ABOUT THE ENTITIES                     *
 	 *******************************************************************************/
-	// display the number of entities
-	std::cout 	<< "Number of entites in the mesh: " << mesh.entities.size()
-				<< std::endl;
+    // general information about the current entity
+    std::cout 	<< "[Entity (" << 1 << ")]:\n"
+                << "\t- Tag of the " << mesh.dim << "D entity: "
+                << mesh.entityTagHD << "\n"
+                << "\t- Tag of the " << mesh.dim-1 << "D entity: "
+                << mesh.entityTagLD << "\n"
+                << "\t- Number of " << mesh.dim << "D elements: "
+                <<  mesh.elements.size() << "\n";
 
-	// display the information of each entity
-	for(size_t i = 0 ; i < mesh.entities.size() ; ++i)
-	{
+    // display the information about each element
+    for(size_t j = 0 ; j < mesh.elements.size() ; ++j)
+    {
 
-		// current entity
-		Entity entitity =  mesh.entities[i];
+        // display the information about the current element
+        Element element = mesh.elements[j];
+        std::cout 	<< "\t[Element (" << j << ")]:\n"
+                    << "\t\t- Tag: " << element.elementTag << "\n"
+                    << "\t\t- " << mesh.dim << "D type: "
+                    << element.elementTypeHD << "\n"
+                    << "\t\t- " << mesh.dim-1 << "D type: "
+                    << element.elementTypeLD << "\n"
+                    << "\t\t- Offset in u: " << element.offsetInU << "\n"
+                    << "\t\t- Nodes tags: " << std::endl;
 
-		// general information about the current entity
-		std::cout 	<< "[Entity (" << i << ")]:\n"
-					<< "\t- Tag of the " << mesh.dim << "D entity: "
-					<< entitity.entityTagHD << "\n"
-					<< "\t- Tag of the " << mesh.dim-1 << "D entity: "
-					<< entitity.entityTagLD << "\n"
-					<< "\t- Number of " << mesh.dim << "D elements: "
-					<<  entitity.elements.size() << "\n";
+        // node tags
+        for(size_t p = 0 ; p < element.nodeTags.size() ; ++p)
+        {
+            std::cout	<<	"\t\t\t Node (" << p << "): "
+                        <<  element.nodeTags[p] << std::endl;
+        }
+        std::cout 	<< std::endl;
 
-		// display the information about each element
-		for(size_t j = 0 ; j < entitity.elements.size() ; ++j)
-		{
+        // determinant of the change of variable
+        for(size_t k = 0 ; k < element.determinantHD.size() ; ++k)
+        {
 
-			// display the information about the current element
-			Element element = mesh.entities[i].elements[j];
-			std::cout 	<< "\t[Element (" << j << ")]:\n"
-						<< "\t\t- Tag: " << element.elementTag << "\n"
-			 			<< "\t\t- " << mesh.dim << "D type: " 
-			 			<< element.elementTypeHD << "\n"
-						<< "\t\t- " << mesh.dim-1 << "D type: " 
-						<< element.elementTypeLD << "\n"
-						<< "\t\t- Offset in u: " << element.offsetInU << "\n"
-						<< "\t\t- Nodes tags: " << std::endl;
-
-			// node tags
-            for(size_t p = 0 ; p < element.nodeTags.size() ; ++p)
+            std::cout	<< "\t\t- [at GP (" << k << ")]:\n"
+                        << "\t\t\t- det = " << element.determinantHD[k]
+                        << std::endl;
+            for(unsigned int l = 0 ; l < 9 ; ++l)
             {
-                std::cout	<<	"\t\t\t Node (" << p << "): "
-                			<<  element.nodeTags[p] << std::endl;
+                std::cout 	<< "\t\t\t- jac[" << l << "] = "
+                            << element.jacobianHD[9*k + l] << std::endl;
             }
-            std::cout 	<< std::endl;
+        }
 
-            // determinant of the change of variable
-			for(size_t k = 0 ; k < element.determinantHD.size() ; ++k)
-			{
+        // edges
+        std::vector<Edge> edges = element.edges;
+        for(size_t k = 0 ; k < edges.size() ; ++k)
+        {
 
-				std::cout	<< "\t\t- [at GP (" << k << ")]:\n"
-							<< "\t\t\t- det = " << element.determinantHD[k]
-							<< std::endl;
-				for(unsigned int l = 0 ; l < 9 ; ++l)
-				{
-					std::cout 	<< "\t\t\t- jac[" << l << "] = "
-								<< element.jacobianHD[9*k + l] << std::endl;
-				}
-			}
+            std::cout	<< "\t\t- [Edge (" << k << ")]:\n";
 
-			// edges
-			std::vector<Edge> edges = element.edges;
-			for(size_t k = 0 ; k < edges.size() ; ++k)
-			{
+            // node tags
+            for(size_t b = 0 ; b < edges[k].nodeTags.size() ; ++b)
+            {
+                    std::cout 	<< "\t\t\t- Tag (" << b << "): "
+                                << edges[k].nodeTags[b] << std::endl;
+            }
 
-				std::cout	<< "\t\t- [Edge (" << k << ")]:\n";
-
-				// node tags
-				for(size_t b = 0 ; b < edges[k].nodeTags.size() ; ++b)
+            // normal and determinant
+            std::cout   << "\t\t\t- Normal: (" ;
+            for(size_t y = 0 ;  y < edges[k].normal.size() ; ++y)
+            {
+                std::cout << element.edges[k].normal[y] << ", ";
+            }
+            std::cout   << ")\n"
+                        << "\t\t\t- Det: ";
+            for(size_t r = 0 ; r < edges[k].determinantLD.size() ; ++r)
+            {
+                std::cout << edges[k].determinantLD[r];
+                if(r != edges[k].determinantLD.size() - 1)
                 {
-                        std::cout 	<< "\t\t\t- Tag (" << b << "): "
-                        			<< edges[k].nodeTags[b] << std::endl;
-                }
-
-                // normal and determinant
-                std::cout   << "\t\t\t- Normal: (" ;
-                for(size_t y = 0 ;  y < edges[k].normal.size() ; ++y)
-                {
-                    std::cout << element.edges[k].normal[y] << ", ";
-                }
-                std::cout   << ")\n"
-							<< "\t\t\t- Det: ";
-				for(size_t r = 0 ; r < edges[k].determinantLD.size() ; ++r)
-               	{
-					std::cout << edges[k].determinantLD[r];
-					if(r != edges[k].determinantLD.size() - 1)
-					{
-						std::cout 	<< ", ";
-					}
-					else
-					{
-						std::cout 	<< std::endl;
-					}
-				}
-
-				// offset in the element
-				for(size_t i = 0 ; i < edges[k].offsetInElm.size() ; ++i)
-				{
-				std::cout 	<< "\t\t\t- OffsetInElm of node (" << i << "): "
-							<< edges[k].offsetInElm[i]
-							<< std::endl;
-				}
-
-				// neighbour or BC
-                if(edges[k].edgeInFront.first != -1)
-                {
-                    std::cout 	<< "\t\t\t- Edge in front: element "
-                                << edges[k].edgeInFront.first << ", "
-                                << "edge " << edges[k].edgeInFront.second
-                                << std::endl;
-
-                   	//Check that the normals are computed correctly
-                   	for(unsigned int v = 0 ; v < edges[k].normal.size() ; ++v)
-                    {
-                        if(edges[k].normal[v] != -entitity
-                    		.elements[edges[k].edgeInFront.first]
-                    		.edges[edges[k].edgeInFront.second].normal[v])
-                        {
-                            std::cerr 	<< "Bug in the normal of that edge !"
-                                        << std::endl;
-                            return;
-                        }
-                    }
+                    std::cout 	<< ", ";
                 }
                 else
                 {
-                    if(edges[k].bcName.size() == 0)
+                    std::cout 	<< std::endl;
+                }
+            }
+
+            // offset in the element
+            for(size_t i = 0 ; i < edges[k].offsetInElm.size() ; ++i)
+            {
+            std::cout 	<< "\t\t\t- OffsetInElm of node (" << i << "): "
+                        << edges[k].offsetInElm[i]
+                        << std::endl;
+            }
+
+            // neighbour or BC
+            if(edges[k].edgeInFront.first != -1)
+            {
+                std::cout 	<< "\t\t\t- Edge in front: element "
+                            << edges[k].edgeInFront.first << ", "
+                            << "edge " << edges[k].edgeInFront.second
+                            << std::endl;
+
+                //Check that the normals are computed correctly
+                for(unsigned int v = 0 ; v < edges[k].normal.size() ; ++v)
+                {
+                    if(edges[k].normal[v] != -mesh
+                        .elements[edges[k].edgeInFront.first]
+                        .edges[edges[k].edgeInFront.second].normal[v])
                     {
-                        std::cerr 	<< "BC node does not have a BC name !"
-                        			<< std::endl;
+                        std::cerr 	<< "Bug in the normal of that edge !"
+                                    << std::endl;
                         return;
                     }
-                    else
-                        std::cout 	<< "\t\t\t- BC: " << edges[k].bcName
-                    				<< std::endl;
                 }
-			}
-		}
-	}
+            }
+            else
+            {
+                if(edges[k].bcName.size() == 0)
+                {
+                    std::cerr 	<< "BC node does not have a BC name !"
+                                << std::endl;
+                    return;
+                }
+                else
+                    std::cout 	<< "\t\t\t- BC: " << edges[k].bcName
+                                << std::endl;
+            }
+        }
+    }
 	std::cout << std::endl;
 
 

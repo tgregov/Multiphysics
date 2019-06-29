@@ -14,88 +14,76 @@ void buildS(const Mesh& mesh, Eigen::SparseMatrix<double>& Sx,
 	std::vector<Eigen::Triplet<double>> indexx, indexy;
     unsigned int offsetMatrix = 0;
 
-    // loop over the entites
-    for(size_t ent = 0 ; ent < mesh.entities.size() ; ++ent)
+    // loop over the elements
+    for(size_t elm = 0 ; elm < mesh.elements.size() ; ++elm)
     {
+        // get the 2D properties of the current element type
+        // * pondFunc[k][i]: w_k*l_i evaluated at each GP
+        ElementProperty elmProp
+            = mesh.elementProperties.at(mesh.elements[elm].elementTypeHD);
+        std::vector<std::vector<double>> pondFunc = elmProp.pondFunc;
 
-    	// current entity
-        Entity entity = mesh.entities[ent];
+        // matrices [Sx], [Sy] for the current element, the matrices are stored
+        // as vectors, such that S_{i,j} = [S](i*elmProp.nSF + j)
+        std::vector<double> sxElm(elmProp.nSF*elmProp.nSF, 0.0);
+        std::vector<double> syElm(elmProp.nSF*elmProp.nSF, 0.0);
 
-        // loop over the elements
-        for(size_t elm = 0 ; elm < entity.elements.size() ; ++elm)
+        // sum over the GP
+        for(unsigned int k = 0 ; k < elmProp.nGP ; ++k)
         {
 
-        	// current element
-            Element element = entity.elements[elm];
+            // only the 2D case here
+            double dxdxi 	= mesh.elements[elm].jacobianHD[9*k];
+            double dxdeta 	= mesh.elements[elm].jacobianHD[9*k + 3];
+            double dydxi 	= mesh.elements[elm].jacobianHD[9*k + 1];
+            double dydeta 	= mesh.elements[elm].jacobianHD[9*k + 4];
 
-			// get the 2D properties of the current element type
-            // * pondFunc[k][i]: w_k*l_i evaluated at each GP
-            ElementProperty elmProp
-            	= mesh.elementProperties.at(element.elementTypeHD);
-            std::vector<std::vector<double>> pondFunc = elmProp.pondFunc;
+            // dzdzeta component of the jacobian: +/-1
+            double sign = mesh.elements[elm].jacobianHD[9*k + 8];
 
-            // matrices [Sx], [Sy] for the current element, the matrices are stored
-            // as vectors, such that S_{i,j} = [S](i*elmProp.nSF + j)
-            std::vector<double> sxElm(elmProp.nSF*elmProp.nSF, 0.0);
-			std::vector<double> syElm(elmProp.nSF*elmProp.nSF, 0.0);
+            // the dets simplify in the inverse of a 2x2 matrix !
+            double dxidx 	= dydeta/sign;
+            double detadx 	= - dydxi/sign;
+            double dxidy 	= - dxdeta/sign;
+            double detady 	= dxdxi/sign;
 
-			// sum over the GP
-			for(unsigned int k = 0 ; k < elmProp.nGP ; ++k)
-			{
+            // loop over the components of the matrix
+            for(unsigned int i = 0 ; i < elmProp.nSF ; ++i)
+            {
+                for(unsigned int j = 0 ; j < elmProp.nSF ; ++j)
+                {
 
-				// only the 2D case here
-				double dxdxi 	= element.jacobianHD[9*k];
-				double dxdeta 	= element.jacobianHD[9*k + 3];
-				double dydxi 	= element.jacobianHD[9*k + 1];
-				double dydeta 	= element.jacobianHD[9*k + 4];
+                    // gradient of the shape functions
+                    double dljdxi = elmProp.basisFuncGrad
+                        [k*elmProp.nSF*3 + j*3];
+                    double dljdeta = elmProp.basisFuncGrad
+                        [k*elmProp.nSF*3 + j*3 + 1];
 
-				// dzdzeta component of the jacobian: +/-1
-				double sign = element.jacobianHD[9*k + 8];
+                    // components of the elements
+                    sxElm[i*elmProp.nSF + j]
+                        += pondFunc[k][i]*(dljdxi*dxidx + dljdeta*detadx);
+                    syElm[i*elmProp.nSF + j]
+                        += pondFunc[k][i]*(dljdxi*dxidy + dljdeta*detady);
 
-				// the dets simplify in the inverse of a 2x2 matrix !
-				double dxidx 	= dydeta/sign;
-				double detadx 	= - dydxi/sign;
-				double dxidy 	= - dxdeta/sign;
-				double detady 	= dxdxi/sign;
+                    // if we have calculated the sum for all the GP,
+                    // we can save the computed components
+                    if(k == elmProp.nGP - 1)
+                    {
+                        indexx.push_back(Eigen::Triplet<double>
+                            (i + offsetMatrix, j + offsetMatrix,
+                                sxElm[i*elmProp.nSF + j]));
 
-				// loop over the components of the matrix
-				for(unsigned int i = 0 ; i < elmProp.nSF ; ++i)
-				{
-					for(unsigned int j = 0 ; j < elmProp.nSF ; ++j)
-					{
+                        indexy.push_back(Eigen::Triplet<double>
+                            (i + offsetMatrix, j + offsetMatrix,
+                                syElm[i*elmProp.nSF + j]));
+                    }
+                }
+            }
+        }
 
-						// gradient of the shape functions
-						double dljdxi = elmProp.basisFuncGrad
-							[k*elmProp.nSF*3 + j*3];
-						double dljdeta = elmProp.basisFuncGrad
-							[k*elmProp.nSF*3 + j*3 + 1];
-
-						// components of the elements
-						sxElm[i*elmProp.nSF + j]
-							+= pondFunc[k][i]*(dljdxi*dxidx + dljdeta*detadx);
-						syElm[i*elmProp.nSF + j]
-							+= pondFunc[k][i]*(dljdxi*dxidy + dljdeta*detady);
-
-						// if we have calculated the sum for all the GP,
-						// we can save the computed components
-						if(k == elmProp.nGP - 1)
-						{
-							indexx.push_back(Eigen::Triplet<double>
-                				(i + offsetMatrix, j + offsetMatrix,
-                					sxElm[i*elmProp.nSF + j]));
-
-    						indexy.push_back(Eigen::Triplet<double>
-                				(i + offsetMatrix, j + offsetMatrix,
-                					syElm[i*elmProp.nSF + j]));
-						}
-					}
-				}
-			}
-
-			// increase the offset of the local matrix
-			offsetMatrix += elmProp.nSF;
-		}
-   	}
+        // increase the offset of the local matrix
+        offsetMatrix += elmProp.nSF;
+    }
 
     // add the triplets in the sparse matrix
     Sx.setFromTriplets(indexx.begin(), indexx.end());
