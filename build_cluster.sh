@@ -1,8 +1,8 @@
 #!/bin/sh
-if [ ! -d "gmsh-4.1.5-Linux64-sdk" ]; then
-  wget http://gmsh.info/bin/Linux/gmsh-4.1.5-Linux64-sdk.tgz
-  tar -xf gmsh-4.1.5-Linux64-sdk.tgz 
-  rm -rf gmsh-4.1.5-Linux64-sdk.tgz 
+if [ ! -d "gmsh-4.4.0-Linux64-sdk" ]; then
+  wget http://gmsh.info/bin/Linux/gmsh-4.4.0-Linux64-sdk.tgz
+  tar -xf gmsh-4.4.0-Linux64-sdk.tgz 
+  rm -rf gmsh-4.4.0-Linux64-sdk.tgz 
 fi
 
 if [ ! -d "eigen-eigen-323c052e1731" ]; then
@@ -20,7 +20,7 @@ fi
 export CC=gcc
 export CXX=g++
 
-cd gmsh-4.1.5-Linux64-sdk/
+cd gmsh-4.4.0-Linux64-sdk/
 export FC=gfortran
 export PATH=${PWD}/bin:${PWD}/lib:${PATH}
 export INCLUDE=${PWD}/include:${INCLUDE}

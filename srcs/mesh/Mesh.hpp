@@ -83,6 +83,7 @@ struct ElementProperty
     std::vector<double> basisFunc;      /**< Basis functions evaluated at each Gauss point in the reference axis */
     std::vector<double> basisFuncGrad;  /**< Basis functions gradient evaluated at each Gauss point in the reference axis */
     std::vector<double> intPoints;      /**< Integration points for Gauss integration */
+    std::vector<double> intWeigths;
     int numComp;
 
     unsigned int nGP;   /**< Number of GP */
@@ -104,9 +105,9 @@ struct ElementProperty
 struct NodeData
 {
     unsigned int numNodes;
-    std::vector<int> elementTags;
+    std::vector<std::size_t> elementTags;
     std::vector<unsigned int> elementNumNodes;
-    std::vector<int> nodeTags;
+    std::vector<std::size_t> nodeTags;
     std::vector<std::vector<double>> coord;
 };
 
@@ -121,7 +122,7 @@ struct Mesh
                                                             properties for each
                                                             element type */
 
-    std::map<std::string, std::vector<int>> nodesTagBoundary;/**< Tags of the nodes
+    std::map<std::string, std::vector<std::size_t>> nodesTagBoundary;/**< Tags of the nodes
                                                                     per BC */
 
     int entityTagHD;                    /**< Tag of the HD entity*/
@@ -133,8 +134,6 @@ struct Mesh
     unsigned short dim;             /**< Mesh dimension (1, 2, (3)) */
 
     NodeData nodeData;
-
-    double DxMin;
 };
 
 /**

@@ -7,7 +7,7 @@
 
 @ECHO OFF
 
-set GMSHSDK=C:\Program Files (x86)\CodeBlocks\gmsh-4.1.5-Windows64-sdk
+set GMSHSDK=C:\Program Files (x86)\CodeBlocks\gmsh-4.4.0-Windows64-sdk
 set EIGENSDK=C:\Program Files (x86)\CodeBlocks\eigen-eigen-323c052e1731
 
 :: where is gmsh.exe and gmsh-**.dll ? (HINT: copy gmsh-**.dll to the bin folder)
@@ -28,7 +28,7 @@ cd build
 mkdir Release
 cd Release
 cmake ../../ -DCMAKE_BUILD_TYPE=Release  -G "CodeBlocks - MinGW Makefiles"
-copy "%GMSHSDK%\bin\gmsh-4.1.dll" "%cd%\bin"
+copy "%GMSHSDK%\bin\gmsh-4.4.dll" "%cd%\bin"
 xcopy /E /I "../../Geometry" "%cd%\bin\Geometry"
 xcopy /E /I "../../Params" "%cd%\bin\Params"
 
@@ -37,7 +37,7 @@ cd ../
 mkdir Debug
 cd Debug
 cmake ../../ -DCMAKE_BUILD_TYPE=Debug  -G "CodeBlocks - MinGW Makefiles"
-copy "%GMSHSDK%\bin\gmsh-4.1.dll" "%cd%\bin"
+copy "%GMSHSDK%\bin\gmsh-4.4.dll" "%cd%\bin"
 xcopy /E /I "../../Geometry" "%cd%\bin\Geometry"
 xcopy /E /I "../../Params" "%cd%\bin\Params"
 

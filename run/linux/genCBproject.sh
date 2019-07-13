@@ -3,8 +3,8 @@
 HERE=$PWD
 
 cd $HOME
-if [ ! -d "gmsh-4.1.5-Linux64-sdk" ]; then
-  wget http://gmsh.info/bin/Linux/gmsh-4.1.5-Linux64-sdk.tgz
+if [ ! -d "gmsh-4.4.0-Linux64-sdk" ]; then
+  wget http://gmsh.info/bin/Linux/gmsh-4.4.0-Linux64-sdk.tgz
   tar -xf gmsh-4.1.5-Linux64-sdk.tgz 
   rm -rf gmsh-4.1.5-Linux64-sdk.tgz 
 fi
@@ -16,7 +16,7 @@ if [ ! -d "eigen-eigen-323c052e1731" ]; then
 fi
 
 cd $HERE
-export GMSHSDK=${HOME}/gmsh-4.1.5-Linux64-sdk/
+export GMSHSDK=${HOME}/gmsh-4.4.0-Linux64-sdk/
 export EIGENSDK=${HOME}/eigen-eigen-323c052e1731/
 
 export PATH=${GMSHSDK}/bin:${GMSHSDK}/lib:${PATH}

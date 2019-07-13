@@ -3,9 +3,9 @@
 
 void writeShallow(std::vector<std::vector<double>>& uDisplay,
                   const std::vector<unsigned int>& elementNumNodes,
-                  const std::vector<int>& elementTags, const std::string& modelName,
-                  unsigned int nbreStep, double t, const Field& field,
-                  const std::vector<double>& fluxCoeffs,
+                  const std::vector<std::size_t>& elementTags,
+                  const std::string& modelName, unsigned int nbreStep, double t,
+                  const Field& field, const std::vector<double>& fluxCoeffs,
                   const std::vector<bool>& whatToWrite, std::vector<int>& viewTags)
 {
     if(nbreStep == 0)

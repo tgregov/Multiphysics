@@ -20,10 +20,10 @@
  * \param viewTags Vector containing the rag of the different writing data's.
  */
 void writeTransport(std::vector<std::vector<double>>& uDisplay,
-                  const std::vector<unsigned int>& elementNumNodes,
-                  const std::vector<int>& elementTags, const std::string& modelName,
-                  unsigned int nbreStep, double t, const Field& field,
-                  const std::vector<double>& fluxCoeffs,
-                  const std::vector<bool>& whatToWrite, std::vector<int>& viewTags);
+                    const std::vector<unsigned int>& elementNumNodes,
+                    const std::vector<std::size_t>& elementTags,
+                    const std::string& modelName, unsigned int nbreStep, double t,
+                    const Field& field, const std::vector<double>& fluxCoeffs,
+                    const std::vector<bool>& whatToWrite, std::vector<int>& viewTags);
 
 #endif /* transport_writer_hpp_included */

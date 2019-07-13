@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <limits>
 #include <gmsh.h>
 #include "Mesh.hpp"
 #include "../utils/utils.hpp"
@@ -16,9 +15,9 @@ static void loadNodeData(Mesh& mesh)
 {
 
     unsigned int numNodes = 0;
-    std::vector<int> elementTags;
+    std::vector<std::size_t> elementTags;
     std::vector<unsigned int> elementNumNodes;
-    std::vector<int> nodeTags;
+    std::vector<std::size_t> nodeTags;
     std::vector<std::vector<double>> coord;
 
     // loop over the elements
@@ -76,25 +75,27 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
                                                     elementProperty.numNodes,
                                                     elementProperty.paramCoord);
 
-            gmsh::model::mesh::getBasisFunctions(eleTypes[i], intScheme,
-                                                    basisFuncType,
+            gmsh::model::mesh::getIntegrationPoints(eleTypes[i], intScheme,
                                                     elementProperty.intPoints,
-                                                    elementProperty.numComp,
-                                                    elementProperty.basisFunc);
+                                                    elementProperty.intWeigths);
 
-            std::vector<double> dummyIntPoints;
+            gmsh::model::mesh::getBasisFunctions(eleTypes[i],
+                                                 elementProperty.intPoints,
+                                                 basisFuncType,
+                                                 elementProperty.numComp,
+                                                 elementProperty.basisFunc);
+
             int dummyNumComp;
-            gmsh::model::mesh::getBasisFunctions(eleTypes[i], intScheme,
-                                                    std::string("Grad" +
-                                                        basisFuncType),
-                                                    dummyIntPoints,
-                                                    dummyNumComp,
-                                                    elementProperty.basisFuncGrad);
+            gmsh::model::mesh::getBasisFunctions(eleTypes[i],
+                                                 elementProperty.intPoints,
+                                                 std::string("Grad" + basisFuncType),
+                                                 dummyNumComp,
+                                                 elementProperty.basisFuncGrad);
 
 
             // add the products prodFunc[k][i,j] = w_k*l_i(x_k)*l_j(x_k)
             // add the products pondFunc[k][i] = w_k*l_i(x_k)
-            elementProperty.nGP = elementProperty.intPoints.size()/4;
+            elementProperty.nGP = elementProperty.intPoints.size()/3;
             elementProperty.nSF = elementProperty.basisFunc.size()
                                     /elementProperty.nGP;
             for(unsigned int k = 0 ; k < elementProperty.nGP ; ++k)
@@ -105,7 +106,7 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
                 for(unsigned int i = 0 ; i < elementProperty.nSF ; ++i)
                 {
 
-                    wl.push_back(elementProperty.intPoints[4*k + 3]
+                    wl.push_back(elementProperty.intWeigths[k]
                             *elementProperty.basisFunc[elementProperty.nSF*k + i]);
 
                     for(unsigned int j = i ; j < elementProperty.nSF ; ++j)
@@ -116,7 +117,7 @@ static void loadElementProperties(std::map<int, ElementProperty>& meshElementPro
                                 std::pair<unsigned int, unsigned int>(i, j));
                         }
 
-                        wll.push_back(elementProperty.intPoints[4*k + 3]
+                        wll.push_back(elementProperty.intWeigths[k]
                             *elementProperty.basisFunc[elementProperty.nSF*k + i]
                             *elementProperty.basisFunc[elementProperty.nSF*k + j]);
                     }
@@ -314,11 +315,11 @@ static void findInFrontEdge(Mesh& mesh, Edge& currentEdge, unsigned int edgePos)
  *  certain boundary.
  * \param edge The edge which we check if it is a boundary.
  */
-static bool IsBounbdary(const std::map<std::string,
-                            std::vector<int>>& nodesTagBoundaries, Edge& edge)
+static bool IsBoundary(const std::map<std::string,
+                            std::vector<std::size_t>>& nodesTagBoundaries, Edge& edge)
 {
     // check if an edge is on the boundary of the domain.
-    for(std::pair<std::string, std::vector<int>> nodeTagBoundary : nodesTagBoundaries)
+    for(std::pair<std::string, std::vector<std::size_t>> nodeTagBoundary : nodesTagBoundaries)
     {
         for(unsigned int j = 0 ; j < edge.nodeTags.size() ; ++j)
         {
@@ -357,9 +358,6 @@ static bool IsBounbdary(const std::map<std::string,
  * \param nodesTagsPerEdge Node tags of the element, per edge.
  * \param nodesTags Node tags of the element.
  * \param elementBarycenter Element barycenter coordinate.
- * \param nodesTagBoundaries Map which stores the tags of the nodes belonging to a certain boundary.
- * \param elementProperty Structure containing informations about a certain element type.
- * \param meshDim Dimension of the mesh (1 or 2)
  */
 static void addElement(Mesh& mesh, int elementTag, int eleTypeHD,
                         int eleTypeLD, std::vector<double> jacobiansHD,
@@ -368,8 +366,7 @@ static void addElement(Mesh& mesh, int elementTag, int eleTypeHD,
                         unsigned int nGPLD, unsigned int offsetInU,
                         std::vector<int> nodesTagsPerEdge,
                         std::vector<int> nodesTags,
-                        const std::vector<double>& elementBarycenter,
-                        double& dx)
+                        const std::vector<double>& elementBarycenter)
 {
     // fill an element structure
     Element element;
@@ -395,8 +392,6 @@ static void addElement(Mesh& mesh, int elementTag, int eleTypeHD,
     unsigned int nEdge = determinantsLD.size()/nGPLD;
     unsigned int nNodePerEdge = mesh.elementProperties.at(eleTypeLD).numNodes;
 
-    double lmin = std::numeric_limits<double>::max();
-
     // for each edge, we add an edge to the element.edges field
     for(unsigned int i = 0 ; i < nEdge ; ++i)
     {
@@ -417,17 +412,14 @@ static void addElement(Mesh& mesh, int elementTag, int eleTypeHD,
         {
             // check if the edge is on the boundary of the domain
             // if not, try to find the edge neighbour in a previously computed element
-            if(!IsBounbdary(mesh.nodesTagBoundary, element.edges[i]))
+            if(!IsBoundary(mesh.nodesTagBoundary, element.edges[i]))
                 findInFrontEdge(mesh, element.edges[i], i);
 
         }
         else
         {
-            IsBounbdary(mesh.nodesTagBoundary, element.edges[i]);
+            IsBoundary(mesh.nodesTagBoundary, element.edges[i]);
         }
-
-        if(element.edges[i].length < lmin)
-            lmin = element.edges[i].length;
 
         // compute the normal of the edge and get the nodes coordinates of the edge
         computeEdgeNormalCoord(element.edges[i], mesh.dim, elementBarycenter);
@@ -447,14 +439,11 @@ static void addElement(Mesh& mesh, int elementTag, int eleTypeHD,
                         mesh.elementProperties.at(eleTypeLD).lalb[nA][nB]));
             }
         }
-
         dMs.setFromTriplets(indices.begin(), indices.end());
         element.dM.push_back(dMs);
     }
 
-    dx = lmin;
-
-    // add the element to the entity
+    // add the element to the mesh
     mesh.elements.push_back(element);
 }
 
@@ -489,12 +478,12 @@ static bool buildMesh(Mesh& mesh, int entityTag, unsigned int& currentOffset,
     for(auto eleTypeHD : eleTypesHD)
     {
         // get the elements of type eleTypeHD and their nodes tags.
-        std::vector<int> nodeTags, elementTags;
+        std::vector<std::size_t> nodeTags, elementTags;
         gmsh::model::mesh::getElementsByType(eleTypeHD, elementTags, nodeTags,
-                                                entityTag);
+                                             entityTag);
 
         // get the elements nodes tags "per edge".
-        std::vector<int> nodesTagPerEdge;
+        std::vector<std::size_t> nodesTagPerEdge;
         gmsh::model::mesh::getElementEdgeNodes(eleTypeHD, nodesTagPerEdge,
                                                 entityTag);
 
@@ -530,24 +519,24 @@ static bool buildMesh(Mesh& mesh, int entityTag, unsigned int& currentOffset,
         }
 
         // creation of the mesh.dim-1 D elements
-        gmsh::model::mesh::setElementsByType(mesh.dim-1, c, eleTypeLD, {},
-                                                nodesTagPerEdge);
+        gmsh::model::mesh::addElementsByType(c, eleTypeLD, {}, nodesTagPerEdge);
 
-        loadElementProperties(mesh.elementProperties,
-                                std::vector<int>(1, eleTypeLD), intScheme,
-                                basisFuncType);
+        loadElementProperties(mesh.elementProperties, std::vector<int>(1, eleTypeLD),
+                              intScheme, basisFuncType);
 
         // we then load jacobian matrices and their determinants of the mesh.dim D
         // and mesh.dim -1 D elements (useful for M, Sx, Sy, Sz)
         std::vector<double> jacobiansHD, determinantsHD, dummyPointsHD;
-        gmsh::model::mesh::getJacobians(eleTypeHD, intScheme, jacobiansHD,
-                                        determinantsHD, dummyPointsHD,
+        gmsh::model::mesh::getJacobians(eleTypeHD,
+                                        mesh.elementProperties[eleTypeHD].intPoints,
+                                        jacobiansHD, determinantsHD, dummyPointsHD,
                                         entityTag);
 
         std::vector<double> dummyJacobiansLD, determinantsLD, dummyPointsLD;
-        gmsh::model::mesh::getJacobians(eleTypeLD, intScheme, dummyJacobiansLD,
-                                        determinantsLD, dummyPointsLD,
-                                        c);
+        gmsh::model::mesh::getJacobians(eleTypeLD,
+                                        mesh.elementProperties[eleTypeLD].intPoints,
+                                        dummyJacobiansLD, determinantsLD,
+                                        dummyPointsLD, c);
 
         // computation of the number of mesh.dim D elements, number of gauss points
         // for mesh.dim and mesh.dim-1 D elements, the number of edges per mesh.dim D
@@ -615,11 +604,7 @@ static bool buildMesh(Mesh& mesh, int entityTag, unsigned int& currentOffset,
                         nGPLD, currentOffset,
                         std::move(nodesTagPerEdgeElement),
                         std::move(nodeTagsElement),
-                        elementBarycenter,
-                        dx);
-
-            if(dx < mesh.DxMin)
-                mesh.DxMin = dx;
+                        elementBarycenter);
 
             currentOffset += elementOffset;
         }
@@ -718,7 +703,7 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
     {
         std::string name;
         gmsh::model::getPhysicalName(mesh.dim - 1, BCHandle.second, name);
-        std::vector<int> nodesTags;
+        std::vector<std::size_t> nodesTags;
         std::vector<double> dummyCoord;
         gmsh::model::mesh::getNodesForPhysicalGroup(mesh.dim - 1, BCHandle.second,
                                                     nodesTags, dummyCoord);
@@ -739,8 +724,6 @@ bool readMesh(Mesh& mesh, const std::string& fileName,
 
 
     unsigned int currentOffset = 0;
-
-    mesh.DxMin = std::numeric_limits<double>::max();
 
     // we add each identified entity to the mesh.
     if(entitiesTag.size() > 1)

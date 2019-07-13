@@ -154,7 +154,7 @@ bool timeInteg(const Mesh& mesh, SolverParams& solverParams,
 	gmsh::model::list(names);
 	std::string modelName = names[0];
 	std::string dataType = "ElementNodeData";
-	std::vector<int> elementTags = mesh.nodeData.elementTags;
+	std::vector<std::size_t> elementTags = mesh.nodeData.elementTags;
 	std::vector<unsigned int> elementNumNodes = mesh.nodeData.elementNumNodes;
     std::vector<std::vector<double>> uDisplay(elementNumNodes.size());
 
