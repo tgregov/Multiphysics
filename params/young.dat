@@ -12,16 +12,16 @@ LF
 no
 0
 BC_Up_1
-	reflectShallow
+	reflectShallowLin
 	1,0,0
 BC_Up_2
-	reflectShallow
+	reflectShallowLin
 	1,0,0
 BC_Down_1
-	reflectShallow
+	reflectShallowLin
 	1,0,0
 BC_Down_2
-	reflectShallow
+	reflectShallowLin
 	1,0,0
 BC_Left
 	sinusShallowLin
@@ -30,13 +30,13 @@ BC_Right
 	openShallowLin
 	10
 BC_Obstacle_Up
-	reflectShallow
+	reflectShallowLin
 	1,0,0
 BC_Obstacle
-	reflectShallow
+	reflectShallowLin
 	1,0,0
 BC_Obstacle_Down
-	reflectShallow
+	reflectShallowLin
 	1,0,0
 Init_Cond
 	constant

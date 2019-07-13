@@ -12,11 +12,11 @@ LF
 no
 0
 Ice
-	reflectShallow
+	reflectShallowLin
 	1
 Infinity
 	openShallowLin
 	1
 Init_Cond
-	gaussian2DShallow
+	gaussian2DShallowLin
 	0.01,1200,3000,1200,3000,1
