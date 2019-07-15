@@ -1,19 +1,22 @@
 # MATH 0471: Multiphysics integrated computational project 
-## Goal
-Development of the [Discontinuous Galerkin method](https://en.wikipedia.org/wiki/Discontinuous_Galerkin_method) (DG) applied to 2D [shallow water equations](https://en.wikipedia.org/wiki/Shallow_water_equations).  
+ [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?branch=master)](https://travis-ci.org/tgregov/Multiphysics) [![Maintenance](https://img.shields.io/badge/Version-1.0-e67e22.svg)](https://github.com/tgregov/Multiphysics/releases/tag/1.0) 
+ 
+Implementation of the [Discontinuous Galerkin method](https://en.wikipedia.org/wiki/Discontinuous_Galerkin_method) (DG) applied to 2D [shallow water equations](https://en.wikipedia.org/wiki/Shallow_water_equations) using [gmsh](http://gmsh.info/) and [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page).  
+
 [Link](http://www.montefiore.ulg.ac.be/~geuzaine/MATH0471/enonce2019.pdf) of the problem statement.
 
 ## Useful reminders
 [Link](https://github.com/tgregov/Multiphysics/wiki) to the wiki.
-
-## Build status 
-Current status: [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?branch=master)](https://travis-ci.org/tgregov/Multiphysics)
 
 ## Assumptions
 ### On the mesh:
 * The elements edges are straight (constant normal vector over it)
 
 ## Compilation procedure
+The project use system to manage the build system. The `run` directory contains already some predefined configuration for various platform.
+
+Do not forget to install gmsh 4.4.0 SDK and Eigen 3.3.7 SDK on your system.
+
 ### On NIC4/VEGA
 Connect to NIC4/VEGA (using SSH for instance). Then, clone the repositoy: 
 ```bash
