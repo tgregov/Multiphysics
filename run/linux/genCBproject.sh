@@ -5,8 +5,8 @@ HERE=$PWD
 cd $HOME
 if [ ! -d "gmsh-4.4.0-Linux64-sdk" ]; then
   wget http://gmsh.info/bin/Linux/gmsh-4.4.0-Linux64-sdk.tgz
-  tar -xf gmsh-4.1.5-Linux64-sdk.tgz 
-  rm -rf gmsh-4.1.5-Linux64-sdk.tgz 
+  tar -xf gmsh-4.4.0-Linux64-sdk.tgz 
+  rm -rf gmsh-4.4.0-Linux64-sdk.tgz 
 fi
 
 if [ ! -d "eigen-eigen-323c052e1731" ]; then
@@ -35,15 +35,15 @@ cd build
 mkdir Release
 cd Release
 cmake ../../ -DCMAKE_BUILD_TYPE=Release  -G "CodeBlocks - Unix Makefiles"
-cp -r ../../Geometry/ $PWD/bin
-cp -r ../../Params/ $PWD/bin
+cp -r ../../geometry/ $PWD/bin
+cp -r ../../params/ $PWD/bin
 
 cd ../
 
 mkdir Debug
 cd Debug
 cmake ../../ -DCMAKE_BUILD_TYPE=Debug  -G "CodeBlocks - Unix Makefiles"
-cp -r ../../Geometry/ $PWD/bin
-cp -r ../../Params/ $PWD/bin
+cp -r ../../geometry/ $PWD/bin
+cp -r ../../params/ $PWD/bin
 
 cd ../../
