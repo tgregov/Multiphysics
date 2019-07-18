@@ -1,5 +1,5 @@
 # MATH 0471: Multiphysics integrated computational project 
- [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?branch=master)](https://travis-ci.org/tgregov/Multiphysics) [![Maintenance](https://img.shields.io/badge/Version-1.1-e67e22.svg)](https://github.com/tgregov/Multiphysics/releases/tag/1.1) 
+ [![Build Status](https://travis-ci.org/tgregov/Multiphysics.svg?branch=master)](https://travis-ci.org/tgregov/Multiphysics) [![Maintenance](https://img.shields.io/badge/Version-1.1.1-e67e22.svg)](https://github.com/tgregov/Multiphysics/releases/tag/1.1.1) 
  
 Implementation of the [Discontinuous Galerkin method](https://en.wikipedia.org/wiki/Discontinuous_Galerkin_method) (DG) applied to 2D [shallow water equations](https://en.wikipedia.org/wiki/Shallow_water_equations) using [gmsh](http://gmsh.info/) and [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page).  
 
