@@ -18,7 +18,7 @@ Line(4) = {1, 2};
 Curve Loop(1) = {1, 4, 3, 2};
 Plane Surface(1) = {1};
 
-Physical Surface(1) = {1};
+Physical Surface("Domain") = {1};
 // Boundary conditions
 Physical Curve("BC_Left") = {1};
 Physical Curve("BC_Up") = {2};
