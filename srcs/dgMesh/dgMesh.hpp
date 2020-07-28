@@ -26,7 +26,6 @@ class DG_MESH_API dgMesh
         void loadPhysicalGroupsAndEntities();
         void loadElementsProperty();
         void loadElements();
-        void loadFaces();
 
         int m_dimension;
 
@@ -55,26 +54,43 @@ class DG_MESH_API dgMesh
             std::vector<double> basisFunctionsGrad  = {};
         };
 
+        struct FaceEdge;
+
         struct Element
         {
-            int tag                                                 = -1;
-            std::vector<int> nodesTag                               = {};
+            std::size_t tag                                         = -1;
+            std::vector<std::size_t> nodesTag                       = {};
             std::vector<std::vector<double>> nodesCoord             = {};
 
             std::vector<double> determinant                         = {};
-            std::vector<std::vector<std::vector<double>>> jacobian  = {};
+            std::vector<double> jacobian                            = {};
 
-            std::vector<Element*> pElements                         = {};
-            std::vector<Entity*> pEntity                            = {};
+            Entity* pEntity                                         = nullptr;
+            std::vector<FaceEdge*> faceEdges                        = {};
+        };
+
+        struct FaceEdge
+        {
+            std::size_t tag                                         = -1;
+            std::vector<std::size_t> nodesTag                       = {};
+            std::vector<std::vector<double>> nodesCoord             = {};
+
+            std::vector<double> determinant                         = {};
+            std::vector<double> jacobian                            = {};
+
+            std::vector<double> normal                              = {};
+            Element* parentElementHD                                = nullptr;
+            Element* elementLD                                      = nullptr;
         };
 
         struct Entity
         {
-            int tag                                      = -1;
+            int mainTag                                  = -1;
+            int subTag                                   = -1;
             std::vector<PhysicalGroup*> pPhysicalGroups  = {};
 
             ElementProperty* pElementProperty            = nullptr;
-            std::vector<Element*> pElements;
+            std::vector<Element*> pElements              = {};
         };
 
         struct PhysicalGroup
@@ -93,8 +109,9 @@ class DG_MESH_API dgMesh
         std::vector<ElementProperty> m_elementsPropertyHD;
         std::vector<ElementProperty> m_elementsPropertyLD;
 
-        std::vector<Element> m_elementsHD;
-        std::vector<Element> m_elementsLD;
+        std::vector<Element>  m_elementsHD;
+        std::vector<Element>  m_elementsLD;
+        std::vector<FaceEdge> m_faceEdges;
 };
 
 #include "dgMesh.inl"

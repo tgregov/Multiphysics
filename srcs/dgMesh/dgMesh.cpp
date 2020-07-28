@@ -48,6 +48,8 @@ void dgMesh::loadFromFile(std::string fileName)
 
     loadElementsProperty();
 
+    loadElements();
+
     gmsh::finalize();
 }
 
@@ -60,7 +62,7 @@ void dgMesh::displayToConsole() const noexcept
         std::cout << "\t\t - tag: " << pg.tag << "\n";
         std::cout << "\t\t - entities tag: ";
         for(Entity* pEntity : pg.pEntities)
-            std::cout << pEntity->tag << ", ";
+            std::cout << pEntity->mainTag << ", ";
         std::cout << std::endl;
     }
     std::cout << std::endl;
@@ -72,7 +74,7 @@ void dgMesh::displayToConsole() const noexcept
         std::cout << "\t\t - tag: " << pg.tag << "\n";
         std::cout << "\t\t - entities tag: ";
         for(Entity* pEntity : pg.pEntities)
-            std::cout << pEntity->tag << ", ";
+            std::cout << pEntity->mainTag << ", ";
         std::cout << std::endl;
     }
     std::cout << std::endl;
@@ -80,7 +82,7 @@ void dgMesh::displayToConsole() const noexcept
     std::cout << m_dimension << "D entities: " << std::endl;
     for(Entity entity : m_entitiesHD)
     {
-        std::cout << "\t * " << entity.tag << ": \n";
+        std::cout << "\t * " << entity.mainTag << ": \n";
         std::cout << "\t\t - element type: " << entity.pElementProperty->type << "\n";
         std::cout << "\t\t - element name: " << entity.pElementProperty->name << "\n";
     }
@@ -89,7 +91,7 @@ void dgMesh::displayToConsole() const noexcept
     std::cout << m_dimension - 1 << "D entities: " << std::endl;
     for(Entity entity : m_entitiesLD)
     {
-        std::cout << "\t * " << entity.tag << ": \n";
+        std::cout << "\t * " << entity.mainTag << ": \n";
         std::cout << "\t\t - element type: " << entity.pElementProperty->type << "\n";
         std::cout << "\t\t - element name: " << entity.pElementProperty->name << "\n";
     }
@@ -161,6 +163,7 @@ void dgMesh::loadPhysicalGroupsAndEntities()
     {
         m_entitiesHD.push_back({
             entityHD.second,
+            -1,
             {},
             nullptr,
             {},
@@ -179,6 +182,7 @@ void dgMesh::loadPhysicalGroupsAndEntities()
     {
         m_entitiesLD.push_back({
             entityLD.second,
+            -1,
             {},
             nullptr,
             {},
@@ -197,7 +201,7 @@ void dgMesh::loadPhysicalGroupsAndEntities()
             auto it = std::find_if(m_entitiesHD.begin(), m_entitiesHD.end(),
             [entityTagInPG](const Entity& knownEntity)
             {
-                return (entityTagInPG == knownEntity.tag);
+                return (entityTagInPG == knownEntity.mainTag);
             });
 
             assert(it != m_entitiesHD.cend());
@@ -216,7 +220,7 @@ void dgMesh::loadPhysicalGroupsAndEntities()
             auto it = std::find_if(m_entitiesLD.begin(), m_entitiesLD.end(),
             [entityTagInPG](const Entity& knownEntity)
             {
-                return (entityTagInPG == knownEntity.tag);
+                return (entityTagInPG == knownEntity.mainTag);
             });
 
             assert(it != m_entitiesLD.cend());
@@ -230,7 +234,7 @@ void dgMesh::loadPhysicalGroupsAndEntities()
     for(Entity& entityHD : m_entitiesHD)
     {
         std::vector<int> physicalGroupsTagInEntity;
-        gmsh::model::getPhysicalGroupsForEntity(m_dimension, entityHD.tag, physicalGroupsTagInEntity);
+        gmsh::model::getPhysicalGroupsForEntity(m_dimension, entityHD.mainTag, physicalGroupsTagInEntity);
 
         for(int pgTagInEntity : physicalGroupsTagInEntity)
         {
@@ -249,7 +253,7 @@ void dgMesh::loadPhysicalGroupsAndEntities()
     for(Entity& entityLD : m_entitiesLD)
     {
         std::vector<int> physicalGroupsTagInEntity;
-        gmsh::model::getPhysicalGroupsForEntity(m_dimension - 1, entityLD.tag, physicalGroupsTagInEntity);
+        gmsh::model::getPhysicalGroupsForEntity(m_dimension - 1, entityLD.mainTag, physicalGroupsTagInEntity);
 
         for(int pgTagInEntity : physicalGroupsTagInEntity)
         {
@@ -311,7 +315,7 @@ void dgMesh::loadElementsProperty()
     for(Entity& entity : m_entitiesHD)
     {
         std::vector<int> elementType;
-        gmsh::model::mesh::getElementTypes(elementType, m_dimension, entity.tag);
+        gmsh::model::mesh::getElementTypes(elementType, m_dimension, entity.mainTag);
 
         if(elementType.size() != 1)
             throw std::runtime_error("Hybrid Meshes are currently not handled");
@@ -330,7 +334,7 @@ void dgMesh::loadElementsProperty()
     for(Entity& entity : m_entitiesLD)
     {
         std::vector<int> elementType;
-        gmsh::model::mesh::getElementTypes(elementType, m_dimension - 1, entity.tag);
+        gmsh::model::mesh::getElementTypes(elementType, m_dimension - 1, entity.mainTag);
 
         if(elementType.size() != 1)
             throw std::runtime_error("Hybrid Meshes are currently not handled");
@@ -344,5 +348,85 @@ void dgMesh::loadElementsProperty()
         assert(it != m_elementsPropertyLD.cend());
 
         entity.pElementProperty = &*it;
+    }
+}
+
+void dgMesh::loadElements()
+{
+    /** Element in HD entities should appear inly once **/
+
+    for(Entity& entity : m_entitiesHD)
+    {
+        entity.subTag = gmsh::model::addDiscreteEntity(1);
+        std::vector<std::size_t> nodesTagPerEdge;
+        gmsh::model::mesh::getElementEdgeNodes(entity.pElementProperty->type, nodesTagPerEdge, entity.mainTag);
+        int eleTypeSubEntity;
+        switch(m_dimension)
+        {
+            case 1:
+                eleTypeSubEntity = gmsh::model::mesh::getElementType("point", entity.pElementProperty->order);
+                break;
+
+            case 2:
+                eleTypeSubEntity = gmsh::model::mesh::getElementType("line", entity.pElementProperty->order);
+                break;
+
+            case 3:
+                eleTypeSubEntity = gmsh::model::mesh::getElementType("line", entity.pElementProperty->order);
+                break;
+        }
+        gmsh::model::mesh::addElementsByType(entity.subTag, eleTypeSubEntity, {}, nodesTagPerEdge);
+
+        std::vector<std::size_t> elementTags;
+        std::vector<std::size_t> nodeTags;
+        gmsh::model::mesh::getElementsByType(entity.pElementProperty->type,
+                                             elementTags, nodeTags, entity.mainTag);
+
+        std::vector<double> jacobians;
+        std::vector<double> determinants;
+        std::vector<double> dummyCoord;
+        gmsh::model::mesh::getJacobians(entity.pElementProperty->type, entity.pElementProperty->localNodeCoord,
+                                        jacobians, determinants, dummyCoord, entity.mainTag);
+
+        std::vector<double> baryCenters;
+        gmsh::model::mesh::getBarycenters(entity.pElementProperty->type, entity.mainTag, false, true, baryCenters);
+
+        unsigned int nNodes = entity.pElementProperty->numNodes;
+        unsigned int nGP = entity.pElementProperty->intPointsWeigth.size();
+
+        for(std::size_t i = 0 ; i < elementTags.size() ; ++i)
+        {
+            std::vector<std::size_t> nodesTagsOfElm(nodeTags.begin() + nNodes*i,
+                                                    nodeTags.begin() + nNodes*(i + 1));
+
+            std::vector<double> determinantsOfElm(determinants.begin() + nGP*i,
+                                                  determinants.begin() + nGP*(i + 1));
+
+            std::vector<double> jacobiansOfElm(jacobians.begin() + 9*nGP*i,
+                                               jacobians.begin() + 9*nGP*(1 + i));
+
+
+            assert(nodesTagsOfElm.size() == nNodes);
+            assert(determinantsOfElm.size() == nGP);
+            assert(jacobiansOfElm.size() == 9*nGP);
+
+            Element elm = {};
+            elm.tag         = elementTags[i];
+            elm.nodesTag    = nodesTagsOfElm;
+            elm.determinant = determinantsOfElm;
+            elm.jacobian    = jacobiansOfElm;
+            elm.pEntity     = &entity;
+            elm.faceEdges   = {};
+
+            for(std::size_t nodeTag : elm.nodesTag)
+            {
+                std::vector<double> coord, dummyParametricCoord;
+                gmsh::model::mesh::getNode(nodeTag, coord, dummyParametricCoord);
+                elm.nodesCoord.push_back(coord);
+            }
+
+            m_elementsHD.push_back(std::move(elm));
+            entity.pElements.push_back(&m_elementsHD.back());
+        }
     }
 }
