@@ -66,12 +66,11 @@ class DG_MESH_API dgMesh
             std::vector<double> jacobian                            = {};
 
             Entity* pEntity                                         = nullptr;
-            std::vector<FaceEdge*> faceEdges                        = {};
+            std::vector<FaceEdge*> pFaceEdges                       = {};
         };
 
         struct FaceEdge
         {
-            std::size_t tag                                         = -1;
             std::vector<std::size_t> nodesTag                       = {};
             std::vector<std::vector<double>> nodesCoord             = {};
 
@@ -79,9 +78,13 @@ class DG_MESH_API dgMesh
             std::vector<double> jacobian                            = {};
 
             std::vector<double> normal                              = {};
+
             Element* parentElementHD                                = nullptr;
             Element* elementLD                                      = nullptr;
+            FaceEdge* edgeInFront                                   = nullptr;
         };
+
+        void computeFaceEdgeNormal(FaceEdge& faceEdge, const std::vector<double>& elementBarycenter);
 
         struct Entity
         {
@@ -90,6 +93,7 @@ class DG_MESH_API dgMesh
             std::vector<PhysicalGroup*> pPhysicalGroups  = {};
 
             ElementProperty* pElementProperty            = nullptr;
+            ElementProperty* pFaceEdgePropety            = nullptr;
             std::vector<Element*> pElements              = {};
         };
 

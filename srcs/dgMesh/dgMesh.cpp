@@ -40,6 +40,7 @@ void dgMesh::loadFromFile(std::string fileName)
         throw std::runtime_error("could not open file " + fileName + ".");
 
     gmsh::initialize();
+    gmsh::option::setNumber("General.Terminal", 1);
     gmsh::open(fileName);
 
     m_dimension = gmsh::model::getDimension();
@@ -357,7 +358,7 @@ void dgMesh::loadElements()
 
     for(Entity& entity : m_entitiesHD)
     {
-        entity.subTag = gmsh::model::addDiscreteEntity(1);
+        entity.subTag = gmsh::model::addDiscreteEntity(m_dimension - 1);
         std::vector<std::size_t> nodesTagPerEdge;
         gmsh::model::mesh::getElementEdgeNodes(entity.pElementProperty->type, nodesTagPerEdge, entity.mainTag);
         int eleTypeSubEntity;
@@ -375,6 +376,18 @@ void dgMesh::loadElements()
                 eleTypeSubEntity = gmsh::model::mesh::getElementType("line", entity.pElementProperty->order);
                 break;
         }
+
+        for(auto& elmProp : m_elementsPropertyLD)
+        {
+            if(elmProp.type == eleTypeSubEntity)
+            {
+                entity.pFaceEdgePropety = &elmProp;
+                break;
+            }
+        }
+
+        assert(entity.pFaceEdgePropety != nullptr);
+
         gmsh::model::mesh::addElementsByType(entity.subTag, eleTypeSubEntity, {}, nodesTagPerEdge);
 
         std::vector<std::size_t> elementTags;
@@ -382,41 +395,40 @@ void dgMesh::loadElements()
         gmsh::model::mesh::getElementsByType(entity.pElementProperty->type,
                                              elementTags, nodeTags, entity.mainTag);
 
-        std::vector<double> jacobians;
-        std::vector<double> determinants;
-        std::vector<double> dummyCoord;
-        gmsh::model::mesh::getJacobians(entity.pElementProperty->type, entity.pElementProperty->localNodeCoord,
-                                        jacobians, determinants, dummyCoord, entity.mainTag);
+        std::vector<double> jacobiansHD;
+        std::vector<double> determinantsHD;
+        std::vector<double> dummyCoordHD;
+        gmsh::model::mesh::getJacobians(entity.pElementProperty->type, entity.pElementProperty->intPointsCoord,
+                                        jacobiansHD, determinantsHD, dummyCoordHD, entity.mainTag);
+
+        std::vector<double> jacobiansLD;
+        std::vector<double> determinantsLD;
+        std::vector<double> dummyCoordLD;
+        gmsh::model::mesh::getJacobians(entity.pFaceEdgePropety->type, entity.pFaceEdgePropety->intPointsCoord,
+                                        jacobiansLD, determinantsLD, dummyCoordLD, entity.subTag);
 
         std::vector<double> baryCenters;
         gmsh::model::mesh::getBarycenters(entity.pElementProperty->type, entity.mainTag, false, true, baryCenters);
 
-        unsigned int nNodes = entity.pElementProperty->numNodes;
-        unsigned int nGP = entity.pElementProperty->intPointsWeigth.size();
+        unsigned int nNodesElm = entity.pElementProperty->numNodes;
+        unsigned int nElements = elementTags.size();
+        unsigned int nNodesFaceEdge = entity.pFaceEdgePropety->numNodes;
+        unsigned int nFaceEdges = nodesTagPerEdge.size()/nNodesFaceEdge;
+        unsigned int nFaceEdgesPerElm = nNodesElm;
+        unsigned int nGPHD = entity.pElementProperty->intPointsWeigth.size();
+        unsigned int nGPLD = entity.pFaceEdgePropety->intPointsWeigth.size();
 
-        for(std::size_t i = 0 ; i < elementTags.size() ; ++i)
+        for(std::size_t e = 0 ; e < nElements ; ++e)
         {
-            std::vector<std::size_t> nodesTagsOfElm(nodeTags.begin() + nNodes*i,
-                                                    nodeTags.begin() + nNodes*(i + 1));
-
-            std::vector<double> determinantsOfElm(determinants.begin() + nGP*i,
-                                                  determinants.begin() + nGP*(i + 1));
-
-            std::vector<double> jacobiansOfElm(jacobians.begin() + 9*nGP*i,
-                                               jacobians.begin() + 9*nGP*(1 + i));
-
-
-            assert(nodesTagsOfElm.size() == nNodes);
-            assert(determinantsOfElm.size() == nGP);
-            assert(jacobiansOfElm.size() == 9*nGP);
-
             Element elm = {};
-            elm.tag         = elementTags[i];
-            elm.nodesTag    = nodesTagsOfElm;
-            elm.determinant = determinantsOfElm;
-            elm.jacobian    = jacobiansOfElm;
+            elm.tag         = elementTags[e];
+            elm.nodesTag    = std::vector<std::size_t>(nodeTags.begin() + nNodesElm*e,
+                                                       nodeTags.begin() + nNodesElm*(e + 1));
+            elm.determinant = std::vector<double>(determinantsHD.begin() + nGPHD*e,
+                                                  determinantsHD.begin() + nGPHD*(e + 1));
+            elm.jacobian    = std::vector<double>(jacobiansHD.begin() + 9*nGPHD*e,
+                                                  jacobiansHD.begin() + 9*nGPHD*(e + 1));
             elm.pEntity     = &entity;
-            elm.faceEdges   = {};
 
             for(std::size_t nodeTag : elm.nodesTag)
             {
@@ -425,8 +437,82 @@ void dgMesh::loadElements()
                 elm.nodesCoord.push_back(coord);
             }
 
+            std::vector<double> elementBarycenters(baryCenters.begin() + 3*e,
+                                                   baryCenters.begin() + 3*(e + 1));
+
+            for(unsigned int i = 0 ; i < nFaceEdgesPerElm ; ++i)
+            {
+                FaceEdge faceEdge = {};
+
+                faceEdge.nodesTag = std::vector<std::size_t>(nodesTagPerEdge.begin() + nNodesFaceEdge*nFaceEdgesPerElm*e + nNodesFaceEdge*i,
+                                                             nodesTagPerEdge.begin() + nNodesFaceEdge*nFaceEdgesPerElm*e + nNodesFaceEdge*(i + 1));
+
+                for(std::size_t nodeTag : faceEdge.nodesTag)
+                {
+                    std::vector<double> coord, dummyParametricCoord;
+                    gmsh::model::mesh::getNode(nodeTag, coord, dummyParametricCoord);
+                    faceEdge.nodesCoord.push_back(coord);
+                }
+
+                faceEdge.determinant = std::vector<double>(determinantsLD.begin() + nFaceEdgesPerElm*nGPLD*e + nGPLD*i,
+                                                           determinantsLD.begin() + nFaceEdgesPerElm*nGPLD*e + nGPLD*(i + 1));
+
+                faceEdge.jacobian = std::vector<double>(jacobiansLD.begin() + nFaceEdgesPerElm*9*nGPLD*e + 9*nGPLD*i,
+                                                        jacobiansLD.begin() + nFaceEdgesPerElm*9*nGPLD*e + 9*nGPLD*(i + 1));
+
+                computeFaceEdgeNormal(faceEdge, elementBarycenters);
+
+                m_faceEdges.push_back(std::move(faceEdge));
+                elm.pFaceEdges.push_back(&m_faceEdges.back());
+            }
+
             m_elementsHD.push_back(std::move(elm));
             entity.pElements.push_back(&m_elementsHD.back());
+
+            Element& finalElm = m_elementsHD.back();
+            for(FaceEdge* pFaceEdge : finalElm.pFaceEdges)
+            {
+                pFaceEdge->parentElementHD = &finalElm;
+            }
         }
     }
 }
+
+void dgMesh::computeFaceEdgeNormal(FaceEdge& faceEdge, const std::vector<double>& elementBarycenter)
+{
+    std::vector<double> normal;
+
+    //TO DO: 3D version and 1D version
+//    double edgeLength = std::sqrt((faceEdge.nodesCoord[0][0] - faceEdge.nodesCoord[1][0])
+//                                  *(faceEdge.nodesCoord[0][0] - faceEdge.nodesCoord[1][0])
+//                                 + (faceEdge.nodesCoord[0][1] - faceEdge.nodesCoord[1][1])
+//                                  *(faceEdge.nodesCoord[0][1] - faceEdge.nodesCoord[1][1])
+//                                 + (faceEdge.nodesCoord[0][2] - faceEdge.nodesCoord[1][2])
+//                                  *(faceEdge.nodesCoord[0][2] - faceEdge.nodesCoord[1][2]));
+
+    // compute the normal
+    // if A:(x1, y1) and B:(x2, y2), then AB = (x2 - x1, y2 - y1) and a
+    // normal is given by n = (y2 - y1, x1 - x2)
+    double nx = faceEdge.nodesCoord[1][1] - faceEdge.nodesCoord[0][1];
+    double ny = faceEdge.nodesCoord[0][0] - faceEdge.nodesCoord[1][0];
+    double norm = sqrt(ny*ny + nx*nx);
+
+    // unfortunately, nodes per edge in nodes vector are not always in
+    // the same order (clockwise vs anticlockwise) => we need to check
+    // the orientation
+    double vx = elementBarycenter[0] - (faceEdge.nodesCoord[1][0] + faceEdge.nodesCoord[0][0])/2;
+    double vy = elementBarycenter[1] - (faceEdge.nodesCoord[1][1] + faceEdge.nodesCoord[0][1])/2;
+
+    if(nx*vx + ny*vy > 0)
+    {
+        nx = -nx;
+        ny = -ny;
+    }
+
+    // normalize the normal components
+    normal.push_back(nx/norm);
+    normal.push_back(ny/norm);
+
+    faceEdge.normal = std::move(normal);
+}
+
