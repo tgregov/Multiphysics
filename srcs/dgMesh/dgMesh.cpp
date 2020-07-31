@@ -111,8 +111,11 @@ void dgMesh::loadPhysicalGroupsAndEntities()
                                  + std::to_string(m_dimension) + ".");
     }
 
-    for(std::pair pgHD : physicalGroupsHD)
+    m_physicalGroupHD.resize(physicalGroupsHD.size());
+    for(std::size_t i = 0 ; i < m_physicalGroupHD.size() ; ++i)
     {
+        std::pair pgHD = physicalGroupsHD[i];
+
         std::string pgName;
         gmsh::model::getPhysicalName(pgHD.first, pgHD.second, pgName);
 
@@ -122,7 +125,11 @@ void dgMesh::loadPhysicalGroupsAndEntities()
                                      "D physical group does not have a name.");
         }
 
-        m_physicalGroupHD.push_back({pgHD.second, pgName, {}});
+        PhysicalGroup physGroup = {
+            pgHD.second, pgName, {}
+        };
+
+        m_physicalGroupHD[i] = std::move(physGroup);
     }
 
     gmsh::vectorpair physicalGroupsLD;
@@ -133,8 +140,11 @@ void dgMesh::loadPhysicalGroupsAndEntities()
                                  + std::to_string(m_dimension - 1) + ".");
     }
 
-    for(std::pair pgLD : physicalGroupsLD)
+    m_physicalGroupLD.resize(physicalGroupsLD.size());
+    for(std::size_t i = 0 ; i < m_physicalGroupLD.size() ; ++i)
     {
+        std::pair pgLD = physicalGroupsLD[i];
+
         std::string pgName;
         gmsh::model::getPhysicalName(pgLD.first, pgLD.second, pgName);
 
@@ -144,7 +154,11 @@ void dgMesh::loadPhysicalGroupsAndEntities()
                                      "D physical group does not have a name.");
         }
 
-        m_physicalGroupLD.push_back({pgLD.second, pgName, {}});
+        PhysicalGroup physGroup = {
+            pgLD.second, pgName, {}
+        };
+
+        m_physicalGroupLD[i] = std::move(physGroup);
     }
 
     /**
@@ -160,15 +174,20 @@ void dgMesh::loadPhysicalGroupsAndEntities()
                                  + std::to_string(m_dimension) + ".");
     }
 
-    for(std::pair entityHD : entitiesHD)
+    m_entitiesHD.resize(entitiesHD.size());
+    for(std::size_t i = 0 ; i < m_entitiesHD.size() ; ++i)
     {
-        m_entitiesHD.push_back({
+        std::pair entityHD = entitiesHD[i];
+
+        Entity entity = {
             entityHD.second,
             -1,
             {},
             nullptr,
-            {},
-        });
+            {}
+        };
+
+        m_entitiesHD[i] = std::move(entity);
     }
 
     gmsh::vectorpair entitiesLD;
@@ -179,15 +198,20 @@ void dgMesh::loadPhysicalGroupsAndEntities()
                                  + std::to_string(m_dimension - 1) + ".");
     }
 
-    for(std::pair entityLD : entitiesLD)
+    m_entitiesLD.resize(entitiesLD.size());
+    for(std::size_t i = 0 ; i < m_entitiesLD.size() ; ++i)
     {
-        m_entitiesLD.push_back({
+        std::pair entityLD = entitiesLD[i];
+
+        Entity entity = {
             entityLD.second,
             -1,
             {},
             nullptr,
-            {},
-        });
+            {}
+        };
+
+        m_entitiesLD[i] = std::move(entity);
     }
 
     /** We now create the vector of pointers to entities in each physical group **/
@@ -354,8 +378,23 @@ void dgMesh::loadElementsProperty()
 
 void dgMesh::loadElements()
 {
-    /** Element in HD entities should appear inly once **/
+    /**
+        Get all the elementTags across all entities (assume one elementType per entities!)
+        and resize the vectors of elements.
+    **/
 
+    std::vector<int> dummyElementType;
+    std::vector<std::vector<std::size_t>> dummyElementTags;
+    std::vector<std::vector<std::size_t>> dummyNodesTags;
+    gmsh::model::mesh::getElements(dummyElementType, dummyElementTags, dummyNodesTags, m_dimension);
+
+    std::size_t totalElementHDNumber = 0;
+    for(auto elmTags : dummyElementTags)
+        totalElementHDNumber += elmTags.size();
+
+    m_elementsHD.resize(totalElementHDNumber);
+
+    std::size_t totalFaceEdgeNumber = 0;
     for(Entity& entity : m_entitiesHD)
     {
         entity.subTag = gmsh::model::addDiscreteEntity(m_dimension - 1);
@@ -390,6 +429,21 @@ void dgMesh::loadElements()
 
         gmsh::model::mesh::addElementsByType(entity.subTag, eleTypeSubEntity, {}, nodesTagPerEdge);
 
+        totalFaceEdgeNumber += nodesTagPerEdge.size()/entity.pFaceEdgePropety->numNodes;
+    }
+
+    m_faceEdges.resize(totalFaceEdgeNumber);
+
+    /** Fill the elements vector with th required infos. **/
+
+    std::size_t elmCounter = 0;
+    std::size_t faceEdgeCounter = 0;
+
+    for(Entity& entity : m_entitiesHD)
+    {
+        std::vector<std::size_t> nodesTagPerEdge;
+        gmsh::model::mesh::getElementEdgeNodes(entity.pElementProperty->type, nodesTagPerEdge, entity.mainTag);
+
         std::vector<std::size_t> elementTags;
         std::vector<std::size_t> nodeTags;
         gmsh::model::mesh::getElementsByType(entity.pElementProperty->type,
@@ -413,7 +467,6 @@ void dgMesh::loadElements()
         unsigned int nNodesElm = entity.pElementProperty->numNodes;
         unsigned int nElements = elementTags.size();
         unsigned int nNodesFaceEdge = entity.pFaceEdgePropety->numNodes;
-        unsigned int nFaceEdges = nodesTagPerEdge.size()/nNodesFaceEdge;
         unsigned int nFaceEdgesPerElm = nNodesElm;
         unsigned int nGPHD = entity.pElementProperty->intPointsWeigth.size();
         unsigned int nGPLD = entity.pFaceEdgePropety->intPointsWeigth.size();
@@ -462,11 +515,13 @@ void dgMesh::loadElements()
 
                 computeFaceEdgeNormal(faceEdge, elementBarycenters);
 
-                m_faceEdges.push_back(std::move(faceEdge));
+                m_faceEdges[faceEdgeCounter] = std::move(faceEdge);
                 elm.pFaceEdges.push_back(&m_faceEdges.back());
+
+                faceEdgeCounter++;
             }
 
-            m_elementsHD.push_back(std::move(elm));
+            m_elementsHD[elmCounter] = std::move(elm);
             entity.pElements.push_back(&m_elementsHD.back());
 
             Element& finalElm = m_elementsHD.back();
@@ -474,6 +529,8 @@ void dgMesh::loadElements()
             {
                 pFaceEdge->parentElementHD = &finalElm;
             }
+
+            elmCounter++;
         }
     }
 }
