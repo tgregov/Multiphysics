@@ -84,7 +84,6 @@ class DG_MESH_API dgMesh
             Element* pParentElementHD                                = nullptr;
             Element* pElementLD                                      = nullptr;
             FaceEdge* pEdgeInFront                                   = nullptr;
-            bool nodesInFrontInverted                               = false;
         };
 
         void computeFaceEdgeNormal(FaceEdge& faceEdge, const std::vector<double>& elementBarycenter);

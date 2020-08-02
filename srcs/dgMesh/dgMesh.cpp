@@ -528,9 +528,9 @@ void dgMesh::loadElements()
         unsigned int nNodesElm = entity.pElementProperty->numNodes;
         unsigned int nElements = elementTags.size();
         unsigned int nNodesFaceEdge = entity.pFaceEdgePropety->numNodes;
-        unsigned int nFaceEdgesPerElm = nNodesElm;
         unsigned int nGPHD = entity.pElementProperty->intPointsWeigth.size();
         unsigned int nGPLD = entity.pFaceEdgePropety->intPointsWeigth.size();
+        unsigned int nFaceEdgesPerElm = determinantsLD.size()/(nGPLD*nElements);
 
         for(std::size_t e = 0 ; e < nElements ; ++e)
         {
@@ -668,30 +668,18 @@ void dgMesh::associateFaceEdges()
     {
         std::vector<std::size_t> currentFaceEdgeNodeTag = pFaceEdges[0]->nodesTag;
         std::size_t indexInFront = 0;
-        bool nodesInFrontInverted = false;
 
         #pragma omp parallel default(shared)
         {
             #pragma omp for schedule(static)
             for(std::size_t i = 1 ; i < pFaceEdges.size() ; ++i)
             {
-                if((currentFaceEdgeNodeTag.front() == pFaceEdges[i]->nodesTag.front()) &&
-                   (currentFaceEdgeNodeTag.back() == pFaceEdges[i]->nodesTag.back()))
+                if(std::is_permutation(pFaceEdges[i]->nodesTag.begin(), pFaceEdges[i]->nodesTag.end(),
+                                       currentFaceEdgeNodeTag.begin()))
                 {
                     #pragma omp critical
                     {
                         indexInFront = i;
-                        nodesInFrontInverted = false;
-                    }
-                    #pragma omp cancel for
-                }
-                else if((currentFaceEdgeNodeTag.front() == pFaceEdges[i]->nodesTag.back()) &&
-                        (currentFaceEdgeNodeTag.back() == pFaceEdges[i]->nodesTag.front()))
-                {
-                    #pragma omp critical
-                    {
-                        indexInFront = i;
-                        nodesInFrontInverted = true;
                     }
                     #pragma omp cancel for
                 }
@@ -703,45 +691,9 @@ void dgMesh::associateFaceEdges()
         assert(indexInFront != 0);
 
         pFaceEdges[0]->pEdgeInFront = pFaceEdges[indexInFront];
-        pFaceEdges[0]->nodesInFrontInverted = nodesInFrontInverted;
         pFaceEdges[indexInFront]->pEdgeInFront = pFaceEdges[0];
-        pFaceEdges[indexInFront]->nodesInFrontInverted = nodesInFrontInverted;
 
         pFaceEdges.erase(pFaceEdges.begin() + indexInFront);
         pFaceEdges.erase(pFaceEdges.begin());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
