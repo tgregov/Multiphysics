@@ -51,6 +51,10 @@ void dgMesh::loadFromFile(std::string fileName)
 
     loadElements();
 
+    checkIfFaceEdgeIsBoundary();
+
+    associateFaceEdges();
+
     gmsh::finalize();
 }
 
@@ -380,7 +384,64 @@ void dgMesh::loadElements()
 {
     /**
         Get all the elementTags across all entities (assume one elementType per entities!)
-        and resize the vectors of elements.
+        and resize the vectors of elements LD.
+    **/
+
+    std::vector<int> dummyElementTypeLD;
+    std::vector<std::vector<std::size_t>> dummyElementTagsLD;
+    std::vector<std::vector<std::size_t>> dummyNodesTagsLD;
+    gmsh::model::mesh::getElements(dummyElementTypeLD, dummyElementTagsLD, dummyNodesTagsLD, m_dimension - 1);
+
+    std::size_t totalElementLDNumber = 0;
+    for(auto elmTags : dummyElementTagsLD)
+        totalElementLDNumber += elmTags.size();
+
+    m_elementsLD.resize(totalElementLDNumber);
+
+    /**
+        Fill the elements LD vector with th required infos (we do not load determinant
+        and jacobian as it will be loaded in the required faceEdge.
+    **/
+
+    std::size_t elmLDCounter = 0;
+
+    for(Entity& entity : m_entitiesLD)
+    {
+        std::vector<std::size_t> elementTags;
+        std::vector<std::size_t> nodeTags;
+        gmsh::model::mesh::getElementsByType(entity.pElementProperty->type,
+                                             elementTags, nodeTags, entity.mainTag);
+
+
+        unsigned int nNodesElm = entity.pElementProperty->numNodes;
+        unsigned int nElements = elementTags.size();
+
+
+        for(std::size_t e = 0 ; e < nElements ; ++e)
+        {
+            Element elm = {};
+            elm.tag         = elementTags[e];
+            elm.nodesTag    = std::vector<std::size_t>(nodeTags.begin() + nNodesElm*e,
+                                                       nodeTags.begin() + nNodesElm*(e + 1));
+            elm.pEntity     = &entity;
+
+            for(std::size_t nodeTag : elm.nodesTag)
+            {
+                std::vector<double> coord, dummyParametricCoord;
+                gmsh::model::mesh::getNode(nodeTag, coord, dummyParametricCoord);
+                elm.nodesCoord.push_back(coord);
+            }
+
+            m_elementsLD[elmLDCounter] = std::move(elm);
+            entity.pElements.push_back(&m_elementsLD.back());
+
+            elmLDCounter++;
+        }
+    }
+
+    /**
+        Get all the elementTags across all entities (assume one elementType per entities!)
+        and resize the vectors of elements HD.
     **/
 
     std::vector<int> dummyElementType;
@@ -434,7 +495,7 @@ void dgMesh::loadElements()
 
     m_faceEdges.resize(totalFaceEdgeNumber);
 
-    /** Fill the elements vector with th required infos. **/
+    /** Fill the elements HD vector with th required infos. **/
 
     std::size_t elmCounter = 0;
     std::size_t faceEdgeCounter = 0;
@@ -527,7 +588,7 @@ void dgMesh::loadElements()
             Element& finalElm = m_elementsHD.back();
             for(FaceEdge* pFaceEdge : finalElm.pFaceEdges)
             {
-                pFaceEdge->parentElementHD = &finalElm;
+                pFaceEdge->pParentElementHD = &finalElm;
             }
 
             elmCounter++;
@@ -572,4 +633,115 @@ void dgMesh::computeFaceEdgeNormal(FaceEdge& faceEdge, const std::vector<double>
 
     faceEdge.normal = std::move(normal);
 }
+
+void dgMesh::checkIfFaceEdgeIsBoundary()
+{
+    assert(m_elementsLD.size() != 0);
+
+    //TO DO: OpenMP This ! As well as use pointers to elementLD to remove elements found
+    for(FaceEdge& faceEdge : m_faceEdges)
+    {
+        for(Element& elementLD : m_elementsLD)
+        {
+            if(std::is_permutation(faceEdge.nodesTag.begin(), faceEdge.nodesTag.end(), elementLD.nodesTag.begin()))
+            {
+                faceEdge.pElementLD = &elementLD;
+                break;
+            }
+        }
+    }
+}
+
+void dgMesh::associateFaceEdges()
+{
+    std::vector<FaceEdge*> pFaceEdges;
+
+    for(FaceEdge& faceEdge : m_faceEdges)
+    {
+        if(faceEdge.pElementLD == nullptr)
+            pFaceEdges.push_back(&faceEdge);
+    }
+
+    assert(pFaceEdges.size() % 2 == 0);
+
+    while(pFaceEdges.size() != 0)
+    {
+        std::vector<std::size_t> currentFaceEdgeNodeTag = pFaceEdges[0]->nodesTag;
+        std::size_t indexInFront = 0;
+        bool nodesInFrontInverted = false;
+
+        #pragma omp parallel default(shared)
+        {
+            #pragma omp for schedule(static)
+            for(std::size_t i = 1 ; i < pFaceEdges.size() ; ++i)
+            {
+                if((currentFaceEdgeNodeTag.front() == pFaceEdges[i]->nodesTag.front()) &&
+                   (currentFaceEdgeNodeTag.back() == pFaceEdges[i]->nodesTag.back()))
+                {
+                    #pragma omp critical
+                    {
+                        indexInFront = i;
+                        nodesInFrontInverted = false;
+                    }
+                    #pragma omp cancel for
+                }
+                else if((currentFaceEdgeNodeTag.front() == pFaceEdges[i]->nodesTag.back()) &&
+                        (currentFaceEdgeNodeTag.back() == pFaceEdges[i]->nodesTag.front()))
+                {
+                    #pragma omp critical
+                    {
+                        indexInFront = i;
+                        nodesInFrontInverted = true;
+                    }
+                    #pragma omp cancel for
+                }
+
+                #pragma omp cancellation point for
+            }
+        }
+
+        assert(indexInFront != 0);
+
+        pFaceEdges[0]->pEdgeInFront = pFaceEdges[indexInFront];
+        pFaceEdges[0]->nodesInFrontInverted = nodesInFrontInverted;
+        pFaceEdges[indexInFront]->pEdgeInFront = pFaceEdges[0];
+        pFaceEdges[indexInFront]->nodesInFrontInverted = nodesInFrontInverted;
+
+        pFaceEdges.erase(pFaceEdges.begin() + indexInFront);
+        pFaceEdges.erase(pFaceEdges.begin());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

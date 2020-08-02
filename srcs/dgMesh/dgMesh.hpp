@@ -26,6 +26,8 @@ class DG_MESH_API dgMesh
         void loadPhysicalGroupsAndEntities();
         void loadElementsProperty();
         void loadElements();
+        void checkIfFaceEdgeIsBoundary();
+        void associateFaceEdges();
 
         int m_dimension;
 
@@ -79,9 +81,10 @@ class DG_MESH_API dgMesh
 
             std::vector<double> normal                              = {};
 
-            Element* parentElementHD                                = nullptr;
-            Element* elementLD                                      = nullptr;
-            FaceEdge* edgeInFront                                   = nullptr;
+            Element* pParentElementHD                                = nullptr;
+            Element* pElementLD                                      = nullptr;
+            FaceEdge* pEdgeInFront                                   = nullptr;
+            bool nodesInFrontInverted                               = false;
         };
 
         void computeFaceEdgeNormal(FaceEdge& faceEdge, const std::vector<double>& elementBarycenter);
