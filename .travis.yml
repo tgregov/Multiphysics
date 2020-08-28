@@ -4,10 +4,13 @@ os: linux
 
 dist: focal
 
+compiler: 
+  - gcc
+  - clang
+
 install:
   - sudo apt-get update
   - sudo apt-get install -y cmake
-  - sudo apt-get install -y build-essential  
   - sudo apt-get install -y wget
   - sudo apt-get install -y tar
   - sudo apt-get install -y libgfortran5 
@@ -19,14 +22,14 @@ install:
   - tar -xf eigen-3.3.7.tar.gz
 
 before_script:
+  - export PATH=${PWD}/gmsh-4.6.0-Linux64-sdk/bin:${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PATH}
+  - export INCLUDE=${PWD}/gmsh-4.6.0-Linux64-sdk/include:${INCLUDE}
+  - export LIB=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${LIB}
+  - export PYTHONPATH=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH}
+  - export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE}
   - mkdir build
   - cd build
   - cmake ../ -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles"
 
 script:
-  - export PATH=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/bin:${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/lib:${PATH}
-  - export INCLUDE=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/include:${INCLUDE}
-  - export LIB=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/lib:${LIB}
-  - export PYTHONPATH=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH}
-  - export INCLUDE=${TRAVIS_BUILD_DIR}/eigen-3.3.7/:${INCLUDE}
   - make
