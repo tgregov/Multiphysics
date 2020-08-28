@@ -30,7 +30,7 @@ namespace dG
             void displayToConsole() const noexcept;
             void loadFromFile(std::string fileName);
 
-            inline unsigned int getEntityHDCount() const noexcept;
+            inline std::size_t getEntityHDCount() const noexcept;
             inline const Entity& getEntityHD(unsigned int entityIndex) const noexcept;
 
         private:

@@ -2,7 +2,7 @@
 
 namespace dG
 {
-    inline unsigned int Mesh::getEntityHDCount() const noexcept
+    inline std::size_t Mesh::getEntityHDCount() const noexcept
     {
         return m_entitiesHD.size();
     }
