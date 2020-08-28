@@ -2,7 +2,7 @@
 # gmsh.h
 FIND_PATH(GMSH_INCLUDE_DIRS NAMES "gmsh.h")
 MESSAGE(STATUS "Found GMSH: " ${GMSH_INCLUDE_DIRS})
-if(NOT GMSH_INCLUDE_DIRS)
+IF(NOT GMSH_INCLUDE_DIRS)
     MESSAGE(FATAL_ERROR "gmsh.h not found!")
 ENDIF()
 INCLUDE_DIRECTORIES(SYSTEM ${GMSH_INCLUDE_DIRS})
@@ -27,4 +27,3 @@ TARGET_INCLUDE_DIRECTORIES(dgMesh SYSTEM
                            PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
                            PRIVATE ${GMSH_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(dgMesh PRIVATE ${GMSH_LIBRARIES})
-SET_TARGET_PROPERTIES(dgMesh PROPERTIES COMPILE_FLAGS "-Wall -Wextra -pedantic-errors -Wold-style-cast -Wduplicated-cond -Wduplicated-branches -Wlogical-op -Wnull-dereference -Wuseless-cast -Wshadow")
