@@ -1,32 +1,32 @@
 language: cpp
 
-matrix:
-  include:
-    - env: NAME="Ubuntu 64 bits"
-      sudo: required
-      services:
-        - docker
-      before_install:
-        - docker run -d --name ubuntu-20-04 -v $(pwd):/travis ubuntu:20.04 tail -f /dev/null
-      install:
-        - docker exec -e DEBIAN_FRONTEND=noninteractive -t ubuntu-20-04 bash -c "apt-get -qq update; apt-get install -y git; apt-get install -y cmake; apt-get install -y build-essential;  apt-get install -y wget;  apt-get install -y tar;  apt-get install -y  libgfortran5; apt-get install -y libgmsh-dev; apt-get install -y libeigen3-dev"
-        - docker exec -t ubuntu-20-04 bash -c "
-            cd /travis; wget http://gmsh.info/bin/Linux/gmsh-4.6.0-Linux64-sdk.tgz; 
-            tar -xf gmsh-4.6.0-Linux64-sdk.tgz; 
-            wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz; 
-            tar -xf eigen-3.3.7.tar.gz
-        "
-      script:
-        - docker exec -t ubuntu-20-04 bash -c "
-            cd /travis/tgregov/Multiphysics;
-            cd gmsh-4.6.0-Linux64-sdk/;
-            export PATH=/travis/gmsh-4.6.0-Linux64-sdk/bin:/travis/gmsh-4.6.0-Linux64-sdk/lib:${PATH};
-            export INCLUDE=/travis/gmsh-4.6.0-Linux64-sdk/include:${INCLUDE};
-            export LIB=/travis/gmsh-4.6.0-Linux64-sdk/lib:${LIB};
-            export PYTHONPATH=/travis/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH};
-            export INCLUDE=/travis/eigen-3.3.7/:${INCLUDE};
-            mkdir build;
-            cd build;
-            cmake ../ -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles";
-            make;
-        "
+os: linux
+
+dist: focal
+
+install:
+  - sudo apt-get update
+  - sudo apt-get install -y cmake
+  - sudo apt-get install -y build-essential  
+  - sudo apt-get install -y wget
+  - sudo apt-get install -y tar
+  - sudo apt-get install -y libgfortran5 
+  - sudo apt-get install -y libgmsh-dev 
+  - sudo apt-get install -y libeigen3-dev
+  - wget http://gmsh.info/bin/Linux/gmsh-4.6.0-Linux64-sdk.tgz 
+  - tar -xf gmsh-4.6.0-Linux64-sdk.tgz 
+  - wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz 
+  - tar -xf eigen-3.3.7.tar.gz
+
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles"
+
+script:
+  - export PATH=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/bin:${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/lib:${PATH}
+  - export INCLUDE=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/include:${INCLUDE}
+  - export LIB=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/lib:${LIB}
+  - export PYTHONPATH=${TRAVIS_BUILD_DIR}/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH}
+  - export INCLUDE=${TRAVIS_BUILD_DIR}/eigen-3.3.7/:${INCLUDE}
+  - make
