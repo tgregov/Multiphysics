@@ -453,7 +453,7 @@ namespace dG
             entity.subTag = gmsh::model::addDiscreteEntity(m_dimension - 1);
             std::vector<std::size_t> nodesTagPerFace;
             gmsh::model::mesh::getElementEdgeNodes(entity.pElementProperty->type, nodesTagPerFace, entity.mainTag);
-            int eleTypeSubEntity;
+            int eleTypeSubEntity = -1;
             switch(m_dimension)
             {
                 case 1:
