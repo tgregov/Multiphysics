@@ -7,22 +7,63 @@ jobs:
       compiler: gcc
     - os: osx
       osx_image: xcode12u
-    
+    - os: windows
+
+before_install:
+- |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
+        choco uninstall -y mingw
+        choco upgrade --no-progress -y msys2
+        export msys2='cmd //C RefreshEnv.cmd '
+        export msys2+='& set MSYS=winsymlinks:nativestrict '
+        export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
+        export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
+        export msys2+=" -msys2 -c "\"\$@"\" --"
+        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
+        ## Install more MSYS2 packages from https://packages.msys2.org/base here
+        taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
+        export PATH=/C/tools/msys64/mingw64/bin:$PATH
+        export MAKE=mingw32-make  # so that Autotools can find it
+        ;;
+    esac
+
+before_cache:
+- |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        # https://unix.stackexchange.com/a/137322/107554
+        $msys2 pacman --sync --clean --noconfirm
+        ;;
+    esac
+
+cache:
+    directories:
+    - $HOME/AppData/Local/Temp/chocolatey
+    - /C/tools/msys64 
+   
 install:
   - if [ $TRAVIS_OS_NAME == linux ]; then 
       sudo apt-get update && sudo apt-get install -y cmake wget tar libgmsh-dev;   
       wget http://gmsh.info/bin/Linux/gmsh-4.6.0-Linux64-sdk.tgz; 
       tar -xf gmsh-4.6.0-Linux64-sdk.tgz; 
-      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz ;
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
       tar -xf eigen-3.3.7.tar.gz;
     fi 
   - if [ $TRAVIS_OS_NAME == osx ]; then 
-      brew update && brew install cmake wget tar;   
+      brew update && brew intall cmake wget tar llvm libomp;   
       wget http://gmsh.info/bin/MacOSX/gmsh-4.6.0-MacOSX-sdk.tgz; 
       tar -xf gmsh-4.6.0-MacOSX-sdk.tgz; 
-      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz ;
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
       tar -xf eigen-3.3.7.tar.gz;
-    fi  
+    fi
+  - if [ $TRAVIS_OS_NAME == windows ]; then 
+      wget http://gmsh.info/bin/Windows/gmsh-4.6.0-Windows64-sdk.zip; 
+      7z x gmsh-4.6.0-Windows64-sdk.zip; 
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
+      7z x eigen-3.3.7.tar.gz;
+    fi 
 
 before_script:  
   - if [ $TRAVIS_OS_NAME == linux ]; then
@@ -32,14 +73,20 @@ before_script:
       export PYTHONPATH=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH};
       export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
     fi
-  
   - if [ $TRAVIS_OS_NAME == osx ]; then
       export PATH=${PWD}/gmsh-4.6.0-MacOSX-sdk/bin:${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${PATH};
       export INCLUDE=${PWD}/gmsh-4.6.0-MacOSX-sdk/include:${INCLUDE};
       export LIB=${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${LIB};
       export PYTHONPATH=${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${PYTHONPATH};
       export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
-    fi  
+    fi 
+  - if [ $TRAVIS_OS_NAME == windows ]; then
+      export PATH=${PWD}/gmsh-4.6.0-Windows64-sdk/bin:${PWD}/gmsh-4.6.0-Windows64-sdk/lib:${PATH};
+      export INCLUDE=${PWD}/gmsh-4.6.0-Windows64-sdk/include:${INCLUDE};
+      export LIB=${PWD}/gmsh-4.6.0-Windows64-sdk/lib:${LIB};
+      export PYTHONPATH=${PWD}/gmsh-4.6.0-Windows64-sdk/lib:${PYTHONPATH};
+      export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
+    fi 
   - mkdir build
   - cd build
   - cmake ../ -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles"
