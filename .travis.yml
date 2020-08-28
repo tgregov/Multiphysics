@@ -52,7 +52,8 @@ install:
       tar -xf eigen-3.3.7.tar.gz;
     fi 
   - if [ $TRAVIS_OS_NAME == osx ]; then 
-      brew update && brew install cmake wget gnu-tar libomp;   
+      brew update && brew install cmake wget gnu-tar llvm libomp;
+      export PATH=/usr/local/opt/llvm/bin:${PATH};	  
       wget http://gmsh.info/bin/MacOSX/gmsh-4.6.0-MacOSX-sdk.tgz; 
       gtar -xf gmsh-4.6.0-MacOSX-sdk.tgz; 
       wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
