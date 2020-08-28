@@ -1,32 +1,45 @@
 language: cpp
 
-os: linux
-
-dist: focal
-
-compiler: 
-  - gcc
-  - clang
-
+jobs:
+  include:
+    - os: linux
+      dist: focal
+      compiler: gcc
+    - os: osx
+      osx_image: xcode12u
+    
 install:
-  - sudo apt-get update
-  - sudo apt-get install -y cmake
-  - sudo apt-get install -y wget
-  - sudo apt-get install -y tar
-  - sudo apt-get install -y libgfortran5 
-  - sudo apt-get install -y libgmsh-dev 
-  - sudo apt-get install -y libeigen3-dev
-  - wget http://gmsh.info/bin/Linux/gmsh-4.6.0-Linux64-sdk.tgz 
-  - tar -xf gmsh-4.6.0-Linux64-sdk.tgz 
-  - wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz 
-  - tar -xf eigen-3.3.7.tar.gz
+  - if [ $TRAVIS_OS_NAME == linux ]; then 
+      sudo apt-get update && sudo apt-get install -y cmake wget tar libgmsh-dev;   
+      wget http://gmsh.info/bin/Linux/gmsh-4.6.0-Linux64-sdk.tgz; 
+      tar -xf gmsh-4.6.0-Linux64-sdk.tgz; 
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz ;
+      tar -xf eigen-3.3.7.tar.gz;
+    fi 
+  - if [ $TRAVIS_OS_NAME == osx ]; then 
+      brew update && brew intall cmake wget tar;   
+      wget http://gmsh.info/bin/MacOSX/gmsh-4.6.0-MacOSX-sdk.tgz; 
+      tar -xf gmsh-4.6.0-MacOSX-sdk.tgz; 
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz ;
+      tar -xf eigen-3.3.7.tar.gz;
+    fi  
 
-before_script:
-  - export PATH=${PWD}/gmsh-4.6.0-Linux64-sdk/bin:${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PATH}
-  - export INCLUDE=${PWD}/gmsh-4.6.0-Linux64-sdk/include:${INCLUDE}
-  - export LIB=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${LIB}
-  - export PYTHONPATH=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH}
-  - export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE}
+before_script:  
+  - if [ $TRAVIS_OS_NAME == linux ]; then
+      export PATH=${PWD}/gmsh-4.6.0-Linux64-sdk/bin:${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PATH};
+      export INCLUDE=${PWD}/gmsh-4.6.0-Linux64-sdk/include:${INCLUDE};
+      export LIB=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${LIB};
+      export PYTHONPATH=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH};
+      export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
+    fi
+  
+  - if [ $TRAVIS_OS_NAME == osx ]; then
+      export PATH=${PWD}/gmsh-4.6.0-MacOSX-sdk/bin:${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${PATH};
+      export INCLUDE=${PWD}/gmsh-4.6.0-MacOSX-sdk/include:${INCLUDE};
+      export LIB=${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${LIB};
+      export PYTHONPATH=${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${PYTHONPATH};
+      export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
+    fi  
   - mkdir build
   - cd build
   - cmake ../ -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles"
