@@ -52,7 +52,7 @@ install:
       tar -xf eigen-3.3.7.tar.gz;
     fi 
   - if [ $TRAVIS_OS_NAME == osx ]; then 
-      brew update && brew intall cmake wget tar llvm libomp;   
+      brew update && brew install cmake wget tar llvm libomp;   
       wget http://gmsh.info/bin/MacOSX/gmsh-4.6.0-MacOSX-sdk.tgz; 
       tar -xf gmsh-4.6.0-MacOSX-sdk.tgz; 
       wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
@@ -63,6 +63,7 @@ install:
       7z x gmsh-4.6.0-Windows64-sdk.zip; 
       wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
       7z x eigen-3.3.7.tar.gz;
+      $mingw64 pacman -S mingw-w64-x86_64-toolchain
     fi 
 
 before_script:  
@@ -89,7 +90,15 @@ before_script:
     fi 
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles"
+  - if [ $TRAVIS_OS_NAME == linux ]; then
+      cmake .. -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles";
+    fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then
+      cmake .. -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles";
+    fi
+  - if [ $TRAVIS_OS_NAME == windows ]; then
+      cmake .. -DCMAKE_BUILD_TYPE=Release  -G "MinGW Makefiles";
+    fi
 
 script:
   - make
