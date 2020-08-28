@@ -1,14 +1,111 @@
 language: cpp
 
-matrix:
+jobs:
   include:
-    - env: NAME="Ubuntu 64 bits"
-      sudo: required
-      services:
-        - docker
-      before_install:
-        - docker run -d --name ubuntu-19-04 -v $(pwd):/travis ubuntu:19.04 tail -f /dev/null
-      install:
-        - docker exec -t ubuntu-19-04 bash -c "apt-get -qq update; apt-get install -y git; apt-get install -y cmake; apt-get install -y build-essential;  apt-get install -y wget;  apt-get install -y tar;  apt-get install -y  libgfortran3; apt-get install -y libgmsh-dev; apt-get install -y libeigen3-dev"
-      script:
-         - docker exec -t ubuntu-19-04 bash -c "cd /travis; ./build_travis.sh;"
+    - os: linux
+      dist: focal
+      compiler: gcc
+    - os: osx
+      osx_image: xcode12u
+    - os: windows
+
+before_install:
+- |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
+        choco uninstall -y mingw
+        choco upgrade --no-progress -y msys2
+        export msys2='cmd //C RefreshEnv.cmd '
+        export msys2+='& set MSYS=winsymlinks:nativestrict '
+        export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
+        export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
+        export msys2+=" -msys2 -c "\"\$@"\" --"
+        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
+        ## Install more MSYS2 packages from https://packages.msys2.org/base here
+        taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
+        export PATH=/C/tools/msys64/mingw64/bin:$PATH
+        export MAKE=mingw32-make  # so that Autotools can find it
+        ;;
+    esac
+
+before_cache:
+- |-
+    case $TRAVIS_OS_NAME in
+      windows)
+        # https://unix.stackexchange.com/a/137322/107554
+        $msys2 pacman --sync --clean --noconfirm
+        ;;
+    esac
+
+cache:
+    directories:
+    - $HOME/AppData/Local/Temp/chocolatey
+    - /C/tools/msys64 
+   
+install:
+  - if [ $TRAVIS_OS_NAME == linux ]; then 
+      sudo apt-get update && sudo apt-get install -y cmake wget tar libgmsh-dev;   
+      wget http://gmsh.info/bin/Linux/gmsh-4.6.0-Linux64-sdk.tgz; 
+      tar -xf gmsh-4.6.0-Linux64-sdk.tgz; 
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
+      tar -xf eigen-3.3.7.tar.gz;
+    fi 
+  - if [ $TRAVIS_OS_NAME == osx ]; then 
+      brew update && brew install cmake wget gnu-tar llvm libomp;
+      wget http://gmsh.info/bin/MacOSX/gmsh-4.6.0-MacOSX-sdk.tgz; 
+      gtar -xf gmsh-4.6.0-MacOSX-sdk.tgz; 
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
+      gtar -xf eigen-3.3.7.tar.gz;
+    fi
+  - if [ $TRAVIS_OS_NAME == windows ]; then 
+      wget http://gmsh.info/bin/Windows/gmsh-4.6.0-Windows64-sdk.zip; 
+      7z x gmsh-4.6.0-Windows64-sdk.zip; 
+      wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
+      7z x eigen-3.3.7.tar.gz;
+    fi 
+
+before_script:  
+  - if [ $TRAVIS_OS_NAME == linux ]; then
+      export PATH=${PWD}/gmsh-4.6.0-Linux64-sdk/bin:${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PATH};
+      export INCLUDE=${PWD}/gmsh-4.6.0-Linux64-sdk/include:${INCLUDE};
+      export LIB=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${LIB};
+      export PYTHONPATH=${PWD}/gmsh-4.6.0-Linux64-sdk/lib:${PYTHONPATH};
+      export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
+    fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then
+      export PATH=${PWD}/gmsh-4.6.0-MacOSX-sdk/bin:${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${PATH};
+      export INCLUDE=${PWD}/gmsh-4.6.0-MacOSX-sdk/include:${INCLUDE};
+      export LIB=${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${LIB};
+      export PYTHONPATH=${PWD}/gmsh-4.6.0-MacOSX-sdk/lib:${PYTHONPATH};
+      export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
+    fi 
+  - if [ $TRAVIS_OS_NAME == windows ]; then
+      export PATH=${PWD}/gmsh-4.6.0-Windows64-sdk/bin:${PWD}/gmsh-4.6.0-Windows64-sdk/lib:${PATH};
+      export INCLUDE=${PWD}/gmsh-4.6.0-Windows64-sdk/include:${INCLUDE};
+      export LIB=${PWD}/gmsh-4.6.0-Windows64-sdk/lib:${LIB};
+      export PYTHONPATH=${PWD}/gmsh-4.6.0-Windows64-sdk/lib:${PYTHONPATH};
+      export INCLUDE=${PWD}/eigen-3.3.7/:${INCLUDE};
+    fi 
+  - mkdir build
+  - cd build
+  - if [ $TRAVIS_OS_NAME == linux ]; then
+      cmake .. -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles";
+    fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then
+      LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++  -G "Unix Makefiles";
+    fi
+  - if [ $TRAVIS_OS_NAME == windows ]; then
+      cmake .. -DCMAKE_BUILD_TYPE=Release  -G "MinGW Makefiles";
+    fi
+
+script:
+  - if [ $TRAVIS_OS_NAME == linux ]; then
+      make;
+    fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then
+      make;
+    fi
+  - if [ $TRAVIS_OS_NAME == windows ]; then
+      mingw32-make;
+    fi
