@@ -45,11 +45,11 @@ cache:
    
 install:
   - if [ $TRAVIS_OS_NAME == linux ]; then 
-      sudo apt-get update && sudo apt-get install -y cmake wget tar libgmsh-dev;   
+      sudo apt-get update && sudo apt-get install -y cmake wget gnu-tar libgmsh-dev;   
       wget http://gmsh.info/bin/Linux/gmsh-4.6.0-Linux64-sdk.tgz; 
-      tar -xf gmsh-4.6.0-Linux64-sdk.tgz; 
+      gtar -xf gmsh-4.6.0-Linux64-sdk.tgz; 
       wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
-      tar -xf eigen-3.3.7.tar.gz;
+      gtar -xf eigen-3.3.7.tar.gz;
     fi 
   - if [ $TRAVIS_OS_NAME == osx ]; then 
       brew update && brew install cmake wget tar llvm libomp;   
@@ -100,4 +100,12 @@ before_script:
     fi
 
 script:
-  - make
+  - if [ $TRAVIS_OS_NAME == linux ]; then
+      make;
+    fi
+  - if [ $TRAVIS_OS_NAME == osx ]; then
+      make;
+    fi
+  - if [ $TRAVIS_OS_NAME == windows ]; then
+      mingw32_make;
+    fi
