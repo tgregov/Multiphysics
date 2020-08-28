@@ -7,9 +7,9 @@ export INCLUDE=${PWD}/include:${INCLUDE}
 export LIB=${PWD}/lib:${LIB}
 export PYTHONPATH=${PWD}/lib:${PYTHONPATH}
 cd ../
-wget http://bitbucket.org/eigen/eigen/get/3.3.7.tar.gz
-tar -xf 3.3.7.tar.gz
-cd ./eigen-eigen-323c052e1731
+wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz
+tar -xf eigen-3.3.7.tar.gz
+cd ./eigen-3.3.7
 export INCLUDE=${PWD}:${INCLUDE}
 cd ../
 git clone https://github.com/tgregov/Multiphysics.git
