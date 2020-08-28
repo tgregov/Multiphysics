@@ -2,11 +2,11 @@
 #include <stdexcept>
 #include <string>
 
-#include "dgMesh/dgMesh.hpp"
+#include "dG/Mesh/Mesh.hpp"
 
 int main(int argc, char **argv)
 {
-    dgMesh mesh("Gauss1", "Lagrange");
+    dG::Mesh mesh("Gauss1", "Lagrange");
 
     try
     {
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     }
     catch(int e)
     {
-        std::cerr << "GMSH certainly throwed something (only one to use int exceptions): "
+        std::cerr << "GMSH certainly thrown something (only one to use int exceptions): "
                   << e << std::endl;
         return -2;
     }
@@ -29,7 +29,6 @@ int main(int argc, char **argv)
         std::cerr << "Unexpected exception: bip bip boup ?" << std::endl;
         return -3;
     }
-
 
     return 0;
 }

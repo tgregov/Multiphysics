@@ -6,7 +6,7 @@
 
 export GMSHSDK=/c/tools/gmsh-4.6.0-Windows64-sdk #put gmsh sdk here
 
-export PATH=${GMSHSDK}/bin:${GMSHSDK}/lin:${PATH}
+export PATH=${GMSHSDK}/bin:${GMSHSDK}/lib:${PATH}
 export INCLUDE=${GMSHSDK}/include
 export LIB=${GMSHSDK}/lib
 

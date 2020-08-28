@@ -15,7 +15,9 @@ IF(NOT GMSH_LIBRARIES)
 ENDIF()
 
 SET(LIBMESHSRCS
-dgMesh.hpp dgMesh.inl dgMesh.cpp)
+Mesh.hpp Mesh.inl Mesh.cpp
+Entity.hpp PhysicalGroup.hpp ElementProperty.hpp Element.hpp Face.hpp
+Entity.inl PhysicalGroup.inl Element.inl Face.inl)
 
 ADD_LIBRARY(dgMesh SHARED ${LIBMESHSRCS})
 GENERATE_EXPORT_HEADER(dgMesh
