@@ -120,7 +120,7 @@ namespace dG
         m_physicalGroupHD.resize(physicalGroupsHD.size());
         for(std::size_t i = 0 ; i < m_physicalGroupHD.size() ; ++i)
         {
-            std::pair pgHD = physicalGroupsHD[i];
+            std::pair<int, int> pgHD = physicalGroupsHD[i];
 
             std::string pgName;
             gmsh::model::getPhysicalName(pgHD.first, pgHD.second, pgName);
@@ -149,7 +149,7 @@ namespace dG
         m_physicalGroupLD.resize(physicalGroupsLD.size());
         for(std::size_t i = 0 ; i < m_physicalGroupLD.size() ; ++i)
         {
-            std::pair pgLD = physicalGroupsLD[i];
+            std::pair<int, int> pgLD = physicalGroupsLD[i];
 
             std::string pgName;
             gmsh::model::getPhysicalName(pgLD.first, pgLD.second, pgName);
@@ -183,7 +183,7 @@ namespace dG
         m_entitiesHD.resize(entitiesHD.size());
         for(std::size_t i = 0 ; i < m_entitiesHD.size() ; ++i)
         {
-            std::pair entityHD = entitiesHD[i];
+            std::pair<int, int> entityHD = entitiesHD[i];
 
             Entity entity;
             entity.mainTag = entityHD.second;
@@ -202,7 +202,7 @@ namespace dG
         m_entitiesLD.resize(entitiesLD.size());
         for(std::size_t i = 0 ; i < m_entitiesLD.size() ; ++i)
         {
-            std::pair entityLD = entitiesLD[i];
+            std::pair<int, int> entityLD = entitiesLD[i];
 
             Entity entity;
             entity.mainTag = entityLD.second;

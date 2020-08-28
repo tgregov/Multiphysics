@@ -8,40 +8,7 @@ jobs:
     - os: osx
       osx_image: xcode12u
     - os: windows
-
-before_install:
-- |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-        choco uninstall -y mingw
-        choco upgrade --no-progress -y msys2
-        export msys2='cmd //C RefreshEnv.cmd '
-        export msys2+='& set MSYS=winsymlinks:nativestrict '
-        export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
-        export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
-        export msys2+=" -msys2 -c "\"\$@"\" --"
-        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
-        ## Install more MSYS2 packages from https://packages.msys2.org/base here
-        taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
-        export PATH=/C/tools/msys64/mingw64/bin:$PATH
-        export MAKE=mingw32-make  # so that Autotools can find it
-        ;;
-    esac
-
-before_cache:
-- |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        # https://unix.stackexchange.com/a/137322/107554
-        $msys2 pacman --sync --clean --noconfirm
-        ;;
-    esac
-
-cache:
-    directories:
-    - $HOME/AppData/Local/Temp/chocolatey
-    - /C/tools/msys64 
+      env: MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
    
 install:
   - if [ $TRAVIS_OS_NAME == linux ]; then 
@@ -59,6 +26,7 @@ install:
       gtar -xf eigen-3.3.7.tar.gz;
     fi
   - if [ $TRAVIS_OS_NAME == windows ]; then 
+      choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
       wget http://gmsh.info/bin/Windows/gmsh-4.6.0-Windows64-sdk.zip; 
       7z x gmsh-4.6.0-Windows64-sdk.zip; 
       wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
@@ -96,7 +64,8 @@ before_script:
       LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang  -G "Unix Makefiles";
     fi
   - if [ $TRAVIS_OS_NAME == windows ]; then
-      cmake .. -DCMAKE_BUILD_TYPE=Release  -G "MinGW Makefiles";
+      export PATH=MSBUILD_PATH:${PATH};
+      cmake .. -DCMAKE_BUILD_TYPE=Release  -G "Visual Studio 16 2019" -A x64;
     fi
 
 script:
@@ -107,5 +76,5 @@ script:
       make;
     fi
   - if [ $TRAVIS_OS_NAME == windows ]; then
-      mingw32-make;
+      cmake --build;
     fi
