@@ -26,7 +26,7 @@ install:
       gtar -xf eigen-3.3.7.tar.gz;
     fi
   - if [ $TRAVIS_OS_NAME == windows ]; then 
-      choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+      choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
       wget http://gmsh.info/bin/Windows/gmsh-4.6.0-Windows64-sdk.zip; 
       7z x gmsh-4.6.0-Windows64-sdk.zip; 
       wget https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.gz;
@@ -61,7 +61,7 @@ before_script:
       cmake .. -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles";
     fi
   - if [ $TRAVIS_OS_NAME == osx ]; then
-      LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang  -G "Unix Makefiles";
+      LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang++  -G "Unix Makefiles";
     fi
   - if [ $TRAVIS_OS_NAME == windows ]; then
       export PATH=MSBUILD_PATH:${PATH};
