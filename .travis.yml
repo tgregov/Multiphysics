@@ -76,5 +76,5 @@ script:
       make;
     fi
   - if [ $TRAVIS_OS_NAME == windows ]; then
-      cmake --build;
+      cmake --build .;
     fi
