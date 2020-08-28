@@ -93,7 +93,7 @@ before_script:
       cmake .. -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles";
     fi
   - if [ $TRAVIS_OS_NAME == osx ]; then
-      LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" cmake .. -DCMAKE_BUILD_TYPE=Release  -G "Unix Makefiles";
+      LDFLAGS="-L/usr/local/opt/llvm/lib" CPPFLAGS="-I/usr/local/opt/llvm/include" cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=/usr/local/opt/llvm/bin/clang -DCMAKE_CXX_COMPILER=/usr/local/opt/llvm/bin/clang  -G "Unix Makefiles";
     fi
   - if [ $TRAVIS_OS_NAME == windows ]; then
       cmake .. -DCMAKE_BUILD_TYPE=Release  -G "MinGW Makefiles";
